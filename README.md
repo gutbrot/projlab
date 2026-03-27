@@ -12,3 +12,4 @@
 - **Feladatbeadó portál**: https://devil.iit.bme.hu:9181/hercules/
 - **Ütemterv**: https://www.iit.bme.hu/targyak/BMEVIIIAB02/%C3%BCtemterv-hat%C3%A1rid%C5%91k
 - **Drive link**: https://drive.google.com/drive/folders/1DEHVwv-1j8PgObFTKmL04u2LgZ6OFkXJ
+- **Szoftech git repo**: https://github.com/ftsrg-softeng/labs/wiki/Labor-3-%E2%80%93-CI-%C3%A9s-Statikus-technik%C3%A1k-feladatok
