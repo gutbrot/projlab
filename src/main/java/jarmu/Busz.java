@@ -4,16 +4,16 @@ public class Busz extends Jarmu{
     // private final Lokacio[2] vegallomasok
 
     @Override
-    public void mozgas(){
+    public void mozgas(){ //Ennek a függvénynek a segítével fogja tudni a Buszvezető a járművet mozgatni
 
     }
 
     @Override
-    public void utkozos(){
+    public void utkozos(){ //Ez a függvény fogja kezelni a járművek ütközését
         
     }
 
-    public void vegallomasbaErt(){
+    public void vegallomasbaErt(){ //Ez a függvény fogja kezelni, hogy a busz elérte a végállomását
 
     }
 }
