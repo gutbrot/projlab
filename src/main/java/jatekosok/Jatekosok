@@ -1,0 +1,19 @@
+package jatekosok;
+
+/**
+ * A játékos karakterek közös őse. Kezeli az akciópontokat, 
+ * amelyek a körök alatti tevékenységekhez szükségesek.
+ */
+public abstract class Jatekos {
+    protected int akcioPont;
+
+    /**
+     * A játékos körének befejezését végző metódus.
+     */
+    public void korVege() { /* Kör végi adminisztráció */ }
+
+    /**
+     * Ellenőrzi és levonja a tevékenységhez szükséges akciópontot.
+     */
+    public void akcioPontKezelo() { /* Pont levonás logika */ }
+}

@@ -1,0 +1,22 @@
+package jatekosok;
+import java.util.List;
+
+/**
+ * Hókotrókat irányító és karbantartó karakter. 
+ * Saját eszköztárral és pénztárcával rendelkezik.
+ */
+public class Takarito extends Jatekos {
+    private List<Object> iranyitottHokotrok;
+    private Eszkoztar eszkoztar;
+    private int penz;
+
+    public void hokotrotValaszt(Object hokotro) { /* Kiválasztás */ }
+    public void hokotrotMozgat() { /* Mozgatás vezénylése */ }
+    public void kotrofejetValt() { /* Alkatrész csere */ }
+    
+    /**
+     * Boltban történő vásárlást végző metódus.
+     */
+    public void vasarol(Object bolt, String termekNev) { /* Vásárlási logika */ }
+    public void penztKap(int p) { this.penz += p; }
+}

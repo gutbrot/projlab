@@ -1,0 +1,14 @@
+package jatekosok;
+import java.util.List;
+
+/**
+ * A buszok forgalomirányításáért felelős karakter.
+ */
+public class Buszvezeto extends Jatekos {
+    private List<Object> iranyithatoBuszok;
+    private int pont;
+
+    public void busztValaszt(Object busz) { /* Busz kijelölése */ }
+    public void busztMozgat(Object sav) { /* Haladás utasítás */ }
+    public void pontotKap() { this.pont++; }
+}

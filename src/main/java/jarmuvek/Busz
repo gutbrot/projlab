@@ -1,0 +1,15 @@
+package jarmuvek;
+
+/**
+ * Menetrend szerinti autóbusz, amely végállomások között közlekedik.
+ */
+public class Busz extends Jarmu {
+    private final Object[] vegallomasok = new Object[2];
+
+    public void vegallomasbaErt() { /* Megérkezés kezelése */ }
+
+    @Override public void mozgas() { /* Busz specifikus mozgás */ }
+    @Override public void utkozos() { /* Busz ütközés kezelése */ }
+    
+    public boolean mozgasKeptelen() { return false; }
+}

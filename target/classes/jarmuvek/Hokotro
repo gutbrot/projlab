@@ -1,0 +1,50 @@
+package jarmuvek;
+
+import kotrofejek.KotroFej;
+import jatekosok.Takarito;
+
+/**
+ * Hókotró munkagép, amely a rá felszerelt KotroFej segítségével
+ * végzi az utak karbantartását.
+ */
+public class Hokotro extends Jarmu {
+    
+    /** A járműre jelenleg felszerelt munkaeszköz. */
+    private KotroFej felszereltFej;
+
+    /**
+     * Lecseréli a munkagépen lévő fejet.
+     * @param ujFej Az új felszerelendő egység.
+     */
+    public void fejCsere(KotroFej ujFej) {
+        this.felszereltFej = ujFej;
+    }
+
+    /**
+     * Meghívja a felszerelt fej tisztítási funkcióját a megadott területen.
+     */
+    public void takarit(Object terkep) {
+        // Implementáció: felszereltFej.tisztit(...) hívása
+    }
+
+    @Override
+    public void mozgas() {
+        // Hókotró specifikus lassú haladás
+    }
+
+    @Override
+    public void utkozos() {
+        // Ütközéskezelés (pl. munkavégzés megszakítása)
+    }
+
+    /**
+     * Átadja a jármű feletti irányítást egy Takarító játékosnak.
+     */
+    public void atadVevonek(Takarito v) {
+        // Átadási logika
+    }
+
+    public Hokotro getHokotro() {
+        return this;
+    }
+}

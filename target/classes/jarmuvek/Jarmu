@@ -1,0 +1,20 @@
+package jarmuvek;
+
+/**
+ * A járművek közös absztrakt ősosztálya. 
+ * Felelős a pozíció tárolásáért és az alapvető mozgási interfész biztosításáért.
+ */
+public abstract class Jarmu {
+    // A diagram szerinti mező
+    protected Object pozicio; // Később 'Lokacio' típusra cserélendő
+
+    /**
+     * Kezeli a jármű megcsúszását az útviszonyok függvényében.
+     */
+    public void csuszasKezeles(Object s, Object t) {
+        // Szkeleton: csúszás logika
+    }
+
+    public abstract void mozgas();
+    public abstract void utkozos();
+}
