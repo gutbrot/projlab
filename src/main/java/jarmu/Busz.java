@@ -1,5 +1,9 @@
 package jarmu;
 
+/* 
+*A játékos által irányított jármű fajta, amelynek célja, hogy minél többször megforduljon a két végállomása között.
+ */
+
 public class Busz extends Jarmu{
     // private final Lokacio[2] vegallomasok
 
