@@ -1,0 +1,7 @@
+TODO List
+=========
+
+- [ ] Lokacios globalis tipus letrehozsa, jelenleg ki van kommentelve
+- [ ] Task 2
+- [ ] Task 3
+
