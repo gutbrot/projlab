@@ -89,4 +89,8 @@ public class Jatekter {
     
     /** @return A játéktérhez tartozó térkép objektum. */
     public Terkep getTerkep() { return terkep; }
+
+    public void ujKor() { // Kör indítása: időjárás frissítése és akciópontok visszaállítása
+        
+    }
 }
