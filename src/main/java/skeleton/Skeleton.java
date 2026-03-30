@@ -1,7 +1,9 @@
 package skeleton;
 
 public class Skeleton {
-    public static void main(String[] args) {
-        System.out.println("GitHub Actions teszt: SIKERES FORDITAS!");
-    }
+	private Skeleton() {}
+
+	public static void log(String uzenet) {
+	    System.out.println(uzenet);
+	}
 }
