@@ -6,6 +6,10 @@ import java.util.List;
 
 import jarmu.*;
 
+/**
+ * Absztrakt út osztály, amely a térkép úthálózatának alapeleme.
+ * Az utok sávokból állnak.
+ */
 public abstract class Ut {
     protected final String nev;
     protected final int hossz;

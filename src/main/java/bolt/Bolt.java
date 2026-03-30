@@ -5,6 +5,10 @@ import java.util.Map;
 
 import jatekos.Takarito;
 
+/**
+ * A játékban található boltot reprezentáló osztály.
+ * Itt vásárolhatnak a Takarítók különböző eszközöket és alapanyagokat.
+ */
 public class Bolt {
 	private final Map<String, IBoltiCikk> kinalat = new LinkedHashMap<>();
     
