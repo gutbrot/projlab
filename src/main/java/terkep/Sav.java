@@ -7,27 +7,21 @@ import jarmu.Jarmu;
  * Tárolja az aktuális útviszonyokat, mint a hóvastagság és a jegesedés.
  */
 public class Sav {
-    // A diagram szerinti belső állapotok
-    private int hoVastagsag; // A sávban lévő hó vastagsága cm-ben
-    private boolean vanEJarmu; // Van-e jelenleg jármű a sávban
-    private int savSzama; // A sáv azonosítója
-    private int athaladokSzama; // Hány jármű haladt át a sávon
-    private int soMennyiseg; //Mennyi só van a sávban, ami segíti a hó olvadását
-    private boolean jegese; // Jeges-e a sáv
+	private int hoVastagsag;
+	private boolean vanEJarmu;
+	private final int savSzama;
+	private int athaladokSzama;
+	private int soMennyiseg;
+	private boolean jegesE;
 
-    /**
-     * Eldönti, hogy a sáv az adott jármű számára járható-e.
-     * @param j A jármű, amely át szeretne haladni.
-     * @return true, ha a jármű képes áthaladni a sávon.
-     */
-    public boolean atjarhatoE(Jarmu j) {
-        // Szkeleton logika: ha nincs rajta roncs és a hó kezelhető
-        return !vanEJarmu && hoVastagsag < 50;
-    }
+	public Sav(int savSzama) {
+	    this.savSzama = savSzama;
+	}
 
-    /**
-     * Kezeli a só hatására történő hóolvadást a sávban.
-     */
+	public boolean atjarhatoE(Jarmu jarmu) {
+	    return !vanEJarmu && hoVastagsag < 30 && (!jegesE || jarmu != null);
+	}
+	
     public void soOlvadas() {
         if (soMennyiseg > 0) {
             hoVastagsag = Math.max(0, hoVastagsag - 10);
@@ -35,28 +29,14 @@ public class Sav {
         }
     }
 
-    /**
-     * Beállítja vagy módosítja a hóvastagságot a sávban.
-     * @param h A hozzáadandó hó mennyisége.
-     */
-    public void setHo(int h) {
-        this.hoVastagsag = h;
-    }
-
-    /**
-     * Lekérdezi, hogy a sáv felülete jeges-e.
-     * @return true, ha az út le van fagyva.
-     */
-    public boolean jegeseE() {
-        return jegese;
-    }
-
-    /**
-     * Visszaadja az aktuális hóvastagságot.
-     * @return A hó vastagsága mm-ben vagy cm-ben.
-     */
-    public int getHo() {
-        return hoVastagsag;
-    }
-
+    public void setHo(int h){ hoVastagsag += h; }
+    public boolean jegesE() { return jegesE; }
+    public void setJeges(boolean jeges) { this.jegesE = jeges; }
+    public int getHo() { return hoVastagsag; }
+    public boolean isVanEJarmu() { return vanEJarmu; }
+    public void setVanEJarmu(boolean vanEJarmu) { this.vanEJarmu = vanEJarmu; }
+    public int getSavSzama() { return savSzama; }
+    public int getAthaladokSzama() { return athaladokSzama; }
+    public void novelAthaladok() { athaladokSzama++; }
+    public int getSoMennyiseg() { return soMennyiseg; }
 }

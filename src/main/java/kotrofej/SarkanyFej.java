@@ -1,21 +1,28 @@
 package kotrofej;
 
-/**
- * Hókotróra szerelhető kotró fej, amely képes a havat és a jeget felolvasztani  
- * megfelelő fogyóanyag mennyiség birtokában. 
- * Felelős a hó és jég útról való eltakarításáért.
- */
+import terkep.*;
+
 public class SarkanyFej extends KotroFej {
-    
-    /** A működéshez szükséges üzemanyag mennyisége. */
     private int biokerozinIgeny;
 
-    @Override
-    public void tisztit(Object cel, Object melle, Object ut) { // Olvasztási logika biokerozin felhasználásával
+    public SarkanyFej(int ar, int biokerozinIgeny) {
+        super(ar);
+        this.biokerozinIgeny = biokerozinIgeny;
     }
 
     @Override
-    public String getNev() { // Visszaadja a kotró fej nevét
-        return "SarkanyFej";
+    public void tisztit(Sav cel, Sav melle, Ut ut) {
+        if (cel != null) {
+            cel.setHo(0);
+            cel.setJeges(false);
+        }
     }
+
+    @Override
+    public String getNev() { return "SarkanyFej"; }
+
+    public int getBiokerozinIgeny() { return biokerozinIgeny; }
+
+    @Override
+    public KotroFej getKotroFej() { return new SarkanyFej(getAr(), biokerozinIgeny); }
 }

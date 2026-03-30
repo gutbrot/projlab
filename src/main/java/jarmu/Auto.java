@@ -1,17 +1,20 @@
 package jarmu;
 
-/*
-*Két végpont között a legrövidebb úton mozgó jármű fajta, amit nem lehet irányítani. 
-*/
+import terkep.Lokacio;
 
 public class Auto extends Jarmu{
-    @Override
-    public void mozgas(){ //Ennek a függvénynek a segítével fog tudni az Auto mozogni
+	private final Lokacio[] vegallomasok = new Lokacio[2];
 
-    }
+	public Auto(Lokacio elso, Lokacio masodik, Lokacio kezdo) {
+	    super(kezdo);
+	    vegallomasok[0] = elso;
+	    vegallomasok[1] = masodik;
+	}
 
-    @Override
-    public void utkozos(){ //Ez a függvény fogja kezelni a járművek ütközését
-        
-    }
+	@Override
+	public void utkozos() {
+	    mozgasKeptelen();
+	}
+
+	public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
 }

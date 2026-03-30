@@ -1,18 +1,19 @@
 package kotrofej;
 
-/**
- * Hókotróra szerelhető kotró fej, amely képes a jeget feltörni. 
- * Felelős a jégpáncél feltöréséért. A feltört jeget nem tudja feltakarítani.
- */
+import terkep.*;
+
 public class JegtoroFej extends KotroFej {
 
+    public JegtoroFej(int ar) { super(ar); }
+
     @Override
-    public void tisztit(Object cel, Object melle, Object ut) {
-        
+    public void tisztit(Sav cel, Sav melle, Ut ut) {
+        if (cel != null) cel.setJeges(false);
     }
 
     @Override
-    public String getNev() { // Visszaadja a kotró fej nevét
-        return "JegtoroFej";
-    }
+    public String getNev() { return "JegtoroFej"; }
+
+    @Override
+    public KotroFej getKotroFej() { return new JegtoroFej(getAr()); }
 }

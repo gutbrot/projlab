@@ -1,20 +1,60 @@
 package eszkoztar;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import kotrofej.KotroFej;
 
 public class Eszkoztar {
-    private int soKeszlet; //Az a só mennyiség amivel a Takarító rendelkezik
-    private int biokerozinKeszlet; //Az a biokerozin mennyiség amivel a Takarító rendelkezik
-    private List<KotroFej> kotroFejek; //Az a lista amiben a Takarító rendelkezésére álló kotrófejek vannak tárolva
+    private int soKeszlet;
+    private int biokerozinKeszlet;
+    private List<KotroFej> kotroFejek = new ArrayList<>();
 
-    public boolean levon(String tipus, int mennyiseg){ //Ez a függvény fogja kezelni, hogy a Takarító elhasznál egy bizonyos mennyiségű eszközt
-        return false;
+    public boolean levon(String tipus, int mennyiseg){
+    	if (mennyiseg < 0) return false;
+    	switch (tipus.toLowerCase()) {
+    	    case "so":
+    	        if (soKeszlet >= mennyiseg) { soKeszlet -= mennyiseg; return true; }
+    	        return false;
+    	    case "biokerozin":
+    	        if (biokerozinKeszlet >= mennyiseg) { biokerozinKeszlet -= mennyiseg; return true; }
+    	        return false;
+    	    default:
+    	        return false;
+    	}
     }
-    public void hozzaad(String tipus, int mennyiseg){ //Ez a függvény fogja kezelni, hogy a Takarító új eszközt kapjon vagy új adag fogyóanyagot kapjon
+    public void hozzaad(String tipus, int mennyiseg){
+    	if (mennyiseg < 0) return;
+    	switch (tipus.toLowerCase()) {
+    	    case "so": soKeszlet += mennyiseg; break;
+    	    case "biokerozin": biokerozinKeszlet += mennyiseg; break;
+    	    default: break;
+    	}
+    }
+    
+    public boolean vanE(String tipus, int mennyiseg){
+    	if (mennyiseg < 0) return false;
+    	switch (tipus.toLowerCase()) {
+    	    case "so": return soKeszlet >= mennyiseg;
+    	    case "biokerozin": return biokerozinKeszlet >= mennyiseg;
+    	    default: return false;
+    	}
+    }
+    
+    public void hozzaadFej(KotroFej fej) {
+        if (fej != null) kotroFejek.add(fej);
+    }
+    
+    public KotroFej kiveszFej() {
+        if (kotroFejek.isEmpty()) return null;
+        return kotroFejek.remove(0);
+    }
 
+    public List<KotroFej> getKotroFejek() {
+        return Collections.unmodifiableList(kotroFejek);
     }
-    public boolean vanE(String tipus, int mennyiseg){ //Ez a függvény fogja kezelni, hogy a Takarító rendelkezésére áll-e egy bizonyos eszköz vagy egy bizonyos mennyiségű eszköz/fogyóanyag
-        return false;
-    }
+    
+    public int getSoKeszlet() { return soKeszlet; }
+    public int getBiokerozinKeszlet() { return biokerozinKeszlet; }
 }

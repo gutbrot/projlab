@@ -1,19 +1,30 @@
 package kotrofej;
 
-/**
- * Hókotróra szerelhető kotró fej, amely képes havat és a feltört jeget a 
- * hókotró nyomvonalától több sávval arrébb szórni. Felelős a hó, 
- * illetve feltört jég útról való eltakarításáért.
- */
+import terkep.*;
+
 public class HanyoFej extends KotroFej {
 
-    @Override
-    public void tisztit(Object cel, Object melle, Object ut) {
-        
+    public HanyoFej(int ar) {
+        super(ar);
     }
 
     @Override
-    public String getNev() { // Visszaadja a kotró fej nevét
+    public void tisztit(Sav cel, Sav melle, Ut ut) {
+        if (cel == null) return;
+        int ho = cel.getHo();
+        cel.setHo(0);
+        if (melle != null) {
+            melle.setHo(melle.getHo() + ho);
+        }
+    }
+
+    @Override
+    public String getNev() {
         return "HanyoFej";
+    }
+
+    @Override
+    public KotroFej getKotroFej() {
+        return new HanyoFej(getAr());
     }
 }

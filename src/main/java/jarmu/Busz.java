@@ -1,23 +1,24 @@
 package jarmu;
 
-/* 
-*A játékos által irányított jármű fajta, amelynek célja, hogy minél többször megforduljon a két végállomása között.
- */
+import terkep.Lokacio;
 
-public class Busz extends Jarmu{
-    // private final Lokacio[2] vegallomasok
+public class Busz extends Jarmu {
+    private final Lokacio[] vegallomasok = new Lokacio[2];
 
-    @Override
-    public void mozgas(){ //Ennek a függvénynek a segítével fogja tudni a Buszvezető a járművet mozgatni
+    public Busz(Lokacio elso, Lokacio masodik, Lokacio kezdo) {
+        super(kezdo);
+        vegallomasok[0] = elso;
+        vegallomasok[1] = masodik;
+    }
 
+    public boolean vegallomasbaErt() {
+        return pozicio == vegallomasok[0] || pozicio == vegallomasok[1];
     }
 
     @Override
-    public void utkozos(){ //Ez a függvény fogja kezelni a járművek ütközését
-        
+    public void utkozos() {
+        mozgasKeptelen();
     }
 
-    public void vegallomasbaErt(){ //Ez a függvény fogja kezelni, hogy a busz elérte a végállomását
-
-    }
+    public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
 }

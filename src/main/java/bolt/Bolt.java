@@ -1,7 +1,8 @@
 package bolt;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.HashMap;
+
 import jatekos.Takarito;
 
 /**
@@ -9,26 +10,30 @@ import jatekos.Takarito;
  * Itt vásárolhatnak a Takarítók különböző eszközöket és alapanyagokat.
  */
 public class Bolt {
-
-    /** * A bolt kínálata: a termék neve (kulcs) és a hozzá tartozó ár (érték). 
-     */
-    private Map<String, Integer> termekek = new HashMap<>();
-
-    /**
-     * Kilistázza a konzolra a bolt aktuális kínálatát és az árakat.
-     * A szkeleton fázisban ez segít ellenőrizni a bolt tartalmát.
-     */
-    public void listaz() {
-        
+	private final Map<String, IBoltiCikk> kinalat = new LinkedHashMap<>();
+    
+    public void felveszTermek(String nev, IBoltiCikk cikk) {
+        if (nev != null && cikk != null) {
+            kinalat.put(nev, cikk);
+        }
     }
-
-    /**
-     * Kezeli a vásárlási folyamatot. Ellenőrzi a termék létezését, 
-     * és levonja a Takarító pénzét, ha van rá fedezet.
-     * * @param v A vásárlást végző Takarító objektum.
-     * @param termek A megvásárolni kívánt termék pontos neve.
-     */
-    public void vasarlas(Takarito v, String termek) {
-        
+    
+    public void listaz() {
+        for (Map.Entry<String, IBoltiCikk> e : kinalat.entrySet()) {
+            System.out.println(e.getKey() + " - ár: " + e.getValue().getAr());
+        }
+    }
+    
+    public boolean vasarlas(Takarito v, String termek) {
+        if (v == null || termek == null) return false;
+        IBoltiCikk cikk = kinalat.get(termek);
+        if (cikk == null || v.getPenz() < cikk.getAr()) return false;
+        v.penztKap(-cikk.getAr());
+        cikk.atadVevonek(v);
+        return true;
+    }
+    
+    public Map<String, IBoltiCikk> getKinalat() {
+        return kinalat;
     }
 }

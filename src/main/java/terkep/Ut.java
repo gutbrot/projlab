@@ -1,81 +1,42 @@
 package terkep;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import jarmu.Jarmu;
+
+import jarmu.*;
 
 /**
  * Absztrakt út osztály, amely a térkép úthálózatának alapeleme.
  * Az utok sávokból állnak.
  */
 public abstract class Ut {
-    /** Az út megnevezése. */
-    protected String nev;
-    
-    /** Az út hossza egységekben. */
-    protected int hossz;
-    
-    /** * Kétdimenziós lista, amely az utat szakaszokra (első szint) 
-     * és azon belüli sávokra (második szint) bontja.
-     */
-    protected List<List<Sav>> szakaszok;
+    protected final String nev;
+    protected final int hossz;
+    protected final List<List<Sav>> szakaszok = new ArrayList<>();
 
-    /**
-     * Irányítja a járművek haladását az úton a sávok között.
-     * @param j Az érintett jármű.
-     * @param s Az aktuális sáv.
-     * @return true, ha a jármű sikeresen továbbhaladt.
-     */
-    public boolean jarmuEligazito(Jarmu j, Sav s) {
-        // Szkeleton logika: alapértelmezetten engedi a haladást, ha a sáv átjárható
-        return s.atjarhatoE(j);
+    protected Ut(String nev, int hossz, int savokSzama) {
+        this.nev = nev;
+        this.hossz = Math.max(1, hossz);
+        for (int i = 0; i < this.hossz; i++) {
+            List<Sav> szakasz = new ArrayList<>();
+            for (int j = 0; j < Math.max(1, savokSzama); j++) {
+                szakasz.add(new Sav(j));
+            }
+            szakaszok.add(szakasz);
+        }
     }
 
-    /**
-     * Absztrakt metódus az időjárási események kezelésére.
-     * @param h A lehullott hó mennyisége.
-     */
+    public boolean jarmuEligazito(Jarmu jarmu, Sav sav) {
+        return sav != null && sav.atjarhatoE(jarmu);
+    }
+
     public abstract void havazik(int h);
-}
 
-/**
- * Normál útszakasz
- */
-class SimaUt extends Ut {
-    @Override
-    public void havazik(int h) {
-        if (szakaszok != null) {
-            for (List<Sav> szakasz : szakaszok) {
-                for (Sav s : szakasz) {
-                    s.setHo(h); // A Sav osztályban korábban setHo-ra neveztük át
-                }
-            }
-        }
-    }
-}
-
-/**
- * Alagút, amely megvédi az úttestet a havazástól.
- */
-class Alagut extends Ut {
-    @Override
-    public void havazik(int h) {
-        // Az alagút fedett, így a belső sávok hóvastagsága nem változik.
-    }
-}
-
-/**
- * Híd, amely a sima úthoz hasonlóan behavazódik, de speciális, mivel van egy exra sávja ami csak arra van fentartva
- * hogy a havat oda lehessen takarítani
- */
-class Hid extends Ut {
-    @Override
-    public void havazik(int h) {
-        if (szakaszok != null) {
-            for (List<Sav> szakasz : szakaszok) {
-                for (Sav s : szakasz) {
-                    s.setHo(h);
-                }
-            }
-        }
+    public String getNev() { return nev; }
+    public int getHossz() { return hossz; }
+    public List<List<Sav>> getSzakaszok() { return Collections.unmodifiableList(szakaszok); }
+    public Sav getSav(int szakaszIndex, int savIndex) {
+        return szakaszok.get(szakaszIndex).get(savIndex);
     }
 }
