@@ -1,7 +1,11 @@
 package terkep;
 
-import jarmu.*;
+import jarmu.Jarmu;
 
+/**
+ * A térkép egy forgalmi sávját reprezentáló osztály.
+ * Tárolja az aktuális útviszonyokat, mint a hóvastagság és a jegesedés.
+ */
 public class Sav {
 	private int hoVastagsag;
 	private boolean vanEJarmu;
@@ -20,7 +24,8 @@ public class Sav {
 	
     public void soOlvadas() {
         if (soMennyiseg > 0) {
-            hoVastagsag -= 10;
+            hoVastagsag = Math.max(0, hoVastagsag - 10);
+            soMennyiseg--;
         }
     }
 
