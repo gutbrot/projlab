@@ -1,7 +1,5 @@
 package kotrofej;
 
-import jatekos.Takarito;
-
 import terkep.*;
 import jatekos.*;
 import bolt.*;
