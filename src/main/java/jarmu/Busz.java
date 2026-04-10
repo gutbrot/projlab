@@ -3,49 +3,56 @@ package jarmu;
 import terkep.Lokacio;
 
 /**
- * A Busz osztály egy játékos által irányított járművet reprezentál
- * Elsődleges felelőssége a kijelölt megállóhelyek (végállomások) közötti közlekedés
- * Célja, hogy minél többször megforduljon a két végállomása között, amivel pontokat gyűjt az irányítója számára
+ * A Busz osztály egy játékos által irányított járművet reprezentál.
+ * Kezeli a végállomások közötti közlekedést és az egyedi azonosítást.
  */
 public class Busz extends Jarmu {
-    /**
-     * Lokacio típusú 2 hosszú tömb, amely a busz két végállomását tárolja el fix módon
-     */
+    /** A busz egyedi azonosítója (pl. "B1", "B2"). */
+    private final String id;
+
+    /** Lokacio típusú 2 hosszú tömb, amely a busz két végállomását tárolja. */
     private final Lokacio[] vegallomasok = new Lokacio[2];
 
     /**
      * Konstruktor a Busz példányosításához.
-     * @param elso Az egyik kijelölt végállomás lokációja
-     * @param masodik A másik kijelölt végállomás lokációja
+     * @param id A busz egyedi azonosítója.
+     * @param elso Az egyik kijelölt végállomás lokációja.
+     * @param masodik A másik kijelölt végállomás lokációja.
      * @param kezdo A busz indulási pozíciója a játéktérben.
      */
-    public Busz(Lokacio elso, Lokacio masodik, Lokacio kezdo) {
+    public Busz(String id, Lokacio elso, Lokacio masodik, Lokacio kezdo) {
         super(kezdo);
+        this.id = id;
         vegallomasok[0] = elso;
         vegallomasok[1] = masodik;
+        System.out.println(">>> Busz létrehozva (ID: " + id + ") a(z) " + kezdo.getUt().getNev() + " úton.");
     }
 
     /**
-     * Ez a metódus vizsgálja, hogy a busz elérte-e a saját vonalán lévő valamelyik végállomást
-     * Képes detektálni a célállomás elérését a pontszerzés érdekében
-     * @return True, ha a busz aktuális pozíciója megegyezik valamelyik végállomással.
+     * Vizsgálja, hogy a busz elérte-e valamelyik végállomását.
+     * @return True, ha a busz aktuális pozíciója végállomás.
      */
     public boolean vegallomasbaErt() {
-        return pozicio == vegallomasok[0] || pozicio == vegallomasok[1];
+        boolean cellert = (pozicio == vegallomasok[0] || pozicio == vegallomasok[1]);
+        if (cellert) {
+            System.out.println(">>> A(z) " + id + " azonosítójú busz elérte az egyik végállomását!");
+        }
+        return cellert;
     }
 
     /**
-     * Megvalósítja az ütközéskezelést a busz számára
-     * Kezeli azokat a kritikus helyzeteket, amikor a jármű baleset miatt mozgásképtelenné válik
+     * Megvalósítja az ütközéskezelést.
+     * Ütközés esetén a jármű mozgásképtelenné válik.
      */
     @Override
     public void utkozos() {
+        System.out.println(">>> Ütközés! A(z) " + id + " azonosítójú busz balesetet szenvedett és mozgásképtelenné vált.");
         mozgasKeptelen();
     }
 
-    /**
-     * Visszaadja a buszhoz rendelt rögzített végállomásokat.
-     * @return A végállomásokat tartalmazó tömb másolata
-     */
+    /** @return A busz egyedi azonosítója. */
+    public String getId() { return id; }
+
+    /** @return A végállomásokat tartalmazó tömb másolata. */
     public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
 }

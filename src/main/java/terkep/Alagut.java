@@ -2,15 +2,12 @@ package terkep;
 
 /**
  * Az Alagut osztály az Ut egy speciális típusa.
- * Felelőssége egy olyan útszakasz reprezentálása, amely fedett, 
- * így a környezeti hatások (például a havazás) korlátozottan vagy egyáltalán nem érintik.
- * Az úthálózat részét képezi, de speciális időjárási szabályok vonatkoznak rá.
+ * Speciális időjárási szabályok vonatkoznak rá: a hóvastagság sosem nő benne.
  */
 public class Alagut extends Ut {
     
     /**
      * Konstruktor az Alagut példányosításához.
-     * Meghívja az ősosztály konstruktorát az alapvető útadatok beállításához.
      * @param nev Az alagút egyedi megnevezése.
      * @param hossz Az alagút hossza (szakaszok száma).
      * @param savokSzama Az alagútban futó párhuzamos sávok száma.
@@ -21,13 +18,12 @@ public class Alagut extends Ut {
 
     /**
      * Felüldefiniálja a havazás logikáját.
-     * Az alagút fedett jellege miatt a csapadék nem jut be az úttestre, 
-     * így a hóvastagság nem növekszik az időjárás-frissítés során.
-     * @param h A lehullott hó mennyisége (az alagút esetében figyelmen kívül hagyva).
+     * Mivel az alagút fedett, a metódus üres marad, így a sávok hóvastagsága 
+     * az időjárás-frissítés során változatlan marad.
      */
     @Override
     public void havazik(int h) {
-        // Az alagútban a konstrukcióból adódóan nem havazik, 
-        // így ez a metódus nem módosítja a sávok állapotát.
+        // Logolás a prototípushoz, hogy lássuk a tesztelés során:
+         System.out.println(">>> Alagut (" + nev + "): A fedett kialakitas miatt nem hullik ho az utra.");
     }
 }

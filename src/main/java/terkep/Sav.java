@@ -4,83 +4,73 @@ import jarmu.Jarmu;
 
 /**
  * A térkép egy forgalmi sávját reprezentáló osztály.
- * Felelőssége az aktuális útviszonyok (hóvastagság, jegesedés, sómennyiség) tárolása 
- * és a sáv foglaltságának kezelése.
- * Ez az egység határozza meg, hogy egy adott jármű áthaladhat-e az adott útszakaszon.
+ * Tárolja az útviszonyokat és kezeli a foglaltságot.
  */
 public class Sav {
-    /** A sávon található hó aktuális vastagsága milliméterben. */
-    private int hoVastagsag;
-    /** Jelzi, hogy tartózkodik-e éppen jármű ebben a sávban (biztonsági követés). */
-    private boolean vanEJarmu;
-    /** A sáv azonosító száma az adott útszakaszon belül. */
-    private final int savSzama;
-    /** Statisztikai adat: hány jármű haladt át ezen a sávon a játék során. */
-    private int athaladokSzama;
-    /** A sávra kijuttatott só mennyisége, amely segíti az olvadást. */
-    private int soMennyiseg;
-    /** Jelzi, hogy a sáv felülete le van-e fagyva (jeges-e). */
-    private boolean jegesE;
+    private int hoVastagsag = 0;
+    private boolean vanEJarmu = false;
+    private int savSzama;
+    private int athaladokSzama = 0;
+    private int soMennyiseg = 0;
+    private boolean jegesE = false;
+    private boolean zuzalekosE = false;
 
     /**
-     * Konstruktor egy sáv példányosításához.
-     * @param savSzama A sáv sorszáma az út keresztmetszetében.
+     * Konstruktor a sáv példányosításához.
+     * @param savSzama A sáv sorszáma a keresztmetszetben.
      */
     public Sav(int savSzama) {
         this.savSzama = savSzama;
     }
 
     /**
-     * Meghatározza, hogy a sáv az aktuális állapotában járható-e egy jármű számára.
-     * Szabályok: Nem lehet benne másik jármű, a hóvastagság nem haladhat meg egy kritikus szintet (30), 
-     * és figyelembe veszi a jegesedést is a jármű típusától függően.
-     * @param jarmu A jármű, amely át szeretne haladni.
-     * @return True, ha a sáv szabad és járható, egyébként false.
+     * Meghatározza, hogy a sáv járható-e.
+     * @param jarmu A belépni kívánó jármű.
+     * @return True, ha szabad, nincs túl mély hó (<30mm) és nem akadályozza jég.
      */
     public boolean atjarhatoE(Jarmu jarmu) {
-        // A sáv akkor járható, ha nincs benne más, a hó < 30 mm és nem akadályozza jég a járművet.
-        return !vanEJarmu && hoVastagsag < 30 && (!jegesE || jarmu != null);
+        // Alapszabály: nem lehet benne másik jármű és a hó nem lehet 30mm-nél több.
+        boolean szabad = !vanEJarmu;
+        boolean hoRendben = hoVastagsag < 30;
+        
+        // A jegesedés vagy zúzalékosság a jármű típusától és felszerelésétől függően akadályozhat.
+        // Prototípus szinten: ha jeges, csak a hóláncos/speciális járművek haladnak jól.
+        return szabad && hoRendben && (!jegesE || jarmu != null);
     }
     
     /**
-     * A kijuttatott só hatására bekövetkező olvadást szimulálja.
-     * Ha van só a sávon, csökkenti a hóvastagságot és a sómennyiséget is.
+     * A sózás hatására bekövetkező olvadás szimulációja.
      */
     public void soOlvadas() {
         if (soMennyiseg > 0) {
-            // A só 10 egységgel csökkenti a hóvastagságot, de az nem mehet 0 alá.
+            // A só 10 egységgel csökkenti a havat, de nem megy 0 alá.
             hoVastagsag = Math.max(0, hoVastagsag - 10);
             soMennyiseg--;
         }
     }
 
-    /** @param h A hozzáadandó hó mennyisége. */
-    public void setHo(int h){ hoVastagsag += h; }
-    
-    /** @return True, ha a sáv jeges. */
-    public boolean jegesE() { return jegesE; }
-    
-    /** @param jeges A sáv jegesedési állapotának beállítása. */
-    public void setJeges(boolean jeges) { this.jegesE = jeges; }
-    
-    /** @return Az aktuális hóvastagság. */
+    // --- Módosító és lekérdező metódusok ---
+
+    public void setHo(int h) { this.hoVastagsag = Math.max(0, h); }
     public int getHo() { return hoVastagsag; }
     
-    /** @return True, ha van jármű a sávban. */
+    public boolean jegesE() { return jegesE; }
+    public void setJeges(boolean jeges) { this.jegesE = jeges; }
+
+    /** Beállítja a zúzalékos állapotot (pl. jégtörés után). */
+    public void setZuzalekos(boolean zuzalekos) { this.zuzalekosE = zuzalekos; }
+    public boolean isZuzalekos() { return zuzalekosE; }
+
     public boolean isVanEJarmu() { return vanEJarmu; }
-    
-    /** @param vanEJarmu A sáv foglaltságának beállítása. */
     public void setVanEJarmu(boolean vanEJarmu) { this.vanEJarmu = vanEJarmu; }
-    
-    /** @return A sáv sorszáma. */
+
     public int getSavSzama() { return savSzama; }
     
-    /** @return Az áthaladt járművek száma. */
-    public int getAthaladokSzama() { return athaladokSzama; }
-    
-    /** Növeli az áthaladások számát, amikor egy jármű sikeresen belép a sávba. */
+    /** Regisztrálja az áthaladást és növeli a statisztikát. */
     public void novelAthaladok() { athaladokSzama++; }
-    
-    /** @return A sávon lévő sómennyiség. */
+    public int getAthaladokSzama() { return athaladokSzama; }
+
+    /** Só hozzáadása a sávhoz (pl. sószóró fej által). */
+    public void hozzaadSo(int mennyiseg) { this.soMennyiseg += mennyiseg; }
     public int getSoMennyiseg() { return soMennyiseg; }
 }

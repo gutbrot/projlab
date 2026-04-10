@@ -36,5 +36,6 @@ public class Hid extends Ut {
                 sav.setHo(sav.getHo() + h);
             }
         }
+        System.out.println(">>> A havazás sikeresen megtörtént a hídon (" + nev + "). Minden sáv hóvastagsága " + h + " cm-rel nőtt.");
     }
 }

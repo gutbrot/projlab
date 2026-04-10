@@ -3,37 +3,54 @@ package terkep;
 import java.util.List;
 
 /**
- * A Lokacio osztály felelős egy jármű pontos helyzetének meghatározásáért a térképen.
- * Egyfajta koordinátaként szolgál, amely összefogja az úthálózat különböző szintjeit: 
- * megadja, hogy a jármű melyik úton, annak melyik keresztmetszeti szakaszán 
- * és pontosan melyik forgalmi sávjában tartózkodik.
+ * A Lokacio osztály összeköti a járművet a térkép egy konkrét pontjával.
+ * Tárolja az utat, a szakaszt (keresztmetszetet) és a konkrét sávot.
  */
 public class Lokacio {
-    /** Az út objektum, amelyen a tartózkodási hely található. */
-    private final Ut ut;
-    /** Az út egy adott keresztmetszete (szakasz), amely több párhuzamos sávot tartalmaz. */
-    private final List<Sav> szakasz;
-    /** A konkrét forgalmi sáv, amelyben a jármű vagy objektum elhelyezkedik. */
-    private final Sav sav;
+    /** Az út, amin a jármű tartózkodik. */
+    private Ut ut;
+    /** A sáv, amiben a jármű éppen áll. */
+    private Sav sav;
 
     /**
-     * Konstruktor egy új lokáció (helymeghatározás) létrehozásához.
-     * @param ut A konkrét út (pl. utca vagy híd).
-     * @param szakasz Az út hosszirányú felosztásának egy szelete.
-     * @param sav A szakaszban található sávok egyike.
+     * Konstruktor a lokáció létrehozásához.
+     * @param ut Az út objektum.
+     * @param sav A konkrét sáv az úton.
      */
-    public Lokacio(Ut ut, List<Sav> szakasz, Sav sav) {
+    public Lokacio(Ut ut, Sav sav) {
         this.ut = ut;
-        this.szakasz = szakasz;
         this.sav = sav;
     }
 
-    /** @return Visszaadja a lokációhoz tartozó utat. */
+    /**
+     * Visszaadja a jelenlegi szakasz összes sávját. 
+     * Ez segít a szomszédos sávok (balra/jobbra) megtalálásában koordináták nélkül.
+     */
+    public List<Sav> getSzakasz() {
+        if (ut == null || sav == null) return null;
+        
+        // Megkeressük, melyik szakaszban van a sávunk
+        for (List<Sav> szakasz : ut.getSzakaszok()) {
+            if (szakasz.contains(sav)) {
+                return szakasz;
+            }
+        }
+        return null;
+    }
+
+    // --- Getterek és a hiányzó Setter ---
+
     public Ut getUt() { return ut; }
     
-    /** @return Visszaadja az út adott keresztmetszetét alkotó sávok listáját. */
-    public List<Sav> getSzakasz() { return szakasz; }
-    
-    /** @return Visszaadja a pontos forgalmi sávot. */
+    public void setUt(Ut ut) { this.ut = ut; }
+
     public Sav getSav() { return sav; }
+
+    /**
+     * Ez a metódus hiányzott! Frissíti a konkrét sávot a lokáción belül.
+     * @param sav Az új sáv, amibe a jármű átlépett.
+     */
+    public void setSav(Sav sav) { 
+        this.sav = sav; 
+    }
 }

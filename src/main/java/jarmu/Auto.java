@@ -3,41 +3,52 @@ package jarmu;
 import terkep.Lokacio;
 
 /**
- * Egy NPC járművet reprezentál, ami az utakon közlekedik a saját körének ideje alatt
- * Két végpont között a legrövidebb úton mozgó jármű fajta, amit nem lehet irányítani
- * Elsődleges feladata a jármű állapotának tárolása, a célállomásainak ismerete, valamint az ütközések kezelése
+ * Egy NPC járművet reprezentál, amely automatikusan közlekedik a végpontjai között.
+ * Nem irányítható közvetlenül, a szimuláció mozgatja a legrövidebb úton.
  */
-public class Auto extends Jarmu{
-    /** * Lokacio típusú 2 hosszú tömb, ami az autó indulási és érkezési helyét tárolja el fix módon
-     * Ezek a végállomások határozzák meg a mozgásának irányát
-     */
+public class Auto extends Jarmu {
+    /** Az autó egyedi azonosítója (pl. "A1", "A2"). */
+    private final String id;
+
+    /** Az autó indulási és érkezési helyét tároló tömb. */
     private final Lokacio[] vegallomasok = new Lokacio[2];
 
     /**
      * Konstruktor az Auto példányosításához.
-     * @param elso Az egyik végállomás lokációja
-     * @param masodik a másik végállomás lokációja
-     * @param kezdo Az autó indulási helye
+     * @param id Az autó egyedi azonosítója.
+     * @param elso Az egyik végállomás lokációja.
+     * @param masodik A másik végállomás lokációja.
+     * @param kezdo Az autó indulási helye.
      */
-    public Auto(Lokacio elso, Lokacio masodik, Lokacio kezdo) {
+    public Auto(String id, Lokacio elso, Lokacio masodik, Lokacio kezdo) {
         super(kezdo);
-        vegallomasok[0] = elso;
-        vegallomasok[1] = masodik;
+        this.id = id;
+        this.vegallomasok[0] = elso;
+        this.vegallomasok[1] = masodik;
+        System.out.println(">>> Autó létrehozva (ID: " + id + ") a(z) " + kezdo.getUt().getNev() + " úton.");
     }
 
     /**
-     * Ez a függvény vizsgálja, hogy az autó ütközött-e
-     * Reagál a más járművekkel vagy objektumokkal való interakciókra
-     * Ütközés esetén a járművet mozgásképtelen állapotba helyezi
+     * Megvalósítja az ütközéskezelést.
+     * Ha az autó ütközik, mozgásképtelen állapotba kerül.
      */
     @Override
     public void utkozos() {
+        System.out.println(">>> Ütközés! A(z) " + id + " azonosítójú autó balesetet szenvedett.");
         mozgasKeptelen();
     }
 
     /**
-     * Visszaadja az autó fix végállomásait.
-     * @return A végállomásokat tartalmazó tömb másolata.
+     * Megvizsgálja, hogy az autó valamelyik végállomásánál tartózkodik-e.
+      * @return True, ha az autó aktuális pozíciója valamelyik végállomás.
      */
+    public boolean vegallomasraErt() {
+        return pozicio == vegallomasok[0] || pozicio == vegallomasok[1];
+    }
+
+    /** @return Az autó egyedi azonosítója. */
+    public String getId() { return id; }
+
+    /** @return A végállomásokat tartalmazó tömb másolata. */
     public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
 }

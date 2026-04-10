@@ -3,14 +3,12 @@ package jatekos;
 /**
  * A Jatekos egy absztrakt osztály, amely a játékban résztvevőket reprezentálja.
  * Kezeli a játékosok akciópontjait, amelyek korlátozzák az egy körben elvégezhető műveletek számát.
- * Biztosítja a körök váltását, lehetővé téve ezzel a különböző játékosok egységes kezelését.
  */
 public abstract class Jatekos {
     /** Tárolja, hogy egy játékosnak aktuálisan hány akciópontja van. */
     protected int akcioPont;
     
     /**
-     * Konstruktor a játékos példányosításához.
      * @param akcioPont A játékos induló akciópontjainak száma.
      */
     protected Jatekos(int akcioPont) {
@@ -40,4 +38,13 @@ public abstract class Jatekos {
      * @return Az aktuális akciópontok mennyisége.
      */
     public int getAkcioPont() { return akcioPont; }
+
+    /**
+     * Prototípus kiegészítés: Lehetővé teszi az akciópontok közvetlen beállítását 
+     * az új körök indításakor (Jatekter által használt metódus).
+     * @param p Az új akciópont érték.
+     */
+    public void setAkcioPont(int p) {
+        this.akcioPont = p;
+    }
 }
