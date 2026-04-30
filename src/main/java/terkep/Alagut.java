@@ -1,19 +1,20 @@
 package terkep;
 
+import skeleton.Skeleton;
+
 /**
  * Az Alagut osztály az Ut egy speciális típusa.
- * Felelőssége egy olyan útszakasz reprezentálása, amely fedett, 
- * így a környezeti hatások (például a havazás) korlátozottan vagy egyáltalán nem érintik.
- * Az úthálózat részét képezi, de speciális időjárási szabályok vonatkoznak rá.
+ * Feladata egy fedett útszakasz reprezentálása, amelynél a környezeti 
+ * hatások (havazás) nem befolyásolják az út állapotát
  */
 public class Alagut extends Ut {
     
     /**
-     * Konstruktor az Alagut példányosításához.
-     * Meghívja az ősosztály konstruktorát az alapvető útadatok beállításához.
-     * @param nev Az alagút egyedi megnevezése.
-     * @param hossz Az alagút hossza (szakaszok száma).
-     * @param savokSzama Az alagútban futó párhuzamos sávok száma.
+     * Konstruktor az Alagút példányosításához.
+     * 
+     * @param nev Az alagút neve.
+     * @param hossz Az alagút hossza.
+     * @param savokSzama A párhuzamos sávok száma.
      */
     public Alagut(String nev, int hossz, int savokSzama) { 
         super(nev, hossz, savokSzama); 
@@ -21,13 +22,17 @@ public class Alagut extends Ut {
 
     /**
      * Felüldefiniálja a havazás logikáját.
-     * Az alagút fedett jellege miatt a csapadék nem jut be az úttestre, 
-     * így a hóvastagság nem növekszik az időjárás-frissítés során.
-     * @param h A lehullott hó mennyisége (az alagút esetében figyelmen kívül hagyva).
+     * Mivel az alagút fedett, a metódus nem növeli a sávok hóvastagságát
+     * 
+     * @param h A hulló hó mennyisége (az alagútban 0 marad).
      */
     @Override
     public void havazik(int h) {
-        // Az alagútban a konstrukcióból adódóan nem havazik, 
-        // így ez a metódus nem módosítja a sávok állapotát.
+        Skeleton.functionCalled("havazik", this, "void", h);
+        
+        // A dokumentáció szerint itt nem történik hóvastagság növelés
+        System.out.println("    [Alagut] " + nev + ": A fedél felfogta a havat.");
+        
+        Skeleton.voidReturn();
     }
 }

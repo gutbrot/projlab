@@ -1,88 +1,135 @@
 package jarmu;
 
 import jatekos.Takarito;
+import eszkoztar.Eszkoztar;
 import kotrofej.KotroFej;
+import bolt.IBoltiCikk;
 import terkep.*;
+import skeleton.Skeleton;
+import java.util.List;
 
 /**
- * A játékos által irányított jármű fajta, aminek a különböző útviszonyokon való közlekedését 
- * az aktuálisan felszerelt kotró fej befolyásolja
- * Célja, hogy letakarítsa a buszok elől az akadályozó tényezőket (hó, jég, feltört jég) 
- * és ezzel segítse a buszok közlekedését
- * Elsődleges feladata az úthálózat tisztán tartása a rá felszerelt eszközök segítségével.
+ * A Hokotro osztály egy járművet reprezentál. 
+ * Elsődleges feladata az úthálózat tisztán tartása a rá felszerelt eszközök segítségével. 
+ * Felelős a saját pozíciójának kezeléséért, valamint a tisztítási folyamat végrehajtásáért. 
+ * A takarító játékosok által irányított jármű
  */
-public class Hokotro extends Jarmu {
-    /** Eltárolja, hogy a hókotrón jelenleg milyen fej van. */
+public class Hokotro extends Jarmu implements IBoltiCikk {
+    
+    /** A hókotró egyedi azonosítója a tesztkörnyezetben. */
+    private final String id;
+    
+    /** A hókotró ára*/
+    private int ar = 50;
+    
+    /** Eltárolja, hogy a hókotrón jelenleg milyen fej van */
     private KotroFej felszereltFej;
+    
+    /** A hókotróhoz tartozó eszköztár */
+    private Eszkoztar eszkoztar;
     
     /**
      * Konstruktor a Hokotro példányosításához.
-     * @param pozicio A jármű kezdeti pozíciója a térképen
-     * @param felszereltFej Az indításkor a járműre szerelt kotrófej
+     * @param id Egyedi azonosító.
+     * @param pozicio Kezdőpozíció.
+     * @param felszereltFej Kezdő kotrófej.
      */
-    public Hokotro(Lokacio pozicio, KotroFej felszereltFej) {
+    public Hokotro(String id, Lokacio pozicio, KotroFej felszereltFej) {
         super(pozicio);
+        this.id = id;
         this.felszereltFej = felszereltFej;
-    }
-    
-    /**
-     * Megvalósítja a vásárlás lebonyolítását és a jármű takarító játékosnak való átadását
-     * @param v A vásárlást végző Takarító játékos
-     */
-    public void atadVevonek(Takarito v) {
-        if (v != null) {
-            v.hozzaadHokotro(this);
-        }
+        this.eszkoztar = new Eszkoztar();
     }
 
     /**
-     * A fejcsere műveletét valósítja meg[cite: 478].
-     * A játékos kiválasztja az aktuális körben használt felszerelhető kotró fejet
-     * @param fej Az új, felszerelni kívánt kotrófej
+     * A vásárlás lebonyolításáért és a jármű takarító játékosnak való átadásáért felel
+     * @param v A vásárlást végző Takarító játékos
      */
-    public void fejcsere(KotroFej fej) {
-        if (fej != null) {
-            this.felszereltFej = fej;
+    @Override
+    public void atadVevonek(Takarito v) {
+        Skeleton.functionCalled("atadVevonek", this, "void", v);
+        if (v != null) {
+            v.hozzaadHokotro(this);
         }
+        Skeleton.voidReturn();
+    }
+
+    /**
+     * A játékos kiválasztja a használt felszerelhető kotró fejet az eszközei közül
+     * A fejcsere műveletét valósítja meg
+     * 
+     * @param ujFej Az újonnan felszerelendő fej
+     */
+    public void fejcsere(KotroFej ujFej) {
+        Skeleton.functionCalled("fejcsere", this, "void", ujFej);
+        
+        // Dokumentáció diagram: Rendelkezésre áll az 'ujFej'?
+        // (A Takarito osztály ellenőrzi az eszköztárat a hívás előtt)
+        if (ujFej != null) {
+            this.felszereltFej = ujFej;
+            System.out.println(">>> Sikeres fejcsere történt.");
+        }
+        
+        Skeleton.voidReturn();
     }
     
     /**
-     * Meghívja a kotrófej tisztító metódusát, amely módosítja az érintett útszakasz állapotát a térképen
-     * Felelős a tisztítási folyamat végrehajtásáért
-     * @param terkep A játéktér térképe, amelyen a takarítás zajlik
+     * Meghívja a kotrófej tisztító metódusát, amely módosítja az 
+     * érintett útszakasz állapotát a térképen
+     * 
+     * @param terkep A játéktér térképe
      */
     public void takarit(Terkep terkep) {
-        if (pozicio == null || felszereltFej == null) return;
+        Skeleton.functionCalled("takarit", this, "void", terkep);
+
+        // 1. Aktuális pozícióhoz tartozó sáv lekérdezése
         Sav cel = pozicio.getSav();
         Ut ut = pozicio.getUt();
+
+        // 2. A sávon lévő csapadék típusának azonosítása
+        // 3. A 'felszereltFej' képes eltakarítani az adott csapadéktípust?
+        // (Ezt a KotroFej leszármazottai döntik el a tisztit hívásakor)
+
+        // 4. A térkép segítségével a szomszédos sáv lekérdezése
         Sav melle = null;
-        // Meghatározzuk a cél sáv melletti sávot a takarítási szabályokhoz
-        if (pozicio.getSzakasz() != null) {
-            int idx = pozicio.getSzakasz().indexOf(cel);
-            if (idx > 0) melle = pozicio.getSzakasz().get(idx - 1);
-            else if (idx + 1 < pozicio.getSzakasz().size()) melle = pozicio.getSzakasz().get(idx + 1);
+        List<Sav> szakasz = pozicio.getSzakasz();
+        if (szakasz != null && szakasz.size() > 1) {
+            int idx = szakasz.indexOf(cel);
+            if (idx + 1 < szakasz.size()) melle = szakasz.get(idx + 1);
+            else if (idx - 1 >= 0) melle = szakasz.get(idx - 1);
         }
-        // A felszerelt fej típusától függően elvégzi a tisztítást
-        felszereltFej.tisztit(cel, melle, ut);
+
+        // 5. Tisztítási logika függvényének hívása
+        if (felszereltFej != null) {
+            felszereltFej.tisztit(cel, melle, ut);
+        }
+
+        Skeleton.voidReturn();
     }
 
     /**
      * Megvalósítja az ütközéskezelést
-     * Ütközés esetén a jármű ideiglenesen mozgásképtelenné válik
      */
     @Override
     public void utkozos() {
+        Skeleton.functionCalled("utkozos", this, "void");
+        // Meghívja a Jarmu ősosztály büntetés-kezelőjét
         mozgasKeptelen();
+        Skeleton.voidReturn();
     }
 
-    /**
-     * Visszaadja a jármű aktuális állapotát
-     * @return Önmagát, mint Hokotro példányt.
-     */
-    public Hokotro getHokotro() { return this; }
+    // --- GETTEREK ---
+    public String getId() { return id; }
     
-    /**
-     * @return A járműre aktuálisan felszerelt kotrófej objektuma
-     */
+    @Override
+    public int getAr() { return ar; }
+    
     public KotroFej getFelszereltFej() { return felszereltFej; }
+    
+    public Eszkoztar getEszkoztar() { return eszkoztar; }
+    
+    /** Visszaadja a jármű aktuális állapotát */
+    public Hokotro getHokotro() { 
+        return this; 
+    }
 }

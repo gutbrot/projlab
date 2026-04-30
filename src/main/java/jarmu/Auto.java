@@ -1,43 +1,74 @@
 package jarmu;
 
 import terkep.Lokacio;
+import skeleton.Skeleton;
 
 /**
- * Egy NPC járművet reprezentál, ami az utakon közlekedik a saját körének ideje alatt
- * Két végpont között a legrövidebb úton mozgó jármű fajta, amit nem lehet irányítani
- * Elsődleges feladata a jármű állapotának tárolása, a célállomásainak ismerete, valamint az ütközések kezelése
+ * Az osztály felelőssége egy NPC jármű reprezentálása a szimulációban. 
+ * A jármű feladata, hogy a térképen két előre meghatározott végállomás között közlekedjen, 
+ * a legrövidebb utat használva ehhez. Reagál a más járművekkel 
+ * vagy objektumokkal való interakciókra.
  */
-public class Auto extends Jarmu{
-    /** * Lokacio típusú 2 hosszú tömb, ami az autó indulási és érkezési helyét tárolja el fix módon
-     * Ezek a végállomások határozzák meg a mozgásának irányát
-     */
+public class Auto extends Jarmu {
+    
+    /** Az autó egyedi azonosítója a tesztekhez. */
+    private final String id;
+
+    /** Az autó két végállomását tárolja. */
     private final Lokacio[] vegallomasok = new Lokacio[2];
 
     /**
      * Konstruktor az Auto példányosításához.
-     * @param elso Az egyik végállomás lokációja
-     * @param masodik a másik végállomás lokációja
-     * @param kezdo Az autó indulási helye
+     * 
+     * @param id Az autó azonosítója.
+     * @param v1 Első végállomás.
+     * @param v2 Második végállomás.
+     * @param kezdo Indulási pozíció.
      */
-    public Auto(Lokacio elso, Lokacio masodik, Lokacio kezdo) {
+    public Auto(String id, Lokacio v1, Lokacio v2, Lokacio kezdo) {
         super(kezdo);
-        vegallomasok[0] = elso;
-        vegallomasok[1] = masodik;
+        this.id = id;
+        this.vegallomasok[0] = v1;
+        this.vegallomasok[1] = v2;
     }
 
     /**
-     * Ez a függvény vizsgálja, hogy az autó ütközött-e
-     * Reagál a más járművekkel vagy objektumokkal való interakciókra
-     * Ütközés esetén a járművet mozgásképtelen állapotba helyezi
+     * Akkor hívódik meg, amikor az autó haladás közben egy másik járművel 
+     * vagy akadállyal találkozik az adott sávon. 
+     * Célja, hogy regisztrálja a balesetet és az autót megfelelő időre 
+     * mozgásképtelenné tegye.
      */
     @Override
     public void utkozos() {
+        Skeleton.functionCalled("utkozos", this, "void");
+        
+        // A dokumentáció szerint regisztrálja a balesetet
+        System.out.println(">>> Ütközés történt: Auto (" + id + ") balesetet szenvedett.");
+        
+        // Mozgásképtelenné teszi az autót (a Jarmu osztályban definiált 3 körre)
         mozgasKeptelen();
+        
+        Skeleton.voidReturn();
     }
 
     /**
-     * Visszaadja az autó fix végállomásait.
-     * @return A végállomásokat tartalmazó tömb másolata.
+     * Segédmetódus a végállomás elérésének ellenőrzéséhez.
+     * 
+     * @return True, ha az autó valamelyik végállomásán tartózkodik.
      */
-    public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
+    public boolean vegallomasraErt() {
+        if (pozicio == null) return false;
+        return pozicio.getSav() == vegallomasok[0].getSav() || 
+               pozicio.getSav() == vegallomasok[1].getSav();
+    }
+
+    // --- GETTEREK ---
+
+    public String getId() { 
+        return id; 
+    }
+
+    public Lokacio[] getVegallomasok() { 
+        return vegallomasok.clone(); 
+    }
 }

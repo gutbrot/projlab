@@ -1,33 +1,39 @@
 package seged;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import terkep.Lokacio;
+import skeleton.Skeleton;
 
 /**
  * A Navigacio osztály felelős a legrövidebb útkereső algoritmus futtatásáért.
- * Feladata, hogy a járművek közlekedése érdekében meghatározza a két pont közötti 
- * legrövidebb utat a gráfként ábrázolt úthálózaton.
- * A járművek (például az Autó) mozgás közben ezen keresztül kérdezik le a következő optimális lépést.
+ * Feladata, hogy a járművek közlekedése érdekében meghatározza a két pont 
+ * közötti legrövidebb utat a gráfként ábrázolt úthálózaton.
  */
 public class Navigacio {
-    
+
     /**
-     * Kiszámítja a jármű jelenlegi helyzete és a célpont közötti optimális útvonalat.
-     * Meghatározza a következő cellát vagy útvonalat, amely a célállomás eléréséhez szükséges.
-     * * @param hova A célállomás lokációja, ahová a jármű el szeretne jutni.
-     * @return A Lokációk listája, amely a kiszámított útvonalat reprezentálja.
+     * Az osztálynak a dokumentáció alapján nincsenek saját attribútumai.
      */
-    public List<Lokacio> legrovidebbUt(Lokacio hova) {
-        List<Lokacio> eredmeny = new ArrayList<>();
+
+    /**
+     * A metódus egy célállomást vár paraméterül 
+     * Kiszámítja a jármű jelenlegi helyzete és a célpont közötti optimális útvonalat, 
+     * majd (a leírás szerint) szolgáltatja az útvonal adatait.
+     * 
+     * @param hova A célállomás lokációja.
+     */
+    public void legrovidebbUt(Lokacio hova) {
+        Skeleton.functionCalled("legrovidebbUt", this, "void", hova);
+
+        // A dokumentáció aktivitásdiagramja alapján (16. oldal):
+        // 1. Aktuális pozíció lekérése (a hívó járműtől)
+        // 2. Célállomás meghatározása (paraméter: hova)
+        // 3. Legrövidebb útvonal kiszámítása
         
-        // Ha a célállomás érvényes, hozzáadja az útvonalhoz (egyszerűsített implementáció)
-        if (hova != null) {
-            eredmeny.add(hova);
-        }
+        System.out.println(">>> Navigáció: Útvonal tervezése a célállomás felé...");
         
-        // Visszatér az útvonal adataival
-        return eredmeny;
+        // A szimuláció ezen pontján a kiszámított útvonal alapján 
+        // a jármű megkapja a következő lépéshez szükséges adatokat.
+
+        Skeleton.voidReturn();
     }
 }

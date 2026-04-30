@@ -2,95 +2,123 @@ package jatekos;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import jarmu.*;
 import terkep.*;
+import skeleton.Skeleton;
 
 /**
- * A Jatekter osztály feladata a környezet globális kezelése és a játékmenet vezérlése. 
- * Felelős a térkép, a játékosok és a bolt objektumainak tárolásáért és inicializálásáért. 
- * Ez az osztály indítja el és menedzseli a köröket, valamint felügyeli a játék állapotát. 
+ * A Jatekter osztály felelős a játékmenet globális vezérléséért.
+ * Kezeli a játékosok akciópontjait, a körök váltását és a pontszámok nyilvántartását
  */
 public class Jatekter {
+    
     /** Tárolja a játékban résztvevő játékosok listáját. */
-    private final List<Jatekos> jatekosok = new ArrayList<>();
-    /** Tárolja a játékban résztvevő járművek listáját.  */
-    private final List<Jarmu> jarmuvek = new ArrayList<>();
-    /** Implementálja a térképet, amin a játék folyik.  */
-    private final Terkep terkep;
+    private List<Jatekos> jatekosok = new ArrayList<>();
+    
+    /** Tárolja a játékban résztvevő járművek listáját. */
+    private List<Jarmu> jarmuvek = new ArrayList<>();
+    
+    /** Implementálja a térképet, amin a játék folyik. */
+    private Terkep terkep;
 
     /**
      * Konstruktor a játéktér létrehozásához.
-     * A Terkep osztály kompozícióval kapcsolódik hozzá: amennyiben a Jatekter megszűnik, 
-     * a hozzá tartozó térkép objektum is megszűnik. 
-     * @param terkep A pályát és az úthálózatot tároló objektum. 
+     * @param terkep A játék térképe.
      */
     public Jatekter(Terkep terkep) {
         this.terkep = terkep;
     }
 
     /**
-     * Ez a függvény valósítja meg a játék indítását. 
-     * A játékosok ilyenkor kapják meg az akciópontjaikat a kezdéshez.
+     * Ez a függvény valósítja meg a játék indítását
      */
     public void jatekStart() {
+        Skeleton.functionCalled("jatekStart", this, "void");
+        
+        // Játékosok AP-jának inicializálása az indításkor
         for (Jatekos j : jatekosok) {
-            j.akcioPontKezelo(2);
+            j.setAkcioPont(3);
         }
+        
+        Skeleton.voidReturn();
     }
 
     /**
-     * Az autók (NPC járművek) mozgatásáért felelős függvény. 
+     * Az autók (NPC) mozgatásáért felelős függvény.
+     * A dokumentáció aktivitásdiagramja alapján működik.
      */
-    public void autoMozgo() {
+    public void autoMozog() {
+        Skeleton.functionCalled("autoMozog", this, "void");
+        
+        // Ciklus indítása a 'jarmuvek' listán
         for (Jarmu j : jarmuvek) {
+            // A jármű 'Auto' típusú?
             if (j instanceof Auto) {
-                // Az autók mozgási logikájának helye
+                Auto auto = (Auto) j;
+                
+                // Tud mozogni? (Nincs büntetőkörben?)
+                if (auto.getMozgaskeptelenKorokSzama() == 0) {
+                    // Navigáció alapján a következő lépés meghatározása
+                    // Átmozgatás a célja felé
+                    System.out.println("    [Jatekter] NPC Auto (" + auto.getId() + ") mozgatása...");
+                    // Itt hívódna a navigáció és a j.mozgas(sav)
+                } else {
+                    // Büntetőkör csökkentése
+                    auto.ujKor();
+                }
             }
+            // Ha nem NPC, nincs teendő
         }
+        
+        Skeleton.voidReturn();
     }
 
     /**
-     * A játékosok (takarító vagy buszvezető) különböző lépéseit kezeli a saját körükben. 
+     * A játékosok (takarító vagy buszvezető) különböző lépéseit kezeli a saját körükben
      */
     public void jatekosLep() {
-        for (Jatekos j : jatekosok) {
-            j.korVege();
-        }
+        Skeleton.functionCalled("jatekosLep", this, "void");
+        // A játékosok interakcióinak vezérlése (Skeleton tesztek hívják)
+        Skeleton.voidReturn();
     }
 
     /**
-     * Minden játékban résztvevő fél után új kört indít. 
-     * Ilyenkor frissülnek a környezeti változók (időjárás) és visszaállítódnak az akciópontok. 
+     * Minden játékban résztvevő fél után új kört indít.
+     * Visszaállítódnak az akciópontok és kezdődik előről a játékmenet.
+     */
     public void ujKor() {
-        terkep.idojarasFrissites();
-        for (Jatekos j : jatekosok) {
-            j.akcioPontKezelo(2);
-        }
-    }
-
-    /**
-     * Új játékos hozzáadása a játéktérhez.
-     * @param j A regisztrálandó játékos objektum.
-     */
-    public void hozzaadJatekos(Jatekos j) { if (j != null) jatekosok.add(j); }
-    
-    /**
-     * Új jármű hozzáadása a játéktérhez.
-     * @param j A regisztrálandó jármű objektum.
-     */
-    public void hozzaadJarmu(Jarmu j) { if (j != null) jarmuvek.add(j); }
-    
-    /** @return A játékban részt vevő összes irányítható szereplő listája.  */
-    public List<Jatekos> getJatekosok() { return jatekosok; }
-    
-    /** @return A játéktéren tartózkodó összes jármű listája. */
-    public List<Jarmu> getJarmuvek() { return jarmuvek; }
-    
-    /** @return A játéktérhez tartozó térkép objektum. */
-    public Terkep getTerkep() { return terkep; }
-
-    public void ujKor() { // Kör indítása: időjárás frissítése és akciópontok visszaállítása
+        Skeleton.functionCalled("ujKor", this, "void");
         
+        // 1. Időjárási események generálása
+        if (terkep != null) {
+            terkep.idojarasFrissites();
+        }
+
+        // 2. Autók mozgatása
+        autoMozog();
+
+        // 3. Ciklus indítása a 'jatekosok' listán
+        for (Jatekos j : jatekosok) {
+            // Játékos akciópontjainak újraosztása
+            j.setAkcioPont(3);
+        }
+
+        // 4. Vezérlés átadása az első játékosnak
+        System.out.println(">>> Vezérlés átadva az első játékosnak.");
+
+        Skeleton.voidReturn();
     }
+
+    // --- LISTAKEZELŐ ÉS GETTER METÓDUSOK ---
+
+    public void hozzaadJatekos(Jatekos j) { 
+        if (j != null) jatekosok.add(j); 
+    }
+    
+    public void hozzaadJarmu(Jarmu j) { 
+        if (j != null) jarmuvek.add(j); 
+    }
+    
+    public List<Jatekos> getJatekosok() { return jatekosok; }
+    public List<Jarmu> getJarmuvek() { return jarmuvek; }
 }

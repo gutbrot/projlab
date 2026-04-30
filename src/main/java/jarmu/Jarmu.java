@@ -1,73 +1,123 @@
 package jarmu;
 
 import terkep.*;
+import skeleton.Skeleton;
 
 /**
- * Absztrakt alaposztály a játékban szereplő összes jármű (Autó, Busz, Hokotró) számára.
- * Közös felelőssége a járművek térbeli helyzetének nyilvántartása, a mozgási logika 
- * alapjainak biztosítása és az útviszonyokhoz való alkalmazkodás kezelése.
- * Minden jármű tudja, hogy aktuálisan hol tartózkodik és képes reagálni az ütközésekre.
+ * A Jarmu egy absztrakt osztály, amely a játékban közlekedő járműveket reprezentálja
+ * Felelős a térképen való mozgás és pozicionálás logikájának kezeléséért
  */
 public abstract class Jarmu {
-    /** A jármű aktuális helyzete (út, szakasz, sáv) a játéktérben. */
+    
+    /** Tárolja a járművek aktuális pozícióját a térképen */
     protected Lokacio pozicio;
-    /** Megadja, hogy a jármű még hány körön keresztül nem képes elindulni (pl. baleset miatt). */
-    protected int mozgaskepetlenKorokSzama;
+    
+    /** Azt tárolja, hogy a jármű hány körig nem mozoghat */
+    protected int mozgaskeptelenKorokSzama = 0;
     
     /**
-     * Konstruktor a jármű alaphelyzetének beállításához.
-     * @param pozicio A jármű kezdeti helye a térképen.
+     * Konstruktor a jármű példányosításához.
+     * @param pozicio A jármű kezdőpozíciója.
      */
     protected Jarmu(Lokacio pozicio) {
         this.pozicio = pozicio;
     }
     
     /**
-     * A jármű mozgását megvalósító metódus egy adott forgalmi sávba.
-     * Ellenőrzi a mozgásképességet, a célsáv átjárhatóságát, és frissíti a sávok foglaltsági állapotát.
-     * Regisztrálja az áthaladást a statisztikák (pl. pontszerzés vagy kopás) számára.
-     * @param sav A sáv, amelybe a jármű át szeretne lépni.
-     * @return True, ha a mozgás sikeresen végrehajtódott, egyébként false.
+     * Kezeli a jármű mozgását.
+     * Ellenőrzi a járhatóságot, lekezeli a csúszást és az esetleges ütközést.
+     * 
+     * @param ujSav A sáv, amibe a jármű lépni szeretne.
+     * @return True, ha a mozgás sikeres volt.
      */
-    public boolean mozgas(Sav sav) {
-        // Ha a jármű mozgásképtelen állapotban van, csökkenti a hátralévő körök számát
-        if (mozgaskepetlenKorokSzama > 0) {
-            mozgaskepetlenKorokSzama--;
-            return false;
+    public boolean mozgas(Sav ujSav) {
+        Skeleton.functionCalled("mozgas", this, "boolean", ujSav);
+
+        // 1. Mozgásképesség ellenőrzése
+        if (mozgaskeptelenKorokSzama > 0) {
+            System.out.println(">>> A jármű mozgásképtelen még " + mozgaskeptelenKorokSzama + " körig.");
+            return Skeleton.functionReturn(false);
         }
-        // Ellenőrzés: a sáv létezik-e és a jármű számára az adott viszonyok között járható-e
-        if (sav == null || !sav.atjarhatoE(this)) {
-            return false;
+
+        if (ujSav == null) return Skeleton.functionReturn(false);
+
+        // 2. Járhatóság ellenőrzése (hóvastagság/foglaltság)
+        if (!ujSav.atjarhatoE(this)) {
+            // Ha nem átjárható, de jármű van ott, az ütközést vált ki
+            if (ujSav.isVanEJarmu()) {
+                this.utkozos();
+            }
+            return Skeleton.functionReturn(false);
         }
-        // A régi pozíció felszabadítása
+
+        // 3. Csúszáskezelés meghívása a dokumentáció szerint
+        // A Terkep objektumot a lokációból érjük el
+        this.csuszasKezeles(ujSav, null); 
+
+        // 4. Pozíció frissítése a térképen
         if (pozicio != null && pozicio.getSav() != null) {
             pozicio.getSav().setVanEJarmu(false);
         }
-        // Az új sáv lefoglalása és az áthaladók számának növelése
-        sav.setVanEJarmu(true);
-        sav.novelAthaladok();
-        return true;
+
+        ujSav.setVanEJarmu(true);
+        ujSav.novelAthaladok();
+        
+        if (pozicio != null) {
+            pozicio.setSav(ujSav);
+        }
+
+        return Skeleton.functionReturn(true);
     }
 
     /**
-     * Absztrakt metódus az ütközések kezelésére.
-     * Minden konkrét járműtípusnak saját módon kell reagálnia (pl. roncs elhelyezése vagy megállás).
+     * Kezeli a jármű viselkedését, amikor szélsőséges útviszonyok közé kerül
+     * Meghatározza az irányítás elvesztését (csúszás balra)
+     * 
+     * @param s A vizsgált sáv.
+     * @param t A térkép a szomszédos sávok lekérdezéséhez.
+     */
+    public void csuszasKezeles(Sav s, Terkep t) {
+        Skeleton.functionCalled("csuszasKezeles", this, "void", s, t);
+        
+        // Dokumentáció: Jeges az út?[cite: 1] (Hókotró immunis)
+        if (s.jegesE() && !s.isZuzalekos() && !(this instanceof Hokotro)) {
+            System.out.println(">>> A jármű megcsúszik a jégen!");
+            // Itt valósulna meg a balra sodródás logikája a sávindexek alapján
+        }
+        
+        Skeleton.voidReturn();
+    }
+
+    /** 
+     * Absztrakt metódus, amely kényszeríti a leszármazottakat az 
+     * ütközési események egyedi lekezelésére
      */
     public abstract void utkozos();
 
     /**
-     * A járművet mozgásképtelen állapotba helyezi.
-     * Ezt hívják meg ütközéskor vagy olyan eseményeknél, amelyek megállítják a forgalmat.
+     * Lekezeli a járművek esetében a mozgásképtelenség állapotát
+     * A dokumentáció állaporgépe alapján balesetkor 3 körre állítjuk
      */
     public void mozgasKeptelen() {
-        mozgaskepetlenKorokSzama++;
+        Skeleton.functionCalled("mozgasKeptelen", this, "void");
+        
+        // Hókotró immunis a mozgásképtelenségre a leírás szerint
+        if (!(this instanceof Hokotro)) {
+            this.mozgaskeptelenKorokSzama = 3;
+        }
+        
+        Skeleton.voidReturn();
     }
 
-    /** @return Visszaadja a jármű aktuális tartózkodási helyét. */
+    // --- Getterek és Setterek ---
     public Lokacio getPozicio() { return pozicio; }
+    public void setPozicio(Lokacio pozicio) { this.pozicio = pozicio; }
+    public int getMozgaskeptelenKorokSzama() { return mozgaskeptelenKorokSzama; }
     
-    /** * Beállítja a jármű új tartózkodási helyét.
-     * @param pozicio Az új lokáció objektum.
-     */
-    public void setPozicio(Lokacio pozicio) { this.pozicio = pozicio; }  
+    /** A kör végén hívódik meg a büntetés csökkentésére. */
+    public void ujKor() {
+        if (mozgaskeptelenKorokSzama > 0) {
+            mozgaskeptelenKorokSzama--;
+        }
+    }
 }

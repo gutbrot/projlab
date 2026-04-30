@@ -3,55 +3,75 @@ package terkep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import jarmu.*;
+import jarmu.Jarmu;
+import skeleton.Skeleton;
 
 /**
- * A Terkep osztály a játék világának központi tárolója.
- * Felelős az úthálózat (Utak listája) nyilvántartásáért, a környezeti hatások 
- * (időjárás) globális kezeléséért, valamint a járművek mozgásának koordinálásáért.
- * Ez az osztály köti össze a különböző úttípusokat egy egységes hálózattá.
+ * A Terkep osztály felelős az úthálózat gráfjának globális kezeléséért.
+ * Nyilvántartja az összes útszakaszt, és koordinálja az olyan globális 
+ * eseményeket, mint az időjárás frissítése
  */
 public class Terkep {
-    /** A játékban szereplő összes útszakasz (SimaUt, Hid, Alagut) gyűjteménye. */
-    private final List<Ut> utak = new ArrayList<>();
+    
+    /** A gráf éleit (útszakaszokat) tároló lista */
+    private List<Ut> utak = new ArrayList<>();
     
     /**
-     * Új útszakasz hozzáadása a térkép hálózatához.
+     * Új út hozzáadása a térkép hálózatához.
+     * 
      * @param ut A hozzáadandó Ut objektum.
      */
     public void addUt(Ut ut) {
-        if (ut != null) utak.add(ut);
-    }
-    
-    /**
-     * Visszaadja a teljes úthálózatot.
-     * @return Az utak listájának nem módosítható változata a biztonságos elérés érdekében.
-     */
-    public List<Ut> getTeljesHalozat() {
-        return Collections.unmodifiableList(utak);
-    }
-    
-    /**
-     * Szimulálja az időjárás változását a teljes térképen.
-     * Minden körben meghívódik, és minden útszakaszon elindítja a havazás folyamatát.
-     * Az utak típusa (pl. Alagút) határozza meg, hogy ott ténylegesen nő-e a hóvastagság.
-     */
-    public void idojarasFrissites(){
-        for (Ut ut : utak) {
-            // A környezeti tényezők alapján 5 egységnyi havat adunk minden nyitott útszakaszhoz.
-            ut.havazik(5);
+        if (ut != null) {
+            utak.add(ut);
         }
     }
     
     /**
-     * Kezeli egy jármű helyváltoztatását a térkép sávjai között.
-     * Ellenőrzi az érvényességet és meghívja a jármű saját mozgási logikáját.
-     * @param jarmu A mozgatni kívánt jármű (Hókotró, Busz vagy Autó).
-     * @param sav A célsáv, ahová a jármű el szeretne jutni.
-     * @return True, ha a mozgás az útviszonyok és a foglaltság alapján sikeres volt.
+     * Kezdeményezi a jármű mozgását a térképen.
+     * A kérést delegálja a jármű saját mozgáslogikája felé.
+     * 
+     * @param jarmu A mozgatni kívánt jármű.
+     * @param celSav A sáv, ahová a jármű lépni szeretne.
+     * @return True, ha a mozgás sikeresen lezajlott.
      */
-    public boolean jarmuMozgatas(Jarmu jarmu, Sav sav) {
-        return jarmu != null && jarmu.mozgas(sav);
+    public boolean jarmuMozgatas(Jarmu jarmu, Sav celSav) {
+        Skeleton.functionCalled("jarmuMozgatas", this, "boolean", jarmu, celSav);
+        
+        if (jarmu == null || celSav == null) {
+            return Skeleton.functionReturn(false);
+        }
+        
+        // A Térkép meghívja a Jármű mozgás metódusát a cél sávval
+        boolean siker = jarmu.mozgas(celSav);
+        
+        return Skeleton.functionReturn(siker);
+    }
+
+    /**
+     * Szimulálja a környezeti változók terjedését a hálózaton.
+     * Végigiterál az utakon, és minden úton kiváltja a havazást.
+     * A dokumentáció 15. oldalán található aktivitásdiagram alapján.
+     */
+    public void idojarasFrissites() {
+        Skeleton.functionCalled("idojarasFrissites", this, "void");
+        
+        // Ciklus indítása az utak listáján
+        for (Ut ut : utak) {
+            // Minden úton meghívjuk a havazás függvényt
+            // Prototípus szinten fixen 5 egységnyi hó hullik minden körben.
+            ut.havazik(5); 
+        }
+        
+        Skeleton.voidReturn();
+    }
+
+    /**
+     * Visszaadja a térkép útjainak listáját.
+     * 
+     * @return Az utak módosíthatatlan listája.
+     */
+    public List<Ut> getTeljesHalozat() {
+        return Collections.unmodifiableList(utak);
     }
 }
