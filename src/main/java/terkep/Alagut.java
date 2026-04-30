@@ -1,16 +1,20 @@
 package terkep;
 
+import skeleton.Skeleton;
+
 /**
  * Az Alagut osztály az Ut egy speciális típusa.
- * Speciális időjárási szabályok vonatkoznak rá: a hóvastagság sosem nő benne.
+ * Feladata egy fedett útszakasz reprezentálása, amelynél a környezeti 
+ * hatások (havazás) nem befolyásolják az út állapotát
  */
 public class Alagut extends Ut {
     
     /**
-     * Konstruktor az Alagut példányosításához.
-     * @param nev Az alagút egyedi megnevezése.
-     * @param hossz Az alagút hossza (szakaszok száma).
-     * @param savokSzama Az alagútban futó párhuzamos sávok száma.
+     * Konstruktor az Alagút példányosításához.
+     * 
+     * @param nev Az alagút neve.
+     * @param hossz Az alagút hossza.
+     * @param savokSzama A párhuzamos sávok száma.
      */
     public Alagut(String nev, int hossz, int savokSzama) { 
         super(nev, hossz, savokSzama); 
@@ -18,12 +22,17 @@ public class Alagut extends Ut {
 
     /**
      * Felüldefiniálja a havazás logikáját.
-     * Mivel az alagút fedett, a metódus üres marad, így a sávok hóvastagsága 
-     * az időjárás-frissítés során változatlan marad.
+     * Mivel az alagút fedett, a metódus nem növeli a sávok hóvastagságát
+     * 
+     * @param h A hulló hó mennyisége (az alagútban 0 marad).
      */
     @Override
     public void havazik(int h) {
-        // Logolás a prototípushoz, hogy lássuk a tesztelés során:
-         System.out.println(">>> Alagut (" + nev + "): A fedett kialakitas miatt nem hullik ho az utra.");
+        Skeleton.functionCalled("havazik", this, "void", h);
+        
+        // A dokumentáció szerint itt nem történik hóvastagság növelés
+        System.out.println("    [Alagut] " + nev + ": A fedél felfogta a havat.");
+        
+        Skeleton.voidReturn();
     }
 }

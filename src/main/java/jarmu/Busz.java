@@ -1,58 +1,99 @@
 package jarmu;
 
 import terkep.Lokacio;
+import terkep.Sav;
+import skeleton.Skeleton;
+import jatekos.Buszvezeto;
 
 /**
- * A Busz osztály egy játékos által irányított járművet reprezentál.
- * Kezeli a végállomások közötti közlekedést és az egyedi azonosítást.
+ * A Busz osztály egy járművet reprezentál
+ * Elsődleges felelőssége a kijelölt megállóhelyek közötti közlekedés 
+ * Képes detektálni a célállomás elérését, és kezelni az ütközéseket 
+ * Ezeket a járműveket a buszvezető játékosok irányítják
  */
 public class Busz extends Jarmu {
-    /** A busz egyedi azonosítója (pl. "B1", "B2"). */
+    
+    /** A busz egyedi azonosítója a tesztkörnyezetben. */
     private final String id;
 
-    /** Lokacio típusú 2 hosszú tömb, amely a busz két végállomását tárolja. */
+    /** A busz két végpontját (végállomását) tárolja[cite: 1]. */
     private final Lokacio[] vegallomasok = new Lokacio[2];
+    
+    /** Referencia a buszt irányító vezetőre a pontok jóváírásához. */
+    private Buszvezeto vezeto;
 
     /**
      * Konstruktor a Busz példányosításához.
-     * @param id A busz egyedi azonosítója.
-     * @param elso Az egyik kijelölt végállomás lokációja.
-     * @param masodik A másik kijelölt végállomás lokációja.
-     * @param kezdo A busz indulási pozíciója a játéktérben.
+     * @param id Egyedi azonosító.
+     * @param pozicio Kezdőpozíció.
+     * @param v1 Első végállomás.
+     * @param v2 Második végállomás.
      */
-    public Busz(String id, Lokacio elso, Lokacio masodik, Lokacio kezdo) {
-        super(kezdo);
+    public Busz(String id, Lokacio pozicio, Lokacio v1, Lokacio v2) {
+        super(pozicio);
         this.id = id;
-        vegallomasok[0] = elso;
-        vegallomasok[1] = masodik;
-        System.out.println(">>> Busz létrehozva (ID: " + id + ") a(z) " + kezdo.getUt().getNev() + " úton.");
+        this.vegallomasok[0] = v1;
+        this.vegallomasok[1] = v2;
     }
 
     /**
-     * Vizsgálja, hogy a busz elérte-e valamelyik végállomását.
-     * @return True, ha a busz aktuális pozíciója végállomás.
+     * Felelőssége annak ellenőrzése, hogy a busz elérte-e a célját
+     * A dokumentáció aktivitásdiagramja alapján: pozíció lekérése -> ellenőrzés -> 
+     * vezető megkeresése -> pont jóváírása
+     * 
+     * @return Igazzal tér vissza, ha a busz megérkezett, hamissal, ha még úton van
      */
     public boolean vegallomasbaErt() {
-        boolean cellert = (pozicio == vegallomasok[0] || pozicio == vegallomasok[1]);
-        if (cellert) {
-            System.out.println(">>> A(z) " + id + " azonosítójú busz elérte az egyik végállomását!");
+        Skeleton.functionCalled("vegallomasbaErt", this, "boolean");
+
+        // 1. Aktuális pozíció lekérdezése (Jarmu.pozicio)
+        Lokacio aktualis = getPozicio();
+
+        // 2. Elérte a végállomást?
+        boolean match = false;
+        for (Lokacio v : vegallomasok) {
+            // Itt a sávok azonosságát vizsgáljuk a lokációkban
+            if (v != null && aktualis != null && v.getSav() == aktualis.getSav()) {
+                match = true;
+                break;
+            }
         }
-        return cellert;
+
+        if (match) {
+            // 3. Buszvezető megkeresése és pont jóváírása
+            if (vezeto != null) {
+                vezeto.pontotKap();
+            }
+            return Skeleton.functionReturn(true);
+        }
+
+        // 4. FALSE visszatérés, ha nincs a végállomáson
+        return Skeleton.functionReturn(false);
     }
 
     /**
-     * Megvalósítja az ütközéskezelést.
-     * Ütközés esetén a jármű mozgásképtelenné válik.
+     * Felüldefiniálja az ősosztály metódusát[
+     * Ütközés esetén a buszt mozgásképtelenné teszi
      */
     @Override
     public void utkozos() {
-        System.out.println(">>> Ütközés! A(z) " + id + " azonosítójú busz balesetet szenvedett és mozgásképtelenné vált.");
+        Skeleton.functionCalled("utkozos", this, "void");
+        
+        // Ütközés esetén a busz balesetet szenved és büntetőköröket kap
         mozgasKeptelen();
+        
+        Skeleton.voidReturn();
     }
 
-    /** @return A busz egyedi azonosítója. */
+    // --- GETTEREK ÉS SETTEREK ---
     public String getId() { return id; }
 
-    /** @return A végállomásokat tartalmazó tömb másolata. */
-    public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
+    /** Beállítja a buszhoz tartozó vezetőt. */
+    public void setVezeto(Buszvezeto vezeto) {
+        this.vezeto = vezeto;
+    }
+
+    public Buszvezeto getVezeto() {
+        return vezeto;
+    }
 }

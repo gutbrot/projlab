@@ -3,75 +3,100 @@ package terkep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jarmu.*;
+import jarmu.Jarmu;
+import skeleton.Skeleton;
 
 /**
- * Absztrakt út osztály, amely a térkép úthálózatának alapeleme.
- * Felelőssége az út gráf-szerkezetének (szakaszok és sávok) kezelése.
+ * Az Ut osztály felelős az útszakaszok alapvető logikai felépítésének 
+ * és tulajdonságainak tárolásáért. 
+ * Absztrakt osztályként keretet ad a leszármazottaknak a környezeti 
+ * hatások lekezelésére. Feladata a forgalom irányítása a sávok között.
  */
 public abstract class Ut {
-    /** Az út egyedi neve */
+    
+    /** Az út megnevezése */
     protected String nev;
+    
     /** Az út hossza. */
     protected int hossz;
-    /** * A gráf topológiája: 
-     * Külső lista: hosszirányú szakaszok.
-     * Belső lista: a szakasz keresztmetszetében lévő párhuzamos sávok.
+    
+    /** 
+     * A sávokat tárolja. 
+     * Az út több egymást követő szakaszból áll, ahol minden szakasz 
+     * több párhuzamos sávot tartalmazhat.
      */
     protected List<List<Sav>> szakaszok = new ArrayList<>();
 
     /**
-     * Konstruktor az út struktúrájának automatikus generálásához.
+     * Konstruktor az út alapvető felépítéséhez.
+     * 
+     * @param nev Az út neve.
+     * @param hossz Az út hossza.
+     * @param savokSzama Párhuzamos sávok száma szakaszonként.
      */
     protected Ut(String nev, int hossz, int savokSzama) {
         this.nev = nev;
-        this.hossz = Math.max(1, hossz); //
+        this.hossz = Math.max(1, hossz);
+        
         for (int i = 0; i < this.hossz; i++) {
             List<Sav> szakasz = new ArrayList<>();
             for (int j = 0; j < Math.max(1, savokSzama); j++) {
-                // Minden sáv kap egy sorszámot a keresztmetszeten belül
-                szakasz.add(new Sav(j)); //
+                szakasz.add(new Sav(j)); 
             }
-            szakaszok.add(szakasz); //
+            szakaszok.add(szakasz); 
         }
     }
 
     /**
-     * Ellenőrzi, hogy a megadott sávba behajthat-e a jármű.
+     * Egy irányító funkció, amely a járműveket a megfelelő sávokhoz rendeli hozzá[
+     * A dokumentáció aktivitásdiagramja alapján (13. oldal)
+     * 
+     * @param j A mozgatni kívánt jármű.
+     * @param s A célsáv, ahová a jármű tart.
+     * @return True, ha a sávváltás vagy haladás sikeres volt
      */
-    public boolean jarmuEligazito(Jarmu jarmu, Sav sav) {
-        // Meghívja a sáv belső logikáját
-        return sav != null && sav.atjarhatoE(jarmu);
+    public boolean jarmuEligazito(Jarmu j, Sav s) {
+        Skeleton.functionCalled("jarmuEligazito", this, "boolean", j, s);
+
+        // 1. Cél sáv létezik az úton?
+        if (s == null) {
+            System.out.println("    [Ut] Út vége vagy érvénytelen irány.");
+            return Skeleton.functionReturn(false);
+        }
+
+        // 2. Járható? (Sav.atjarhatoE hívása)
+        if (s.atjarhatoE(j)) {
+            // 3. Jármű áthelyezése a sávba
+            // (A tényleges pozíciófrissítést a Jarmu.mozgas() fejezi be)
+            System.out.println("    [Ut] Sikeres sávváltás vagy haladás.");
+            return Skeleton.functionReturn(true);
+        } else {
+            // 4. Akadály észlelése (Hó vagy másik jármű)
+            System.out.println("    [Ut] Akadály észlelése. A jármű megáll vagy ütközik.");
+            return Skeleton.functionReturn(false);
+        }
     }
 
     /**
-     * Absztrakt metódus az időjárási szimulációhoz.
-     * A leszármazottak (SimaUt, Hid, Alagut) határozzák meg, 
-     * hogy az adott szakaszon nő-e a hóvastagság.
+     * Absztrakt metódus, amelyet minden konkrét úttípusnak 
+     * sajátosan kell megvalósítania
+     * 
+     * @param h A hulló hó mennyisége.
      */
-    public abstract void havazik(int h); //
+    public abstract void havazik(int h); 
 
-    // --- Lekérdező metódusok ---
+    // --- LEKÉRDEZŐK ---
 
-    /** @return Az út neve. */
-    public String getNev() { return nev; }
+    public String getNev() { 
+        return nev; 
+    }
     
-    /** @return Az út hossza. */
-    public int getHossz() { return hossz; }
+    public int getHossz() { 
+        return hossz; 
+    }
     
-    /** @return Az út teljes topológiája (szakaszok és sávok). */
-    public List<List<Sav>> getSzakaszok() { return Collections.unmodifiableList(szakaszok); }
-    
-    /**
-     * Visszaad egy konkrét csomópontot (sávot).
-     * @param szakaszIndex Hosszanti pozíció (0-tól hossz-1-ig).
-     * @param savIndex Keresztirányú pozíció (melyik sáv).
-     */
-    public Sav getSav(int szakaszIndex, int savIndex) {
-        try {
-            return szakaszok.get(szakaszIndex).get(savIndex); //
-        } catch (IndexOutOfBoundsException e) {
-            return null; // Ha a gráf szélére érnénk
-        }
+    /** Visszaadja az út teljes szakasz- és sávszerkezetét */
+    public List<List<Sav>> getSzakaszok() { 
+        return Collections.unmodifiableList(szakaszok); 
     }
 }

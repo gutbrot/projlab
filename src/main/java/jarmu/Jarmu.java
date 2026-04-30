@@ -1,83 +1,123 @@
 package jarmu;
 
 import terkep.*;
+import skeleton.Skeleton;
 
 /**
- * Absztrakt alaposztály a játékban szereplő összes jármű számára.
+ * A Jarmu egy absztrakt osztály, amely a játékban közlekedő járműveket reprezentálja
+ * Felelős a térképen való mozgás és pozicionálás logikájának kezeléséért
  */
 public abstract class Jarmu {
-    /** A jármű aktuális helyzete. */
-    protected Lokacio pozicio;
-    /** Megadja, hány körig mozgásképtelen még a jármű. */
-    protected int mozgaskepetlenKorokSzama = 0;
     
+    /** Tárolja a járművek aktuális pozícióját a térképen */
+    protected Lokacio pozicio;
+    
+    /** Azt tárolja, hogy a jármű hány körig nem mozoghat */
+    protected int mozgaskeptelenKorokSzama = 0;
+    
+    /**
+     * Konstruktor a jármű példányosításához.
+     * @param pozicio A jármű kezdőpozíciója.
+     */
     protected Jarmu(Lokacio pozicio) {
         this.pozicio = pozicio;
     }
     
     /**
-     * A jármű mozgását megvalósító metódus.
-     * Frissíti a sávok állapotát és a jármű saját pozícióját.
+     * Kezeli a jármű mozgását.
+     * Ellenőrzi a járhatóságot, lekezeli a csúszást és az esetleges ütközést.
+     * 
+     * @param ujSav A sáv, amibe a jármű lépni szeretne.
+     * @return True, ha a mozgás sikeres volt.
      */
     public boolean mozgas(Sav ujSav) {
+        Skeleton.functionCalled("mozgas", this, "boolean", ujSav);
+
         // 1. Mozgásképesség ellenőrzése
-        if (mozgaskepetlenKorokSzama > 0) {
-            System.out.println(">>> Mozgás sikertelen: A jármű még " + mozgaskepetlenKorokSzama + " körig mozgásképtelen.");
-            mozgaskepetlenKorokSzama--;
-            return false;
+        if (mozgaskeptelenKorokSzama > 0) {
+            System.out.println(">>> A jármű mozgásképtelen még " + mozgaskeptelenKorokSzama + " körig.");
+            return Skeleton.functionReturn(false);
         }
 
-        // 2. Célsáv ellenőrzése
-        if (ujSav == null) {
-            System.out.println(">>> Mozgás sikertelen: Nincs célsáv megadva.");
-            return false;
-        }
+        if (ujSav == null) return Skeleton.functionReturn(false);
 
+        // 2. Járhatóság ellenőrzése (hóvastagság/foglaltság)
         if (!ujSav.atjarhatoE(this)) {
-            System.out.println(">>> Mozgás sikertelen: A sáv (" + ujSav.getSavSzama() + ") nem átjárható (hó vagy más jármű miatt).");
-            return false;
+            // Ha nem átjárható, de jármű van ott, az ütközést vált ki
+            if (ujSav.isVanEJarmu()) {
+                this.utkozos();
+            }
+            return Skeleton.functionReturn(false);
         }
 
-        // 3. Régi pozíció felszabadítása
+        // 3. Csúszáskezelés meghívása a dokumentáció szerint
+        // A Terkep objektumot a lokációból érjük el
+        this.csuszasKezeles(ujSav, null); 
+
+        // 4. Pozíció frissítése a térképen
         if (pozicio != null && pozicio.getSav() != null) {
             pozicio.getSav().setVanEJarmu(false);
         }
 
-        // 4. Új pozíció elfoglalása
         ujSav.setVanEJarmu(true);
         ujSav.novelAthaladok();
-
-        // 5. A jármű saját pozíció-objektumának frissítése
-        // Itt feltételezzük, hogy a Lokacio objektumot frissítjük az új sávval
+        
         if (pozicio != null) {
             pozicio.setSav(ujSav);
-            // Ha a mozgás során szakaszt is váltunk, azt a Navigáció/Hívó fogja kezelni a setPozicio-val
         }
 
-        System.out.println(">>> Sikeres mozgás a(z) " + ujSav.getSavSzama() + ". sávba.");
-        return true;
+        return Skeleton.functionReturn(true);
     }
 
-    /** Absztrakt metódus az ütközésekhez. */
+    /**
+     * Kezeli a jármű viselkedését, amikor szélsőséges útviszonyok közé kerül
+     * Meghatározza az irányítás elvesztését (csúszás balra)
+     * 
+     * @param s A vizsgált sáv.
+     * @param t A térkép a szomszédos sávok lekérdezéséhez.
+     */
+    public void csuszasKezeles(Sav s, Terkep t) {
+        Skeleton.functionCalled("csuszasKezeles", this, "void", s, t);
+        
+        // Dokumentáció: Jeges az út?[cite: 1] (Hókotró immunis)
+        if (s.jegesE() && !s.isZuzalekos() && !(this instanceof Hokotro)) {
+            System.out.println(">>> A jármű megcsúszik a jégen!");
+            // Itt valósulna meg a balra sodródás logikája a sávindexek alapján
+        }
+        
+        Skeleton.voidReturn();
+    }
+
+    /** 
+     * Absztrakt metódus, amely kényszeríti a leszármazottakat az 
+     * ütközési események egyedi lekezelésére
+     */
     public abstract void utkozos();
 
     /**
-     * A járművet mozgásképtelen állapotba helyezi.
+     * Lekezeli a járművek esetében a mozgásképtelenség állapotát
+     * A dokumentáció állaporgépe alapján balesetkor 3 körre állítjuk
      */
     public void mozgasKeptelen() {
-        mozgaskepetlenKorokSzama++;
-        System.out.println(">>> A jármű mozgásképtelenné vált. Hátralévő körök: " + mozgaskepetlenKorokSzama);
+        Skeleton.functionCalled("mozgasKeptelen", this, "void");
+        
+        // Hókotró immunis a mozgásképtelenségre a leírás szerint
+        if (!(this instanceof Hokotro)) {
+            this.mozgaskeptelenKorokSzama = 3;
+        }
+        
+        Skeleton.voidReturn();
     }
 
     // --- Getterek és Setterek ---
-
     public Lokacio getPozicio() { return pozicio; }
+    public void setPozicio(Lokacio pozicio) { this.pozicio = pozicio; }
+    public int getMozgaskeptelenKorokSzama() { return mozgaskeptelenKorokSzama; }
     
-    public void setPozicio(Lokacio pozicio) { 
-        this.pozicio = pozicio; 
-    }
-
-    public int getMozgaskepetlenKorokSzama() {
-        return mozgaskepetlenKorokSzama;
+    /** A kör végén hívódik meg a büntetés csökkentésére. */
+    public void ujKor() {
+        if (mozgaskeptelenKorokSzama > 0) {
+            mozgaskeptelenKorokSzama--;
+        }
     }
 }

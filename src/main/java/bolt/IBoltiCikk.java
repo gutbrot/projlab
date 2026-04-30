@@ -1,26 +1,31 @@
 package bolt;
 
-import jatekos.*;
+import jatekos.Takarito;
+import skeleton.Skeleton;
 
 /**
- * Közös interfész minden olyan tárgy vagy szolgáltatás számára, 
- * amely a Bolt kínálatában szerepelhet és megvásárolható.
- * Biztosítja az egységes kezelést a vásárlási tranzakciók során.
+ * Az IBoltiCikk interfész felelőssége egy egységes felület biztosítása a Bolt kínálatához.
+ * Meghatározza az ár lekérdezését és a termék átadását a vásárlónak. 
+ * Ezzel lehetővé teszi a rendszer számára, hogy újabb eladható elemekkel bővüljön
  */
 public interface IBoltiCikk {
     
     /**
-     * Meghatározza a termék átadásának módját a vásárló számára.
-     * A konkrét megvalósítás felelős azért, hogy a termék (pl. kotrófej vagy üzemanyag) 
-     * bekerüljön a Takarító eszköztárába vagy felszerelésre kerüljön.
-     * * @param t A vásárlást végző Takarító játékos, aki megkapja a cikket.
+     * Megadja az átadási folyamatot, amit a megfelelő osztályok 
+     * felüldefiniálhatnak a saját igényeiknek megfelelően
+     * 
+     * A metódus hívásakor a termék (legyen az KotroFej vagy FogyoAnyag) 
+     * ténylegesen bekerül a játékos birtokába
+     * 
+     * @param v A vásárlást végző Takarító játékos
      */
-    void atadVevonek(Takarito t);
+    void atadVevonek(Takarito v);
 
     /**
-     * Visszaadja a termék aktuális vételárát.
-     * A Bolt ezen érték alapján ellenőrzi a fedezetet és vonja le a költséget.
-     * * @return A termék ára játékbeli fizetőeszközben.
+     * Visszaadja a termék aktuális vételárát
+     * A Bolt osztály ezen érték alapján ellenőrzi a vásárló egyenlegét
+     * 
+     * @return A termék ára
      */
     int getAr();
 }

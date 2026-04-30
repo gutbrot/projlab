@@ -1,41 +1,48 @@
 package terkep;
 
+import java.util.List;
+import skeleton.Skeleton;
+
 /**
  * A Hid osztály az Ut egy speciális típusa.
- * Felelőssége egy olyan útszakasz reprezentálása, amely az átlagosnál 
- * kitettebb az időjárási körülményeknek.
- * A hidakon a fagyásveszély és a hó megmaradása fokozottan jelentkezik, 
- * amit a havazás kezelése során külön figyelembe kell venni.
+ * Feladata a hidakon lévő útszakaszok reprezentálása, ahol a havazás 
+ * közvetlenül befolyásolja az út állapotát.
  */
 public class Hid extends Ut {
     
     /**
-     * Konstruktor a Hid példányosításához.
-     * Meghívja az ősosztály konstruktorát az alapvető útadatok beállításához.
-     * @param nev A híd egyedi megnevezése.
-     * @param hossz A híd hossza (szakaszok száma).
-     * @param savokSzama A hídon futó párhuzamos sávok száma.
+     * Konstruktor a Híd példányosításához.
+     * 
+     * @param nev A híd neve.
+     * @param hossz A híd hossza.
+     * @param savokSzama A párhuzamos sávok száma.
      */
     public Hid(String nev, int hossz, int savokSzama) { 
         super(nev, hossz, savokSzama); 
     }
 
     /**
-     * Felüldefiniálja a havazás logikáját a hídon.
-     * A híd nyitott jellege miatt a csapadék közvetlenül az úttestre hullik.
-     * Végigiterál az összes útszakaszon és sávon, hogy növelje a hóvastagságot.
-     * @param h A lehullott hó mennyisége, amellyel minden sáv hórétege növekszik.
+     * Megvalósítja a havazás logikáját a hídon
+     * Végigiterál az út összes szakaszán és sávján, majd megnöveli 
+     * a hóvastagságot a paraméterben kapott értékkel
+     * 
+     * @param h A hulló hó mennyisége.
      */
     @Override
     public void havazik(int h) {
-        // Végigmegyünk az út minden szakaszán
-        for (var szakasz : szakaszok) {
-            // Minden szakaszban végigmegyünk az összes sávon
-            for (var sav : szakasz) {
-                // A híd felületén a hóréteg vastagsága a megadott értékkel nő
-                sav.setHo(sav.getHo() + h);
+        Skeleton.functionCalled("havazik", this, "void", h);
+        
+        // Végigmegyünk az összes szakaszon és sávon (az Ut osztály szakaszok listáját használva)
+        for (List<Sav> szakasz : szakaszok) {
+            for (Sav sav : szakasz) {
+                // Lekérdezzük az aktuális havat és hozzáadjuk az újat
+                int jelenlegiHo = sav.getHo();
+                sav.setHo(jelenlegiHo + h);
             }
         }
-        System.out.println(">>> A havazás sikeresen megtörtént a hídon (" + nev + "). Minden sáv hóvastagsága " + h + " cm-rel nőtt.");
+        
+        System.out.println("    [Hid] " + nev + ": A havazás minden sávban megtörtént (+ " + h + " cm).");
+        
+        Skeleton.voidReturn();
     }
 }

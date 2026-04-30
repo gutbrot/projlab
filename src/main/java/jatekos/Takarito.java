@@ -8,125 +8,161 @@ import eszkoztar.Eszkoztar;
 import jarmu.Hokotro;
 import kotrofej.*;
 import bolt.Bolt;
+import skeleton.Skeleton;
 
 /**
- * A hókotrókat irányító játékosokat reprezentáló osztály.
+ * A Takarito osztály felelős a rendszerben lévő hókotrók irányításáért. 
+ * Feladata a hókotrók és a rendelkezésre álló fejek közül a leghasznosabb kiválasztása, 
+ * azok mozgatása, valamint az útszakaszok sávjainak feltakarítása. 
+ * Mozgásokat az akciópontok felhasználásával végez
  */
 public class Takarito extends Jatekos {
+    
+    /** A takarító által vezérelt hókotrók listája. */
     private List<Hokotro> iranyitottHokotrok = new ArrayList<>();
-    private Eszkoztar eszkoztar = new Eszkoztar();
+    
+    /** Egyes játékosok összegyűjtött pénze. */
     private int penz;
     
-    // Scanner a konzolos beolvasáshoz a választáshoz
+    /** 
+     * A játékos saját eszköztára. 
+     * A dokumentáció szerint ez tárolja a vásárolt eszközöket.
+     */
+    private Eszkoztar eszkoztar = new Eszkoztar();
+    
+    /** Segédeszköz a prototípus interaktív választásaihoz. */
     private Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Konstruktor a Takarító játékos létrehozásához.
+     * @param akcioPont Kezdő akciópontok.
+     * @param penz Kezdő tőke.
+     */
     public Takarito(int akcioPont, int penz) {
         super(akcioPont);
         this.penz = penz;
-        System.out.println(">>> Takarító játékos létrehozva " + akcioPont + " akcióponttal és " + penz + " pénzzel.");
     }
 
-    public Takarito() {
-        this(3, 0);
+    /**
+     * Egy konkrét hókotró kiválasztása a takarító játékos által.
+     * A dokumentáció szerinti "kiválasztási logika (felhasználói input)" alapján.
+     * 
+     * @return A választott Busz objektum (itt: Hokotro).
+     */
+    public Hokotro hokotrotValaszt() {
+        Skeleton.functionCalled("hokotrotValaszt", this, "Hokotro");
+        
+        if (iranyitottHokotrok.isEmpty()) {
+            return Skeleton.functionReturn(null);
+        }
+
+        // A dokumentáció aktivitásdiagramja szerinti választási folyamat
+        System.out.println(">>> Elérhető hókotrók:");
+        for (int i = 0; i < iranyitottHokotrok.size(); i++) {
+            System.out.println("    [" + i + "] " + iranyitottHokotrok.get(i).getId());
+        }
+
+        System.out.print("? Válasszon indexet: ");
+        try {
+            int index = Integer.parseInt(scanner.nextLine());
+            if (index >= 0 && index < iranyitottHokotrok.size()) {
+                Hokotro kivalasztott = iranyitottHokotrok.get(index);
+                // A választás akciópontba kerülhet a játékmenet szerint
+                akcioPontKezelo(); 
+                return Skeleton.functionReturn(kivalasztott);
+            }
+        } catch (Exception e) {
+            System.out.println(">>> Érvénytelen választás.");
+        }
+        
+        return Skeleton.functionReturn(null);
+    }
+
+    /**
+     * A kiválasztott járművek mozgatásáért felelős logika[
+     * Az aktivitásdiagram alapján: Ellenőrzi az AP-t, meghatározza a célt, 
+     * mozgat, majd levonja a pontot
+     * 
+     * @param h A mozgatni kívánt hókotró
+     */
+    public void hokotrotMozgat(Hokotro h) {
+        Skeleton.functionCalled("hokotrotMozgat", this, "void", h);
+        
+        // Ellenőrizzük, van-e elég akciópont
+        if (getAkcioPont() > 0 && h != null) {
+            // A tényleges cél sávot a Jatekter/Skeleton tesztkörnyezet adja meg
+            // Itt a mozgatási szándékot jelezzük
+            akcioPontKezelo(); // Levonunk egy akciópontot
+        }
+        
+        Skeleton.voidReturn();
+    }
+
+    /**
+     * Az aktuális kotró fej lecserélése egy másik típusra a listából
+     * @param h A hókotró, amin a cserét végezzük.
+     */
+    public void kotrofejValt(Hokotro h) {
+        Skeleton.functionCalled("kotrofejValt", this, "void", h);
+        
+        if (getAkcioPont() > 0 && h != null) {
+            KotroFej ujFej = eszkoztar.kiveszFej();
+            if (ujFej != null) {
+                h.fejcsere(ujFej); // Meghívja a Hokotro fejcsere metódusát
+                akcioPontKezelo();
+            }
+        }
+        
+        Skeleton.voidReturn();
+    }
+
+    /**
+     * Általános vásárlási művelet egy Bolt objektumon keresztül
+     * Követi a dokumentáció diagramját: Kínálat ellenőrzés -> Ár lekérés -> 
+     * Pénz ellenőrzés -> Pénz levonás -> Átadás
+     * 
+     * @param bolt A bolt, ahol vásárolunk.
+     * @param termekNev A termék neve.
+     */
+    public void vasarol(Bolt bolt, String termekNev) {
+        Skeleton.functionCalled("vasarol", this, "void", bolt, termekNev);
+        
+        if (getAkcioPont() > 0 && bolt != null) {
+            // A tranzakciót a Bolt indítja és vezényli le a diagram szerint
+            boolean siker = bolt.vasarlas(this, termekNev);
+            if (siker) {
+                akcioPontKezelo(); // Csak sikeres vásárlásnál vonunk le AP-t
+            }
+        }
+        
+        Skeleton.voidReturn();
+    }
+
+    /**
+     * A metódus a játékos pénzét növeli
+     * @param p A kapott összeg.
+     */
+    public void penztKap(int p) {
+        Skeleton.functionCalled("penztKap", this, "void", p);
+        this.penz += p;
+        Skeleton.voidReturn();
     }
     
     /**
-     * Kilistázza a hókotrókat a konzolra, majd bekéri a választott indexét.
-     * @return A választott hókotró példány vagy null.
+     * Levonja a megadott összeget a játékostól.
+     * @param osszeg A fizetendő ár.
      */
-    public Hokotro hokotrotValaszt() {
-        if (iranyitottHokotrok.isEmpty()) {
-            System.out.println(">>> Hiba: A takarítónak nincs irányítható hókotrója.");
-            return null;
-        }
-
-        System.out.println(">>> Elérhető hókotrók listája:");
-        for (int i = 0; i < iranyitottHokotrok.size(); i++) {
-            Hokotro h = iranyitottHokotrok.get(i);
-            String fejNev = (h.getFelszereltFej() != null) ? h.getFelszereltFej().getNev() : "nincs fej";
-            System.out.println("    [" + i + "] Hókotró - Pozíció: " + h.getPozicio().getUt().getNev() + " - Felszerelés: " + fejNev);
-        }
-
-        System.out.print(">>> Válasszon egy hókotrót (írja be az indexet): ");
-        try {
-            int valasztas = Integer.parseInt(scanner.nextLine());
-            if (valasztas >= 0 && valasztas < iranyitottHokotrok.size()) {
-                Hokotro kivalasztott = iranyitottHokotrok.get(valasztas);
-                System.out.println(">>> Takarító kiválasztotta a(z) " + valasztas + ". sorszámú hókotrót.");
-                return kivalasztott;
-            } else {
-                System.out.println(">>> Hiba: Érvénytelen index.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println(">>> Hiba: Kérjük, számot adjon meg!");
-        }
-        return null;
+    public void penztLevon(int osszeg) {
+        this.penz -= osszeg;
     }
 
-    public boolean hokotroMozgat(Hokotro h) {
-        if (h == null || !iranyitottHokotrok.contains(h)) {
-            System.out.println(">>> Hiba: Érvénytelen hókotró a mozgatáshoz.");
-            return false;
-        }
-        if (akcioPont <= 0) {
-            System.out.println(">>> Mozgatás sikertelen: Elfogyott a takarító akciópontja.");
-            return false;
-        }
-        
-        akcioPont--;
-        System.out.println(">>> Hókotró mozgatása kezdeményezve. Felhasznált akciópont: 1. Maradék: " + akcioPont);
-        return true;
-    }
-
-    public boolean kotrofejValt(Hokotro h) {
-        if (h == null || akcioPont <= 0) {
-            System.out.println(">>> Fejcsere sikertelen: Nincs elég akciópont vagy érvénytelen jármű.");
-            return false;
-        }
-        
-        KotroFej uj = eszkoztar.kiveszFej();
-        if (uj == null) {
-            System.out.println(">>> Fejcsere sikertelen: Nincs elérhető kotrófej az eszköztárban.");
-            return false;
-        }
-        
-        h.fejcsere(uj);
-        akcioPont--;
-        System.out.println(">>> Sikeres fejcsere a hókotrón. Új fej: " + uj.getNev() + ". Maradék AP: " + akcioPont);
-        return true;
-    }
-
-    public boolean vasarol(Bolt bolt, String termekNev) {
-        if (bolt == null || akcioPont <= 0) {
-            System.out.println(">>> Vásárlás sikertelen: Nincs elég akciópont.");
-            return false;
-        }
-        
-        int penzElotte = penz;
-        boolean siker = bolt.vasarlas(this, termekNev);
-        
-        if (siker) {
-            akcioPont--;
-            System.out.println(">>> Sikeres vásárlás a boltban: " + termekNev + ". Kifizetve: " + (penzElotte - penz) + ". Maradék AP: " + akcioPont);
-        } else {
-            System.out.println(">>> Vásárlás sikertelen: Nincs elég pénz vagy a termék (" + termekNev + ") nem érhető el.");
-        }
-        return siker;
-    }
-
-    public void penztKap(int p){
-        this.penz += p;
-        System.out.println(">>> Takarító pénzt kapott (" + p + "). Új egyenleg: " + penz);
-    }
-    
+    /** Új hókotró hozzáadása a játékoshoz. */
     public void hozzaadHokotro(Hokotro h) {
-        if (h != null && !iranyitottHokotrok.contains(h)) {
-            iranyitottHokotrok.add(h);
-            System.out.println(">>> Új hókotró hozzáadva a takarítóhoz.");
-        }
+        if (h != null) iranyitottHokotrok.add(h);
     }
-    
-    public List<Hokotro> getIranyitottHokotrok() { return iranyitottHokotrok; }
-    public Eszkoztar getEszkoztar() { return eszkoztar; }
+
+    // --- GETTEREK ---
     public int getPenz() { return penz; }
+    public Eszkoztar getEszkoztar() { return eszkoztar; }
+    public List<Hokotro> getIranyitottHokotrok() { return iranyitottHokotrok; }
 }
