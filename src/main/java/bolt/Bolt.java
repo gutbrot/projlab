@@ -19,7 +19,7 @@ public class Bolt {
     public Bolt() {
         // --- FOGYÓANYAGOK ---
         kinalat.put("SoCsomag", new SoCsomag(10, 10)); // 10 egység, 10 pénz
-        kinalat.put("ZuzalekCsomag", new ZuzalekCsomag(10, 15));
+        kinalat.put("ZuzalekCsomag", new zuzalekCsomag(10, 15));
         kinalat.put("BiokerozinCsomag", new BiokerozinCsomag(10, 20));
         
         // --- KOTRÓFEJEK ---
