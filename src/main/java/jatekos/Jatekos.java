@@ -1,69 +1,59 @@
 package jatekos;
 
-import skeleton.Skeleton;
+import java.util.ArrayList;
+import java.util.List;
+
+import jarmu.*;
+import terkep.*;
+import bolt.*;
+import kotrofej.*;
 
 /**
  * A Jatekos egy absztrakt osztály, amely a játékban résztvevőket reprezentálja. 
- * Kezeli a játékosok akciópontjait, amelyek korlátozzák az egy körben 
- * elvégezhető műveletek számát. 
- * Biztosítja a körök váltását és a pontszámok nyilvántartását.
  */
 public abstract class Jatekos {
     
-    /** Tárolja, hogy egy játékosnak hány akciópontja van */
     private int akcioPont;
-    
-    /**
-     * Konstruktor a játékos példányosításához.
-     * 
-     * @param akcioPont A játékos induló akciópontjainak száma.
-     */
+    public List<Jatekos> jatekosok = new ArrayList<>();
+    public List<Jarmu> jarmuvek = new ArrayList<>();
+    public int aktualisJatekosIndex = 0;
+    public Jarmu aktivJarmu = null;
+
+    private Jatekter jatekter;
+
     protected Jatekos(int akcioPont) {
         this.akcioPont = Math.max(0, akcioPont);
     }
-    
-    /**
-     * Ez a metódus hívódik meg, amikor a játékos befejezte a 
-     * tevékenységét vagy elfogytak az akciópontjai.
-     */
-    public void korVege() {
-        // A kör végén a maradék akciópontok elvesznek
-        this.akcioPont = 0;
-        Skeleton.voidReturn();
+
+    public void setJatekter(Jatekter jatekter) {
+        this.jatekter = jatekter;
     }
     
-    /**
-     * Kezeli az akciópont rendszert. 
-     * Minden cselekvésnél levon a játékostól 1 pontot.
-     * 
-     * A dokumentáció diagramja alapján ellenőrzi, hogy elfogyott-e 
-     * az akciópont, és ha igen, jelzi a kör végét.
-     */
+    public void korVege(Jatekos aktivJatekos) {
+        this.akcioPont = 0;
+        aktivJarmu = null;
+        System.out.println(">>> [JÁTÉKOS] Befejezte a körét.");
+        
+        aktualisJatekosIndex++;
+        if (aktualisJatekosIndex >= jatekosok.size()) {
+            jatekter.ujKor();
+            aktualisJatekosIndex = 0;
+        }
+    }
+    
     public void akcioPontKezelo() {
         if (this.akcioPont > 0) {
             this.akcioPont--;
-            
-            // Ha elfogyott az akciópont, a kör véget ér
             if (this.akcioPont == 0) {
-                this.korVege();
+                this.korVege(this);
             }
         }
     }
     
-    /**
-     * Visszaadja a játékos aktuálisan felhasználható akciópontjainak számát.
-     * 
-     * @return Az aktuális akciópontok mennyisége.
-     */
     public int getAkcioPont() { 
         return akcioPont; 
     }
 
-    /**
-     * Lehetővé teszi az akciópontok beállítását (pl. új kör indításakor).
-     * 
-     * @param p Az új akciópont érték.
-     */
     public void setAkcioPont(int p) {
         this.akcioPont = Math.max(0, p);
     }

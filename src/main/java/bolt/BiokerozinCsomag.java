@@ -1,62 +1,59 @@
 package bolt;
 
+import jarmu.Hokotro;
 import jatekos.Takarito;
 
 /**
- * A BiokerozinCsomag osztály a rendszerben fellelhető egyik fogyóanyagot reprezentálja.
- * Fő felelőssége a biokerozin tárolása és biztonságos átadása a takarító járművek (pontosabban a játékosok) számára
- * Ez a fogyóanyag elengedhetetlen üzemanyagul szolgál a speciális sárkány kotrófej (SarkanyFej) működéséhez
+ * A biokerozin fogyóanyagot reprezentáló osztály. 
+ * A sárkány kotrófej (SarkanyFej) működéséhez szükséges jégolvasztó anyag.
  */
 public class BiokerozinCsomag extends FogyoAnyag {
     
     /**
-     * Konstruktor a BiokerozinCsomag létrehozásához és inicializálásához.
-     * Az osztály ezen keresztül biztosítja, hogy a vásárlási folyamat során a készlet (mennyiség) 
-     * és a vételár adatai a rendszerben megfelelőek és konzisztensek legyenek.
-     * 
-     * @param mennyiseg A csomagban tárolt biokerozin mennyisége (pl. literben vagy egységben).
-     * @param ar A termék aktuális ára, amelyet a Bolt fog levonni a Takarítótól.
+     * Konstruktor, ami beállítja a kerozin mennyiségét és árát 
+     * az ősosztály (FogyoAnyag) konstruktorának segítségével.
      */
     public BiokerozinCsomag(int mennyiseg, int ar) {
-        // Meghívjuk az ősosztály (FogyoAnyag) konstruktorát, amely beállítja 
-        // és egyben validálja is a mennyiség és az ár alapértékeit (pl. ne lehessen negatív).
         super(mennyiseg, ar);
     }
 
     /**
-     * Megvalósítja az eladási folyamat fizikai átadását
-     * Átadja a csomagban lévő biokerozin mennyiséget a paraméterként kapott takarító játékosnak
-     * Ezen a metóduson keresztül lép kapcsolatba az objektum a takarítóval a sikeres tranzakció (fizetés) után
-     * 
-     * @param v A vásárlást végző Takarító játékos, aki az üzemanyagot az eszköztárába kapja.
+     * A tényleges vásárlási tranzakció befejezése. 
+     * Itt dől el, hova kerül a megvásárolt anyag a UML diagram alapján.
      */
     @Override
     public void atadVevonek(Takarito v) {
-        // Biztonsági ellenőrzés: Megbizonyosodunk róla, hogy a vásárló (Takarító) objektum nem null.
-        // Ezzel elkerüljük a futásidejű NullPointerException hibákat, ha a Bolt rossz paramétert adna át.
+        // 1. Biztonsági ellenőrzés: Létezik-e egyáltalán a vevő?
         if (v != null) {
-            // A vásárlás befejezéseként a biokerozin ténylegesen bekerül a Takarító saját eszköztárába[cite: 36].
-            // A "biokerozin" string kulcs azonosítja a fogyóanyag típusát az Eszkoztar osztály switch-case logikájában.
-            v.getEszkoztar().hozzaad("biokerozin", mennyiseg);
             
-            // Konzol alapú visszajelzés a prototípushoz, hogy nyomon követhető legyen a játék állapota.
-            System.out.println(">>> Sikeres tranzakció: A(z) " + mennyiseg + " egységnyi biokerozin bekerült a Takarító eszköztárába.");
+            // 2. A UML alapján a Takarító maga nem tárol anyagot, a Hókotrók igen.
+            // Lekérjük a Takarító által jelenleg aktívan irányított hókotrót.
+            Hokotro aktivHokotro = v.hokotrotValaszt();
+            
+            // 3. Ellenőrizzük, hogy van-e aktív hókotrója, és annak van-e eszköztára.
+            if (aktivHokotro != null && aktivHokotro.getEszkoztar() != null) {
+                
+                // 4. Ha minden rendben, a hókotró eszköztárához adjuk a kerozint.
+                // Fontos a "biokerozin" string kulcs pontos használata az Eszkoztar miatt!
+                aktivHokotro.getEszkoztar().hozzaad("biokerozin", mennyiseg);
+                
+                // Narratív visszajelzés a játékosnak a konzolon.
+                System.out.println(">>> [BOLT] Sikeres vásárlás: " + mennyiseg + " egység biokerozin betöltve a Hókotró tartályába.");
+            } else {
+                // Ha a játékos úgy vásárol, hogy nincs beállítva hókotrója.
+                System.out.println(">>> [BOLT HIBA] A játékosnak nincs aktív hókotrója, amibe tankolhatna!");
+            }
         } else {
-            // Ha valamilyen oknál fogva a vevő null paraméterként érkezik, hibaüzenetet dobunk a konzolra.
-            System.out.println(">>> Hiba az átadásnál: Érvénytelen (null) Takarító próbálta átvenni a BiokerozinCsomagot!");
+            // NullPointerException elkerülése, ha hibás a metódushívás a Bolt részéről.
+            System.out.println(">>> [BOLT HIBA] Érvénytelen (null) játékos próbált vásárolni!");
         }
     }
 
     /**
-     * Visszaadja a termék pontos megnevezését
-     * Ez az azonosító használható a Bolt kínálatának listázásakor, illetve a vásárlási 
-     * folyamat (vasarlas parancs) során a termék név szerinti kereséséhez.
-     * 
-     * @return A termék hivatalos neve a rendszerben: "BiokerozinCsomag".
+     * Segédmetódus a menürendszer és a Bolt számára, hogy 
+     * ki tudja írni a termék nevét a kínálatban.
      */
-    @Override
     public String getNev() {
-        // Szimpla konstans visszatérési érték, ami megegyezik a termék típusával.
         return "BiokerozinCsomag";
     }
 }

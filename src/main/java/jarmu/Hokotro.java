@@ -5,35 +5,19 @@ import eszkoztar.Eszkoztar;
 import kotrofej.KotroFej;
 import bolt.IBoltiCikk;
 import terkep.*;
-import skeleton.Skeleton;
 import java.util.List;
 
 /**
  * A Hokotro osztály egy járművet reprezentál. 
  * Elsődleges feladata az úthálózat tisztán tartása a rá felszerelt eszközök segítségével. 
- * Felelős a saját pozíciójának kezeléséért, valamint a tisztítási folyamat végrehajtásáért. 
- * A takarító játékosok által irányított jármű
  */
 public class Hokotro extends Jarmu implements IBoltiCikk {
     
-    /** A hókotró egyedi azonosítója a tesztkörnyezetben. */
     private final String id;
-    
-    /** A hókotró ára*/
     private int ar = 50;
-    
-    /** Eltárolja, hogy a hókotrón jelenleg milyen fej van */
     private KotroFej felszereltFej;
-    
-    /** A hókotróhoz tartozó eszköztár */
     private Eszkoztar eszkoztar;
     
-    /**
-     * Konstruktor a Hokotro példányosításához.
-     * @param id Egyedi azonosító.
-     * @param pozicio Kezdőpozíció.
-     * @param felszereltFej Kezdő kotrófej.
-     */
     public Hokotro(String id, Lokacio pozicio, KotroFej felszereltFej) {
         super(pozicio);
         this.id = id;
@@ -41,81 +25,70 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
         this.eszkoztar = new Eszkoztar();
     }
 
-    /**
-     * A vásárlás lebonyolításáért és a jármű takarító játékosnak való átadásáért felel
-     * @param v A vásárlást végző Takarító játékos
-     */
     @Override
     public void atadVevonek(Takarito v) {
-        Skeleton.functionCalled("atadVevonek", this, "void", v);
         if (v != null) {
             v.hozzaadHokotro(this);
+            System.out.println(">>> [BOLT] Sikeres vásárlás: A(z) " + id + " azonosítójú hókotró átadva a játékosnak.");
+        } else {
+            System.out.println(">>> [BOLT HIBA] Érvénytelen (null) játékos próbált járművet vásárolni!");
         }
-        Skeleton.voidReturn();
     }
 
-    /**
-     * A játékos kiválasztja a használt felszerelhető kotró fejet az eszközei közül
-     * A fejcsere műveletét valósítja meg
-     * 
-     * @param ujFej Az újonnan felszerelendő fej
-     */
     public void fejcsere(KotroFej ujFej) {
-        Skeleton.functionCalled("fejcsere", this, "void", ujFej);
-        
-        // Dokumentáció diagram: Rendelkezésre áll az 'ujFej'?
-        // (A Takarito osztály ellenőrzi az eszköztárat a hívás előtt)
         if (ujFej != null) {
             this.felszereltFej = ujFej;
-            System.out.println(">>> Sikeres fejcsere történt.");
+            System.out.println(">>> [SZERELÉS] Sikeres fejcsere: Az új eszköz (" + ujFej.getNev() + ") felszerelve a(z) " + id + " hókotróra.");
+        } else {
+            System.out.println(">>> [SZERELÉS HIBA] A kiválasztott fej érvénytelen (null)!");
         }
-        
-        Skeleton.voidReturn();
     }
     
     /**
      * Meghívja a kotrófej tisztító metódusát, amely módosítja az 
-     * érintett útszakasz állapotát a térképen
-     * 
-     * @param terkep A játéktér térképe
+     * érintett útszakasz állapotát a térképen.
      */
-    public void takarit(Terkep terkep) {
-        Skeleton.functionCalled("takarit", this, "void", terkep);
+    public void takarit() {
+        System.out.println("\n>>> [JÁRMŰ AKCIÓ] A(z) " + id + " hókotró takarítást kezdeményezett...");
 
-        // 1. Aktuális pozícióhoz tartozó sáv lekérdezése
+        if (felszereltFej == null) {
+            System.out.println("    >>> [KUDARC] A hókotrón nincs felszerelt fej, nem tud takarítani!");
+            return;
+        }
+
+        if (pozicio == null || pozicio.getSav() == null || pozicio.getUt() == null) {
+            System.out.println("    >>> [KUDARC] A hókotró pozíciója érvénytelen!");
+            return;
+        }
+
+        // 1. Aktuális pozícióhoz tartozó sáv és út lekérdezése
         Sav cel = pozicio.getSav();
         Ut ut = pozicio.getUt();
 
-        // 2. A sávon lévő csapadék típusának azonosítása
-        // 3. A 'felszereltFej' képes eltakarítani az adott csapadéktípust?
-        // (Ezt a KotroFej leszármazottai döntik el a tisztit hívásakor)
-
-        // 4. A térkép segítségével a szomszédos sáv lekérdezése
+        // 2. A szomszédos sáv (melle) meghatározása (pl. Söprőfejnek kell)
         Sav melle = null;
         List<Sav> szakasz = pozicio.getSzakasz();
+        
         if (szakasz != null && szakasz.size() > 1) {
             int idx = szakasz.indexOf(cel);
-            if (idx + 1 < szakasz.size()) melle = szakasz.get(idx + 1);
-            else if (idx - 1 >= 0) melle = szakasz.get(idx - 1);
+            // Először megpróbáljuk jobbra (nagyobb index) áttolni a havat
+            if (idx + 1 < szakasz.size()) {
+                melle = szakasz.get(idx + 1);
+            } 
+            // Ha jobb szélen vagyunk, megpróbáljuk balra (kisebb index)
+            else if (idx - 1 >= 0) {
+                melle = szakasz.get(idx - 1);
+            }
         }
 
-        // 5. Tisztítási logika függvényének hívása
-        if (felszereltFej != null) {
-            felszereltFej.tisztit(cel, melle, ut);
-        }
-
-        Skeleton.voidReturn();
+        // 3. Tisztítási logika hívása a felszerelt fejen (Polimorfizmus)
+        felszereltFej.tisztit(cel, melle, ut);
     }
 
-    /**
-     * Megvalósítja az ütközéskezelést
-     */
     @Override
     public void utkozos() {
-        Skeleton.functionCalled("utkozos", this, "void");
-        // Meghívja a Jarmu ősosztály büntetés-kezelőjét
+        System.out.println(">>> [BALESET] A(z) " + id + " hókotró ütközött és mozgásképtelenné vált!");
         mozgasKeptelen();
-        Skeleton.voidReturn();
     }
 
     // --- GETTEREK ---
@@ -128,8 +101,5 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
     
     public Eszkoztar getEszkoztar() { return eszkoztar; }
     
-    /** Visszaadja a jármű aktuális állapotát */
-    public Hokotro getHokotro() { 
-        return this; 
-    }
+    public Hokotro getHokotro() { return this; }
 }
