@@ -7,12 +7,12 @@ import jatekos.Takarito;
  * A zúzalékot reprezentáló osztály. 
  * A zúzottkő-szóró (ZuzottFej) fejhez szükséges, hogy az autók ne csússzanak meg a jégen.
  */
-public class ZuzalekCsomag extends FogyoAnyag {
+public class zuzalekCsomag extends FogyoAnyag {
 
     /**
      * Konstruktor az ár és a mennyiség beállításához.
      */
-    public ZuzalekCsomag(int mennyiseg, int ar) {
+    public zuzalekCsomag(int mennyiseg, int ar) {
         super(mennyiseg, ar);
     }
 
