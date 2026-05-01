@@ -19,13 +19,14 @@ public abstract class KotroFej implements IBoltiCikk {
      * @param ar A fej vételára.
      */
     protected KotroFej(int ar) {
+        // Biztosítja, hogy az ár ne lehessen negatív
         this.ar = Math.max(0, ar);
     }
 
     /**
-     * Absztrakt metódus a tisztítás végrehajtásához
+     * Absztrakt metódus a tisztítás végrehajtásához.
      * Paraméterként kapja a célsávot, a mellette lévőt és az utat, 
-     * hogy a fej típusa szerint módosítsa a hóviszonyokat
+     * hogy a fej típusa szerint módosítsa a hóviszonyokat.
      * 
      * @param cel A sáv, amelyet a hókotró éppen takarít.
      * @param melle A szomszédos sáv (pl. hó áttolásához).
@@ -34,29 +35,36 @@ public abstract class KotroFej implements IBoltiCikk {
     public abstract void tisztit(Sav cel, Sav melle, Ut ut);
 
     /**
-     * Visszaadja az aktuális fej típusát (nevét)
+     * Visszaadja az aktuális fej típusát (nevét).
      * @return A fej megnevezése.
      */
     public abstract String getNev();
 
     /**
-     * Az interfész metódusa, amely kezeli a vásárlást 
-     * Levonja az árat a játékostól és hozzáadja a fejet a játékos eszköztárához
+     * Az interfész metódusa, amely kezeli a vásárlást.
+     * Átadja az adott fejet a játékos által irányított hókotrónak.
      * 
      * @param v A vásárlást végző Takarító.
      */
     @Override
     public void atadVevonek(Takarito v) {
-        // A dokumentáció szerinti logika: ár levonása és hozzáadás az eszköztárhoz
+        // Ellenőrizzük, hogy létezik-e a vásárló játékos
         if (v != null) {
-            // A tranzakció során egy új példányt adunk át
+            // Létrehozunk egy teljesen új példányt a megvásárolt fejből (Factory minta)
             KotroFej ujFej = this.getKotroFej();
+            
+            // Hozzáadjuk a játékos aktív hókotrójának eszköztárához
             v.getEszkoztar().hozzaadFej(ujFej);
+            
+            // Narratív logolás a játékos felé
+            System.out.println(">>> [BOLT] A(z) " + this.getNev() + " sikeresen átadva a játékosnak és bekerült az eszköztárba.");
+        } else {
+            System.out.println(">>> [BOLT HIBA] Érvénytelen (null) játékos próbált fejet vásárolni!");
         }
     }
 
     /**
-     * Visszaadja a fej árát
+     * Visszaadja a fej árát.
      * @return A termék aktuális ára.
      */
     @Override
@@ -65,7 +73,8 @@ public abstract class KotroFej implements IBoltiCikk {
     }
 
     /**
-     * Visszaadja a fej állapotát (egy új példányt az adott típusból)
+     * Visszaadja a fej állapotát (egy új példányt az adott típusból).
+     * A Bolt használja ezt, hogy új példányokat tudjon generálni az eladáshoz.
      * @return A kotrófej objektum.
      */
     public abstract KotroFej getKotroFej();

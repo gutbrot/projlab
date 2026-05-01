@@ -1,75 +1,36 @@
 package bolt;
 
-import jatekos.Takarito;
-
 /**
- * A FogyoAnyag osztály felelőssége a vásárolható és felhasználható készletek 
- * általános modelljének létrehozása. Összefoglalja az árazást, 
- * a mennyiséget és a neveket.
- * 
- * Megvalósítja az IBoltiCikk interfészt, biztosítva a boltban való eladások kezelését.
+ * A fogyóanyagok (só, zúzalék, biokerozin) közös ősosztálya.
+ * Mivel ez implementálja az IBoltiCikk interfészt, az összes belőle
+ * származó csomag automatikusan eladhatóvá válik a Boltban.
  */
 public abstract class FogyoAnyag implements IBoltiCikk {
     
-    /** A fogyóanyag mennyisége. */
+    // Védett (protected) attribútumok, hogy a leszármazott osztályok is lássák őket.
     protected int mennyiseg;
-    
-    /** A termék aktuális ára. */
     protected int ar;
 
     /**
-     * Konstruktor a fogyóanyag alapadatainak beállításához.
+     * Az ősosztály konstruktora, ami inicializálja az alapvető tulajdonságokat.
+     * Minden specifikus csomag ezt fogja meghívni a saját létrehozásakor.
      * 
-     * @param mennyiseg A csomagban lévő mennyiség.
+     * @param mennyiseg A csomagban lévő anyag mennyisége.
      * @param ar A csomag vételára.
      */
-    protected FogyoAnyag(int mennyiseg, int ar) {
+    public FogyoAnyag(int mennyiseg, int ar) {
+        // Egyszerű adatvalidáció: megakadályozzuk, hogy negatív mennyiségű 
+        // vagy negatív árú csomag jöjjön létre a rendszerben.
         this.mennyiseg = Math.max(0, mennyiseg);
         this.ar = Math.max(0, ar);
     }
 
     /**
-     * Absztrakt metódus, amelyet a leszármazottaknak kell megvalósítaniuk, 
-     * hogy visszaadják a termék nevét.
-     * 
-     * @return A termék neve (pl. "SoCsomag").
-     */
-    public abstract String getNev();
-
-    /**
-     * Absztrakt metódus, amely a vásárlás lebonyolításáért és a készlet 
-     * takarító játékosnak való átadásáért felel.
-     * 
-     * @param v A vásárlást végző Takarító játékos.
-     */
-    @Override
-    public abstract void atadVevonek(Takarito v);
-
-    /**
-     * Visszaadja a termék árát.
-     * 
-     * @return A termék aktuális ára.
+     * Az IBoltiCikk interfészből kötelezően megvalósítandó metódus.
+     * Ezt hívja meg a Bolt, amikor ellenőrzi, hogy a játékosnak van-e elég pénze.
      */
     @Override
     public int getAr() {
-        return ar;
-    }
-
-    /**
-     * Visszaadja az eszközök aktuális állapotát.
-     * 
-     * @return Az objektum saját referenciája.
-     */
-    public FogyoAnyag getFogyo() {
-        return this;
-    }
-
-    /**
-     * Lekérdezi a csomagban tárolt mennyiséget.
-     * 
-     * @return A mennyiség értéke.
-     */
-    public int getMennyiseg() {
-        return mennyiseg;
+        return this.ar;
     }
 }
