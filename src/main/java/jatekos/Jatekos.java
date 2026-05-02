@@ -34,7 +34,7 @@ public abstract class Jatekos {
     public void forduloVege(Jatekos aktivJatekos) {
         this.akcioPont = 0;
         aktivJarmu = null;
-        System.out.println(">>> " + aktivJatekos.getNev() + " Befejezte a körét.");
+        System.out.println(">>> " + aktivJatekos.getNev() + " befejezte a koret.");
         
         aktualisJatekosIndex++;
         if (aktualisJatekosIndex >= jatekosok.size()) {

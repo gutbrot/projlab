@@ -218,7 +218,7 @@ public class Jatekter {
         kiirSoronLevo(aktivJatekos);
 
         while (true) {
-            System.out.print("> ");
+            System.out.print("[" + aktivJatekos.getNev() + "] > ");
             String bemenet = scanner.nextLine();
             if (bemenet == null || bemenet.trim().isEmpty()) continue;
 

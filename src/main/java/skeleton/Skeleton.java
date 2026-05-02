@@ -81,8 +81,10 @@ public class Skeleton {
                 case "2":
                     System.out.print("Add meg a buszsofor nevet (ekezet nelkul, egybe): ");
                     String bNev = scanner.nextLine();
-                    tempBuszvezetok.add(new Buszvezeto(3));
-                    //tempBuszvezetok.setNev(bNev);
+
+                    Buszvezeto buszvezeto = new Buszvezeto(3);
+                    buszvezeto.setNev(bNev);
+                    tempBuszvezetok.add(buszvezeto);
 
                     System.out.println(">>> Buszsofor (" + bNev + ") hozzaadva!");
                     break;
