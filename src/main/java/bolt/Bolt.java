@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import jatekos.Takarito;
 import kotrofej.*;
+import jarmu.*;
 
 /**
  * A Bolt osztály felelős a vásárolható cikkek készletének és tranzakcióknak a kezeléséért.
@@ -31,6 +32,8 @@ public class Bolt {
         kinalat.put("JegtoroFej", new JegtoroFej(60));
         // A sárkányfej paraméterei: (ár, biokerozinIgeny)
         kinalat.put("SarkanyFej", new SarkanyFej(100, 10));
+        // A hókotró
+        kinalat.put("Hokotro", new Hokotro("TEMPLATE", null, null));
     }
     
     public void felveszTermek(String nev, IBoltiCikk cikk) {

@@ -54,8 +54,8 @@ public class Skeleton {
         while (true) {
             System.out.println("\n--- JATEK MOD SETUP ---");
             System.out.println("Eddig hozzaadva: " + tempTakaritok.size() + " Takarito, " + tempBuszvezetok.size() + " Buszsofor");
-            System.out.println("1. Uj takarito hozza adasa");
-            System.out.println("2. Uj buszsofor hozza adasa");
+            System.out.println("1. Uj takarito hozzaadasa");
+            System.out.println("2. Uj buszsofor hozzaadasa");
             System.out.println("3. Jatek inditasa");
             System.out.println("4. Vissza");
 
@@ -68,6 +68,7 @@ public class Skeleton {
                     String tNev = scanner.nextLine();
                     
                     Takarito takarito = new Takarito(3);
+                    takarito.setNev(tNev);
 
                     Hokotro hokotro = new Hokotro("Hokotro_" + (tempTakaritok.size()+1), null, null);
 
@@ -81,6 +82,7 @@ public class Skeleton {
                     System.out.print("Add meg a buszsofor nevet (ekezet nelkul, egybe): ");
                     String bNev = scanner.nextLine();
                     tempBuszvezetok.add(new Buszvezeto(3));
+                    
                     System.out.println(">>> Buszsofor (" + bNev + ") hozzaadva!");
                     break;
                 case "3":

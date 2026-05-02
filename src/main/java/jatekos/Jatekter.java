@@ -186,7 +186,8 @@ public class Jatekter {
         System.out.println("--- ELÉRHETŐ PARANCSOK ---");
         System.out.println("betoltes <FajlNev> - Játékállapot beolvasása");
         System.out.println("mentes [IdoBelyeg] - Játékállapot mentése");
-        System.out.println("korVege - Aktuális kör lezárása");
+        System.out.println("korvege - Aktuális kör lezárása");
+        System.out.println("fordulovege - Aktuális forduló lezárása");
         System.out.println("teszt - Tesztelő módba váltás");
         System.out.println("jatek <Pálya> <Tak> <Busz> <Auto> [RandomKi] - Új játék");
         System.out.println("valaszt <ID> - Jármű vagy Kotrófej kiválasztása");
@@ -261,7 +262,27 @@ public class Jatekter {
 
                 // A körvége parancs lezárja az aktuális játékos körét, és a következő játékosra vált
                 case "korvege":
-                    jatekosok.get(aktualisJatekosIndex).korVege(aktivJatekos);
+                    // 1. Az aktuális játékos lezárja a saját fordulóját (AP nullázás)
+                    aktivJatekos.korVege();
+                    aktivJarmu = null; // Elengedjük a kiválasztott jármű fókuszát
+                    
+                    // 2. Léptetjük az indexet a Játéktéren a KÖVETKEZŐ játékosra
+                    aktualisJatekosIndex++;
+                    
+                    // 3. Ellenőrizzük, hogy mindenki lépett-e már (GLOBÁLIS KÖR VÉGE)
+                    if (aktualisJatekosIndex >= jatekosok.size()) {
+                        ujKor(); // Meghívja az időjárást, levonja a mozgásképtelenséget és frissíti az AP-kat
+                        aktualisJatekosIndex = 0; // Visszaugrunk az első játékosra
+                    }
+                    
+                    // 4. Átváltunk az új soron lévő játékosra, és kiírjuk az adatait
+                    aktivJatekos = jatekosok.get(aktualisJatekosIndex);
+                    System.out.println("SIKERES");
+                    kiirSoronLevo(aktivJatekos);
+                    break;
+
+                case "fordulovege":
+                    jatekosok.get(aktualisJatekosIndex).forduloVege(aktivJatekos);
                     aktivJatekos = jatekosok.get(aktualisJatekosIndex);
                     System.out.println("SIKERES");
                     kiirSoronLevo(aktivJatekos);
