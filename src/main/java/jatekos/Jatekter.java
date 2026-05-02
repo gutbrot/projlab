@@ -107,7 +107,7 @@ public class Jatekter {
     private void kiirSoronLevo(Jatekos jatekos) {
         String tipus = (jatekos instanceof Takarito) ? "Takarító" : "Buszvezető";
         System.out.println("-------------------------------------");
-        System.out.println(">>> Következő játékos: " + tipus + " (AP: " + jatekos.getAkcioPont() + ")");
+        System.out.println(">>> Következő játékos: " + jatekos.getNev() + " - " + tipus + " (AP: " + jatekos.getAkcioPont() + ")");
     }
 
     // Új kör kezdése: időjárás frissítése, járművek és játékosok körének indítása, AP-k visszaállítása
@@ -283,6 +283,7 @@ public class Jatekter {
 
                 case "fordulovege":
                     jatekosok.get(aktualisJatekosIndex).forduloVege(aktivJatekos);
+                    aktualisJatekosIndex = 0;
                     aktivJatekos = jatekosok.get(aktualisJatekosIndex);
                     System.out.println("SIKERES");
                     kiirSoronLevo(aktivJatekos);
