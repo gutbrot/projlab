@@ -103,12 +103,14 @@ public class Jatekter {
         return siker;
     }
 
+    // A soron következő játékos típusát és akciópontjait kiíró segédmetódus
     private void kiirSoronLevo(Jatekos jatekos) {
         String tipus = (jatekos instanceof Takarito) ? "Takarító" : "Buszvezető";
         System.out.println("-------------------------------------");
         System.out.println(">>> Következő játékos: " + tipus + " (AP: " + jatekos.getAkcioPont() + ")");
     }
 
+    // Új kör kezdése: időjárás frissítése, járművek és játékosok körének indítása, AP-k visszaállítása
     public void ujKor() {
         if (terkep != null) terkep.idojarasFrissites();
         
@@ -145,7 +147,6 @@ public class Jatekter {
         int bIndex = 0;
         while (tIndex < takaritokSzam || bIndex < buszvezetokSzam) {
             if (tIndex < takaritokSzam) {
-                // Fontos: Mivel átírtuk a korVege logikát, a hozzaadJatekos() be fogja állítani a Jatekter referenciát!
                 hozzaadJatekos(new Takarito(3));
                 tIndex++;
             }
@@ -180,6 +181,7 @@ public class Jatekter {
         return true;
     }
 
+    // A segítség parancs kiírja a lehetséges parancsokat és azok használatát
     private void kiirSegitseg() {
         System.out.println("--- ELÉRHETŐ PARANCSOK ---");
         System.out.println("betoltes <FajlNev> - Játékállapot beolvasása");
@@ -201,13 +203,17 @@ public class Jatekter {
         this.jatekosok = sorrend;
         aktualisJatekosIndex = 0;
         
+        // Minden játékos akciópontjainak visszaállítása a kör elején
         for (Jatekos j : jatekosok) {
             j.setAkcioPont(3); 
         }
 
+        // Ha nincs játékos, nem tudunk elindítani egyetlen kört sem
         if (jatekosok.isEmpty()) return;
+        // Kezdjük a játékot az első játékossal
         Jatekos aktivJatekos = jatekosok.get(aktualisJatekosIndex);
         System.out.println("\n>>> Jatek elindult!");
+        // Kiírjuk az első játékos típusát és akciópontjait
         kiirSoronLevo(aktivJatekos);
 
         while (true) {
@@ -253,6 +259,7 @@ public class Jatekter {
                     }
                     break;
 
+                // A körvége parancs lezárja az aktuális játékos körét, és a következő játékosra vált
                 case "korvege":
                     jatekosok.get(aktualisJatekosIndex).korVege(aktivJatekos);
                     aktivJatekos = jatekosok.get(aktualisJatekosIndex);
@@ -297,6 +304,7 @@ public class Jatekter {
                     }
                     break;
 
+                // A segítség parancs kiírja a lehetséges parancsokat és azok használatát
                 case "segitseg":
                     kiirSegitseg();
                     System.out.println("SIKERES");
@@ -361,19 +369,27 @@ public class Jatekter {
                     break;
 
                 case "vasarlas":
+                    // Ha nem takarító próbál vásárolni, az mindig hibás
                     if (!(aktivJatekos instanceof Takarito)) {
-                        System.out.println("ROSSZJATEKOS");
+                        System.out.println("ROSSZ JATEKOS");
                     } else {
+                        // Takarító vásárlási logikája
                         Takarito t = (Takarito) aktivJatekos;
+                        // Ha csak "vasarlas" parancs érkezik paraméter nélkül, akkor a kínálatot listázzuk
                         if (darabok.length == 1) {
                             bolt.listaz();
                             System.out.println("SIKERES");
-                        } else {
+                        } 
+                        // Ha terméknevet is megadtak, megpróbáljuk megvásárolni azt a terméket
+                        else {
                             boolean siker = bolt.vasarlas(t, darabok[1]);
+                            // Ha a vásárlás sikeres volt, levonjuk az Akciópontokat és kiírjuk a sikeres üzenetet
                             if (siker) {
                                 t.akcioPontKezelo();
                                 System.out.println("SIKERES");
-                            } else {
+                            } 
+                            // Ha a vásárlás nem sikerült (pl. nincs elég pénz vagy a termék nem létezik), akkor hibás üzenetet írunk ki
+                            else {
                                 System.out.println("HIBAS");
                             }
                         }
@@ -381,18 +397,23 @@ public class Jatekter {
                     break;
 
                 case "allomas":
+                    // Ha nem buszvezető próbálja lekérni a végállomásokat, az hibás
                     if (!(aktivJatekos instanceof Buszvezeto)) {
-                        System.out.println("ROSSZJATEKOS");
+                        System.out.println("ROSSZ JATEKOS");
                     } else {
                         Buszvezeto bv = (Buszvezeto) aktivJatekos;
+                        // Ha csak "allomas" parancs érkezik paraméter nélkül, akkor az összes irányítható buszt listázzuk
                         if (darabok.length == 1) {
                             System.out.println(">>> Elérhető buszaid:");
                             for (Busz b : bv.getIranyithatoBuszok()) {
                                 System.out.println("    - " + b.getId());
                             }
                             System.out.println("SIKERES");
-                        } else {
+                        } 
+                        // Ha buszazonosítót is megadtak, lekérjük annak a végállomásait
+                        else {
                             boolean talalt = false;
+                            // Megkeressük a megadott ID-jű buszt a buszvezető irányítható buszai között
                             for (Busz b : bv.getIranyithatoBuszok()) {
                                 if (b.getId().equals(darabok[1])) {
                                     System.out.println(">>> A(z) " + b.getId() + " végállomásai le lettek kérve.");
@@ -400,15 +421,18 @@ public class Jatekter {
                                     break;
                                 }
                             }
+                            // Ha találtunk ilyen buszt, akkor sikeres, ha nem, akkor hibás
                             if (talalt) System.out.println("SIKERES");
                             else System.out.println("HIBAS");
                         }
                     }
                     break;
-                    
+ 
+                // Kilépési parancs, amivel a játékos befejezheti a játékot
                 case "kilepes": 
                     return;
 
+                // Ha a parancs nem ismert, hibás üzenetet írunk ki
                 default:
                     System.out.println("ERTELMEZHETETLEN");
             }
