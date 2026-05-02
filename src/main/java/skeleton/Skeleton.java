@@ -3,6 +3,8 @@ package skeleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import jarmu.Hokotro;
 import jatekos.Buszvezeto;
 import jatekos.Takarito;
 import jatekos.Jatekos;
@@ -64,7 +66,15 @@ public class Skeleton {
                 case "1":
                     System.out.print("Add meg a takarito nevet (ekezet nelkul, egybe): ");
                     String tNev = scanner.nextLine();
-                    tempTakaritok.add(new Takarito(3)); 
+                    
+                    Takarito takarito = new Takarito(3);
+
+                    Hokotro hokotro = new Hokotro("Hokotro_" + (tempTakaritok.size()+1), null, null);
+
+                    takarito.hozzaadHokotro(hokotro);
+                    tempTakaritok.add(takarito);
+
+                    System.out.println(">>> [RENDSZER] Hókotró létrehozva: " + hokotro.getId() + " és hozzárendelve a " + tNev + " nevű takarítóhoz.");
                     System.out.println(">>> Takarito (" + tNev + ") hozzaadva!");
                     break;
                 case "2":
@@ -101,8 +111,15 @@ public class Skeleton {
 
         while (tIndex < tempTakaritok.size() || bIndex < tempBuszvezetok.size()) {
             if (tIndex < tempTakaritok.size()) {
-                sorrend.add(tempTakaritok.get(tIndex));
-                jatekter.hozzaadJatekos(tempTakaritok.get(tIndex));
+                Takarito takarito = tempTakaritok.get(tIndex);
+                
+                sorrend.add(takarito);
+                jatekter.hozzaadJatekos(takarito);
+
+                for (Hokotro h : takarito.getIranyitottHokotrok()) {
+                    jatekter.hozzaadJarmu(h);
+                }
+
                 tIndex++;
             }
             if (bIndex < tempBuszvezetok.size()) {
