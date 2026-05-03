@@ -27,7 +27,7 @@ public class Betolteskezelo {
             doc.getDocumentElement().normalize();
 
             // 1. TÉRKÉP (Kötelező)
-            Terkep ujTerkep = TerkepLoader.betolt(eleresiUt);
+            Terkep ujTerkep = TerkepLoader.betolt(fajlNev);
             if (ujTerkep == null) return false;
             jatekter.setTerkep(ujTerkep);
 
@@ -46,11 +46,14 @@ public class Betolteskezelo {
                         String id = e.getAttribute("nev");
                         Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
                         
-                        Hokotro h = new Hokotro(id, null, null);
+                        Hokotro h = new Hokotro(id, ujTerkep, null); 
                         h.setPozicio(pos);
-                        
-                        if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
-                        
+
+                        if (pos != null && pos.getSav() != null) {
+                            pos.getSav().setVanEJarmu(true);
+                            // (Ha van rá külön metódusod, hogy a sáv is tudjon a járműről, azt itt hívd meg! pl: pos.getSav().setJarmu(h); )
+                        }
+
                         jatekter.hozzaadJarmu(h);
                         betoltottJarmuvek.put(id, h);
                     }
@@ -159,11 +162,13 @@ public class Betolteskezelo {
         }
     }
 
-    private Lokacio parseLokacio(Element el, Terkep terkep) {
+     private Lokacio parseLokacio(Element el, Terkep terkep) {
         if (el == null) return null;
         try {
             String utNev = el.getAttribute("ut");
             int szakaszIdx = Integer.parseInt(el.getAttribute("szakasz")) - 1;
+            
+            // VISSZAÁLLÍTVA AZ EREDETI LOGIKÁDRA:
             int savIdx = Math.abs(Integer.parseInt(el.getAttribute("sav"))) - 1;
 
             for (Ut ut : terkep.getTeljesHalozat()) {

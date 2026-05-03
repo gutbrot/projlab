@@ -22,7 +22,7 @@ public class Takarito extends Jatekos {
     public Takarito(int akcioPont, int penz) {
         super(akcioPont);
         this.penz = penz;
-        iranyitottHokotrok.add(new Hokotro("H_alap_" + alapHokotroSzamlalo++, null, new SoproFej(0)));
+        //iranyitottHokotrok.add(new Hokotro("H_alap_" + alapHokotroSzamlalo++, null, new SoproFej(0)));
     }
     
     public Takarito(int akcioPont) {
