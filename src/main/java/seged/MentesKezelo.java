@@ -233,10 +233,32 @@ public class MentesKezelo {
      * Kiszámolja a szakasz és a sáv 1-es alapú indexét.
      */
     private static void kiirLokacio(PrintWriter writer, String tagName, Lokacio lok, String behuzas) {
-        if (lok != null && lok.getUt() != null && lok.getSzakasz() != null && lok.getSav() != null) {
-            int szakaszIdx = lok.getUt().getSzakaszok().indexOf(lok.getSzakasz()) + 1;
-            int savIdx = lok.getSzakasz().indexOf(lok.getSav()) + 1;
-            writer.printf("%s<%s ut=\"%s\" szakasz=\"%d\" sav=\"%d\" />\n", behuzas, tagName, lok.getUt().getNev(), szakaszIdx, savIdx);
+        if (lok != null && lok.getUt() != null && lok.getSav() != null) {
+            Ut ut = lok.getUt();
+            Sav keresettSav = lok.getSav();
+            int szakaszIdx = -1;
+            int savIdx = -1;
+
+            // ROBUSZTUS KERESÉS: Végignézzük az egész utat objektum szinten
+            List<List<Sav>> szakaszok = ut.getSzakaszok();
+            for (int i = 0; i < szakaszok.size(); i++) {
+                List<Sav> sávok = szakaszok.get(i);
+                for (int j = 0; j < sávok.size(); j++) {
+                    // Ha megvan a pontos sáv objektum a memóriában
+                    if (sávok.get(j) == keresettSav) { 
+                        szakaszIdx = i + 1;
+                        savIdx = j + 1;
+                        break;
+                    }
+                }
+                if (szakaszIdx != -1) break;
+            }
+
+            if (szakaszIdx != -1 && savIdx != -1) {
+                writer.printf("%s<%s ut=\"%s\" szakasz=\"%d\" sav=\"%d\" />\n", behuzas, tagName, ut.getNev(), szakaszIdx, savIdx);
+            } else {
+                System.out.println(">>> [HIBA] Jármű pozíciójának kiírása sikertelen: Nem található a sáv az úton!");
+            }
         }
     }
 }

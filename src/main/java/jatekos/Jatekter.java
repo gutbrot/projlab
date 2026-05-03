@@ -287,6 +287,7 @@ public class Jatekter {
         kiirSoronLevo(aktivJatekos);
 
         while (true) {
+            alapertelmezettJarmuBeallitasa(aktivJatekos);
             // Kimenet prompttal, hogy lássuk, ki a soron következő játékos
             System.out.print("[" + aktivJatekos.getNev() + "] > ");
             // Bemenet olvasása a konzolról
@@ -364,6 +365,7 @@ public class Jatekter {
                     jatekosok.get(aktualisJatekosIndex).forduloVege(aktivJatekos);
                     aktualisJatekosIndex = 0;
                     aktivJatekos = jatekosok.get(aktualisJatekosIndex);
+                    alapertelmezettJarmuBeallitasa(aktivJatekos);
                     System.out.println("SIKERES");
                     kiirSoronLevo(aktivJatekos);
                     break;

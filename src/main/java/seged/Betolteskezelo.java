@@ -167,9 +167,8 @@ public class Betolteskezelo {
         try {
             String utNev = el.getAttribute("ut");
             int szakaszIdx = Integer.parseInt(el.getAttribute("szakasz")) - 1;
-            
-            // VISSZAÁLLÍTVA AZ EREDETI LOGIKÁDRA:
-            int savIdx = Math.abs(Integer.parseInt(el.getAttribute("sav"))) - 1;
+            // CSAK SIMA KIVONÁS, MERT A JAVA 0-TÓL INDEXEL:
+            int savIdx = Integer.parseInt(el.getAttribute("sav")) - 1;
 
             for (Ut ut : terkep.getTeljesHalozat()) {
                 if (ut.getNev().equals(utNev)) {
@@ -181,9 +180,7 @@ public class Betolteskezelo {
                     }
                 }
             }
-        } catch (Exception e) {
-            return null;
-        }
+        } catch (Exception e) { return null; }
         return null;
     }
 }
