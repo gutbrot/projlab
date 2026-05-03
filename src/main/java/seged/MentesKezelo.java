@@ -11,7 +11,7 @@ import java.util.List;
 
 public class MentesKezelo {
 
-    public static void allapototMent(Jatekter jatekter, String fajlNev) {
+    public static boolean allapototMent(Jatekter jatekter, String fajlNev) {
         try (PrintWriter writer = new PrintWriter(fajlNev, "UTF-8")) {
             writer.println("<Init>");
             writer.println("    <Jatekallapot korok=\"1\" />");
@@ -220,9 +220,11 @@ public class MentesKezelo {
             writer.println("</Init>");
             
             System.out.println(">>> [MENTÉS] A játékállapot sikeresen exportálva (Determinisztikus XML): " + fajlNev);
+            return true;
         } catch (Exception e) {
             System.out.println(">>> [HIBA] Nem sikerült menteni a fájlt: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
     }
 

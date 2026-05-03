@@ -1,0 +1,3 @@
+# Teszt9: Autó sikertelen mozgása
+korvege
+korvege

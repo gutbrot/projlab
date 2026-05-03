@@ -1,0 +1,6 @@
+# Teszt5: Az út havazás után nem járható
+korvege
+korvege
+korvege
+valaszt B2
+mozgas A2 2 1

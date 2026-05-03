@@ -1,0 +1,4 @@
+# Teszt4: Az út havazás után járható
+korvege
+korvege
+korvegemozgas S1 3 2

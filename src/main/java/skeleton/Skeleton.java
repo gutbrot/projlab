@@ -28,24 +28,27 @@ public class Skeleton {
 
         while (true) {
             System.out.println("\nFOMENU:");
-            System.out.println("1. Jatek mod");
-            System.out.println("2. Teszt mod");
-            System.out.println("3. Kilepes");
+            System.out.println("1. Uj jatek (Csak terkep betoltes, manualis setup)");
+            System.out.println("2. Jatek betoltese (Mentes beolvasasa jatekosokkal)");
+            System.out.println("3. Teszt mod");
+            System.out.println("4. Kilepes");
 
             System.out.print("Valassz egy opciot: ");
             String valasztas = scanner.nextLine();
 
             switch (valasztas.trim()) {
                 case "1":
-                    // Mielőtt belépnénk a setupba, be kell tölteni a térképet
                     if (terkepBetoltes()) {
                         jatekModMenu();
                     }
                     break;
                 case "2":
-                    tesztMod();
+                    jatekBetoltesMod(); // ÚJ METÓDUS HÍVÁSA
                     break;
                 case "3":
+                    tesztMod();
+                    break;
+                case "4":
                     System.out.println(">>> Kilepes...");
                     System.exit(0);
                     break;
@@ -73,6 +76,25 @@ public class Skeleton {
         // Beállítjuk a hókotróknak a globális térképet a bolti vásárláshoz is
         Hokotro.setGlobalTerkep(aktualisTerkep);
         return true;
+    }
+
+    private static void jatekBetoltesMod() {
+        System.out.print("Add meg a mentes fajlnevet (pl. teszt_terkep.xml): ");
+        String fajlNev = scanner.nextLine();
+        
+        // Létrehozunk egy üres játékteret egy üres térképpel (a betöltő majd felülírja)
+        Jatekter betoltottJatek = new Jatekter(new Terkep());
+        
+        if (betoltottJatek.betoltes(fajlNev)) {
+            // Beállítjuk a globális térképet a hókotróknak a bolt miatt
+            Hokotro.setGlobalTerkep(betoltottJatek.getTerkep());
+            
+            System.out.println("\n>>> Jatek inditasa a betoltott mentesbol...");
+            // Egyből indítjuk a parancssort a betöltött játékosokkal!
+            betoltottJatek.startCommandLoop(betoltottJatek.getJatekosok());
+        } else {
+            System.out.println(">>> Visszateres a fomenube.");
+        }
     }
 
     private static void jatekModMenu() {

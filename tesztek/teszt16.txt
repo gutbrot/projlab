@@ -1,0 +1,4 @@
+# Teszt16: Takarító nem tud fogyó anyagot vásárolni
+vasarlas BiokerozinCsomag
+0
+Vasarlas SarkanyFej

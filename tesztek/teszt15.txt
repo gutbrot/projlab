@@ -1,0 +1,2 @@
+# Teszt15: Takarító fogyó anyagot vásárol
+vasarlas BiokerozinCsomag

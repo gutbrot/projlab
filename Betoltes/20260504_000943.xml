@@ -1,0 +1,76 @@
+<Init>
+    <Jatekallapot korok="1" />
+
+    <Terkep>
+        <Ut tipus="alagut" nev="A1" hossz="2" pozsav="2" negsav="0">
+            <Elagazodas>
+                <Szomszed nev="S1" irany="-1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="hid" nev="H1" hossz="2" pozsav="2" negsav="0">
+            <Elagazodas>
+                <Szomszed nev="S1" irany="-1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="sima" nev="S1" hossz="5" pozsav="4" negsav="0">
+            <Elagazodas>
+                <Szomszed nev="H1" irany="1" />
+                <Szomszed nev="A1" irany="1" />
+            </Elagazodas>
+        </Ut>
+    </Terkep>
+
+    <!-- alapbol minden utszakasz 0 0 0 0 -->
+    <Utviszonyok>
+        <!-- H1 -->
+        <Sav>
+            <Lokacio ut="H1" szakasz="2" sav="1" />
+            <Allapot athaladokszama="0" ho="25" so="0" zuzalek="0" />
+        </Sav>
+        <!-- S1 -->
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="1" />
+            <Allapot athaladokszama="5" ho="30" so="0" zuzalek="0" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="2" />
+            <Allapot athaladokszama="2" ho="100" so="0" zuzalek="0" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="3" />
+            <Allapot athaladokszama="2" ho="100" so="0" zuzalek="0" />
+        </Sav>
+    </Utviszonyok>
+
+    <Jarmuvek>
+        <Hokotrok>
+            <Hokotro nev="H_alap_1">
+                <Eszkoztar>
+                    <!-- 0=nincs ilyen 1=van ilyen 2=felszerelt -->
+                    <Kotrofejek sopro="2" hanyo="0" sarkany="0" jegtoro="0" soszoro="0" zuzott="0" />
+                    <Fogyoanyagok so="0" biokerozin="0" zuzalek="0" />
+                </Eszkoztar>
+             </Hokotro>
+            <Hokotro nev="Hokotro_1">
+                <Lokacio ut="H1" szakasz="1" sav="1" />
+                <Eszkoztar>
+                    <!-- 0=nincs ilyen 1=van ilyen 2=felszerelt -->
+                    <Kotrofejek sopro="0" hanyo="0" sarkany="0" jegtoro="0" soszoro="0" zuzott="0" />
+                    <Fogyoanyagok so="0" biokerozin="0" zuzalek="0" />
+                </Eszkoztar>
+             </Hokotro>
+        </Hokotrok>
+    </Jarmuvek>
+    <Jatekosok>
+        <Takaritok>
+            <Takarito id="Hugo" akcio="0" penz="100">
+                <Hokotro id="H_alap_1" />
+                <Hokotro id="Hokotro_1" />
+            </Takarito>
+        </Takaritok>
+        <Buszvezetok>
+            <Buszvezeto id="Gerzson" akcio="3" pont="0">
+            </Buszvezeto>
+        </Buszvezetok>
+    </Jatekosok>
+</Init>
