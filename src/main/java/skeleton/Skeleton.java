@@ -10,6 +10,7 @@ import jatekos.Takarito;
 import jatekos.Jatekos;
 import jatekos.Jatekter;
 import terkep.Terkep;
+import terkep.TerkepLoader;
 
 public class Skeleton {
 
@@ -69,6 +70,7 @@ public class Skeleton {
                     
                     Takarito takarito = new Takarito(3);
 
+                    // TODO: lokaciot hozzaadni a takaritohoz, hogy a jatekterben megjelenhessen
                     Hokotro hokotro = new Hokotro("Hokotro_" + (tempTakaritok.size()+1), null, null);
 
                     takarito.hozzaadHokotro(hokotro);
@@ -100,9 +102,14 @@ public class Skeleton {
     }
 
     private static void startJatekLoop() {
-        System.out.println("\n>>> Jatek inicializalasa...");
+        System.out.print("Add meg a terkep fajlnevet (pl. terkep.xml): ");
+        String fajlNev = scanner.nextLine();
         
-        Terkep terkep = new Terkep();
+        Terkep terkep = TerkepLoader.betolt(fajlNev);
+        if (terkep.getTeljesHalozat().isEmpty()) {
+            System.out.println(">>> Hiba: Üres térkép, a játék nem indulhat el!");
+            return;
+        }
         Jatekter jatekter = new Jatekter(terkep);
 
         List<Jatekos> sorrend = new ArrayList<>();
