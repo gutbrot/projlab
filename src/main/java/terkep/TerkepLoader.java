@@ -13,11 +13,12 @@ import java.util.Map;
 public class TerkepLoader {
 
     public static Terkep betolt(String fajlNev) {
+        String eleresiUt = "Betoltes/" + fajlNev;
         Terkep terkep = new Terkep();
         Map<String, Ut> utMap = new HashMap<>();
 
         try {
-            File xmlFile = new File(fajlNev);
+            File xmlFile = new File(eleresiUt);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
