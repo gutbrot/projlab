@@ -1,14 +1,13 @@
 package seged;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import terkep.Lokacio;
 
+/**
+ * A Navigacio osztály felelős a legrövidebb útkereső algoritmus futtatásáért.
+ */
 public class Navigacio {
-    public List<Lokacio> legrovidebbUt(Lokacio hova) {
-        List<Lokacio> eredmeny = new ArrayList<>();
-        if (hova != null) eredmeny.add(hova);
-        return eredmeny;
+
+    public void legrovidebbUt(Lokacio hova) {
+        System.out.println(">>> [NAVIGÁCIÓ] Útvonal tervezése a célállomás felé...");
     }
 }

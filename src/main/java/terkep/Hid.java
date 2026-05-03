@@ -1,14 +1,24 @@
 package terkep;
 
+import java.util.List;
+
+/**
+ * A Hid osztály az Ut egy speciális típusa.
+ */
 public class Hid extends Ut {
-    public Hid(String nev, int hossz, int savokSzama) { super(nev, hossz, savokSzama); }
+    
+    public Hid(String nev, int hossz, int savokSzama) { 
+        super(nev, hossz, savokSzama); 
+    }
 
     @Override
     public void havazik(int h) {
-        for (var szakasz : szakaszok) {
-            for (var sav : szakasz) {
-                sav.setHo(sav.getHo() + h);
+        for (List<Sav> szakasz : szakaszok) {
+            for (Sav sav : szakasz) {
+                int jelenlegiHo = sav.getHo();
+                sav.setHo(jelenlegiHo + h);
             }
         }
+        System.out.println("    >>> [IDŐJÁRÁS] " + nev + " (Híd): Havazás történt (+" + h + " cm minden sávban). Fokozott fagyásveszély!");
     }
 }
