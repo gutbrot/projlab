@@ -12,44 +12,44 @@ import bolt.Bolt;
  * A Takarito osztály felelős a rendszerben lévő hókotrók irányításáért.
  */
 public class Takarito extends Jatekos {
-    
+
     private List<Hokotro> iranyitottHokotrok = new ArrayList<>();
     private int penz;
     private Eszkoztar eszkoztar = new Eszkoztar();
     private Scanner scanner = new Scanner(System.in);
+    private static int alapHokotroSzamlalo = 1;
 
     public Takarito(int akcioPont, int penz) {
         super(akcioPont);
         this.penz = penz;
+        iranyitottHokotrok.add(new Hokotro("H_alap_" + alapHokotroSzamlalo++, null, new SoproFej(0)));
     }
-
+    
     public Takarito(int akcioPont) {
         this(akcioPont, 100); // Alapértelmezett kezdőtőke
     }
 
     public Hokotro hokotrotValaszt() {
         if (iranyitottHokotrok.isEmpty()) {
-            System.out.println("    [KUDARC] Nincs irányítható hókotró a listában!");
+            System.out.println("    [KUDARC] Nincs iranyithato hokotro a listaban!");
             return null;
         }
 
-        System.out.println(">>> Elérhető hókotrók:");
+        System.out.println(">>> Elerheto hokotrok:");
         for (int i = 0; i < iranyitottHokotrok.size(); i++) {
             System.out.println("    [" + i + "] " + iranyitottHokotrok.get(i).getId());
         }
 
-        System.out.print("? Válasszon indexet: ");
+        System.out.print("? Valasszon indexet: ");
         try {
             int index = Integer.parseInt(scanner.nextLine());
             if (index >= 0 && index < iranyitottHokotrok.size()) {
-                Hokotro kivalasztott = iranyitottHokotrok.get(index);
-                akcioPontKezelo(); 
-                return kivalasztott;
+                return iranyitottHokotrok.get(index);
             }
         } catch (Exception e) {
-            System.out.println(">>> Érvénytelen választás.");
+            System.out.println(">>> Ervenytelen valasztas.");
         }
-        
+
         return null;
     }
 
@@ -59,28 +59,46 @@ public class Takarito extends Jatekos {
         }
     }
 
-    public void kotrofejValt(Hokotro h) {
-        if (getAkcioPont() > 0 && h != null) {
-            KotroFej ujFej = eszkoztar.kiveszFej();
-            if (ujFej != null) {
-                h.fejcsere(ujFej);
-                akcioPontKezelo();
-            }
+    public boolean kotrofejValt(Hokotro h, String fejNev) {
+        if (getAkcioPont() <= 0) {
+            return false;
         }
+
+        if (h == null || fejNev == null) {
+            return false;
+        }
+
+        if (!iranyitottHokotrok.contains(h)) {
+            return false;
+        }
+
+        KotroFej ujFej = eszkoztar.kiveszFej(fejNev);
+
+        if (ujFej == null) {
+            return false;
+        }
+
+        KotroFej regiFej = h.getFelszereltFej();
+        if (regiFej != null) {
+            eszkoztar.hozzaadFej(regiFej);
+        }
+
+        h.fejcsere(ujFej);
+        akcioPontKezelo();
+
+        return true;
     }
 
     public void vasarol(Bolt bolt, String termekNev) {
         if (getAkcioPont() > 0 && bolt != null) {
             boolean siker = bolt.vasarlas(this, termekNev);
-            if (siker) {
-                akcioPontKezelo();
-            }
+            if (siker) { akcioPontKezelo(); }
         }
     }
 
     public void penztKap(int p) {
         this.penz += p;
-        System.out.println(">>> [FIZETÉS] A takarító " + p + " pénzt kapott! (Összesen: " + this.penz + ")");
+        System.out.println(">>> [FIZETES] A takaríto " + p + " penzt kapott! (Osszesen: " + this.penz + ")");
     }
     
     public void penztLevon(int osszeg) {

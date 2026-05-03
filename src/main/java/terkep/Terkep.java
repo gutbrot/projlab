@@ -3,6 +3,8 @@ package terkep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
 import jarmu.Jarmu;
 
 /**
@@ -37,5 +39,24 @@ public class Terkep {
 
     public List<Ut> getTeljesHalozat() {
         return Collections.unmodifiableList(utak);
+    }
+
+    public Lokacio getRandomLokacio() {
+        if (utak.isEmpty()) return null;
+
+        Random rand = new Random();
+        // 1. Választunk egy véletlen utat
+        Ut randomUt = utak.get(rand.nextInt(utak.size()));
+        
+        // 2. Választunk az úton belül egy véletlen szakaszt
+        List<List<Sav>> szakaszok = randomUt.getSzakaszok();
+        int szakaszIdx = rand.nextInt(szakaszok.size());
+        List<Sav> randomSzakasz = szakaszok.get(szakaszIdx);
+        
+        // 3. Választunk a szakaszon belül egy véletlen sávot
+        Sav randomSav = randomSzakasz.get(rand.nextInt(randomSzakasz.size()));
+
+        // Létrehozzuk a lokációt (feltételezve a Lokacio konstruktorát)
+        return new Lokacio(randomUt, randomSzakasz, randomSav);
     }
 }

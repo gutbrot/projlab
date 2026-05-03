@@ -13,19 +13,26 @@ import kotrofej.*;
 
 public class Jatekter {
     
+    // A játékosok listája, amelyben a játékban résztvevő összes játékos szerepel.
     private List<Jatekos> jatekosok = new ArrayList<>();
+    // A járművek listája, amelyben a játékban résztvevő összes jármű szerepel.
     private List<Jarmu> jarmuvek = new ArrayList<>();
+    // A térkép, amelyen a játék zajlik.
     private Terkep terkep;
+    // Az aktuális játékos indexe a jatekosok listájában, amely meghatározza, hogy ki a soron következő játékos.
     private int aktualisJatekosIndex = 0;
     private Scanner scanner = new Scanner(System.in);
     
+    // A bolt, amelyből a takarító játékosok vásárolhatnak eszközöket és járműveket.
     private Bolt bolt = new Bolt();
     private Jarmu aktivJarmu = null;
 
+    // Konstruktor, amely inicializálja a játéktér térképét.
     public Jatekter(Terkep terkep) {
         this.terkep = terkep;
     }
 
+    // Játékos hozzáadása a játéktérhez, amely egyben összeköti a játékost a játéktérrel is.
     public void hozzaadJatekos(Jatekos j) { 
         if (j != null) {
             jatekosok.add(j); 
@@ -33,6 +40,7 @@ public class Jatekter {
         }
     }
 
+    // Jármű hozzáadása a játéktérhez.
     public void hozzaadJarmu(Jarmu j) { 
         if (j != null) jarmuvek.add(j); 
     }
@@ -107,17 +115,65 @@ public class Jatekter {
     private void kiirSoronLevo(Jatekos jatekos) {
         String tipus = (jatekos instanceof Takarito) ? "Takarító" : "Buszvezető";
         System.out.println("-------------------------------------");
-        System.out.println(">>> Következő játékos: " + tipus + " (AP: " + jatekos.getAkcioPont() + ")");
+        System.out.println(">>> Következő játékos: " + jatekos.getNev() + " - " + tipus + " (AP: " + jatekos.getAkcioPont() + ")");
+    }
+
+    private void alapertelmezettJarmuBeallitasa(Jatekos jatekos) {
+        aktivJarmu = null;
+
+        if (jatekos instanceof Takarito) {
+            Takarito t = (Takarito) jatekos;
+
+            if (!t.getIranyitottHokotrok().isEmpty()) {
+                aktivJarmu = t.getIranyitottHokotrok().get(0);
+                System.out.println(">>> Alapértelmezett hókotró kiválasztva: " + ((Hokotro) aktivJarmu).getId());
+            }
+        } else if (jatekos instanceof Buszvezeto) {
+            Buszvezeto bv = (Buszvezeto) jatekos;
+
+            if (!bv.getIranyithatoBuszok().isEmpty()) {
+                aktivJarmu = bv.getIranyithatoBuszok().get(0);
+                System.out.println(">>> Alapértelmezett busz kiválasztva: " + ((Busz) aktivJarmu).getId());
+            }
+        }
+    }
+
+    // Ez a metódus felelős annak ellenőrzéséért, hogy a soron lévő játékosnak van-e még akciópontja.
+    // Ha nincs, akkor automatikusan átadja a körét a következő játékosnak.
+    private Jatekos leptetHaNincsAkcioPont(Jatekos aktivJatekos) {
+        if (aktivJatekos.getAkcioPont() > 0) {
+            return aktivJatekos;
+        }
+
+        System.out.println(">>> " + aktivJatekos.getNev() + " befejezte a körét.");
+
+        aktivJarmu = null;
+
+        aktualisJatekosIndex++;
+
+        // Ha az aktuális játékos indexe meghaladja a játékosok számát, akkor új kört kezdünk, és visszaállítjuk az indexet.
+        if (aktualisJatekosIndex >= jatekosok.size()) {
+            ujKor();
+            aktualisJatekosIndex = 0;
+        }
+
+        Jatekos ujAktivJatekos = jatekosok.get(aktualisJatekosIndex);
+        kiirSoronLevo(ujAktivJatekos);
+
+        return ujAktivJatekos;
     }
 
     // Új kör kezdése: időjárás frissítése, járművek és játékosok körének indítása, AP-k visszaállítása
     public void ujKor() {
+        // Időjárás frissítése a térképen
         if (terkep != null) terkep.idojarasFrissites();
         
+        // Minden jármű új körének indítása
         for (Jarmu j : jarmuvek) {
             j.ujKor();
         }
 
+        // Minden játékos AP-jának visszaállítása
         for (Jatekos j : jatekosok) {
             if (j instanceof Takarito) j.setAkcioPont(3);
             else j.setAkcioPont(3); 
@@ -186,13 +242,15 @@ public class Jatekter {
         System.out.println("--- ELÉRHETŐ PARANCSOK ---");
         System.out.println("betoltes <FajlNev> - Játékállapot beolvasása");
         System.out.println("mentes [IdoBelyeg] - Játékállapot mentése");
-        System.out.println("korVege - Aktuális kör lezárása");
+        System.out.println("korvege - Aktuális kör lezárása");
+        System.out.println("fordulovege - Aktuális forduló lezárása");
         System.out.println("teszt - Tesztelő módba váltás");
         System.out.println("jatek <Pálya> <Tak> <Busz> <Auto> [RandomKi] - Új játék");
-        System.out.println("valaszt <ID> - Jármű vagy Kotrófej kiválasztása");
+        System.out.println("valaszt [ID] - Jarmu kivalasztasa / listazas");
+        System.out.println("fejcsere [ID] - Kotrofej felszerelese / listazas (csak Takarito)");
         System.out.println("mozgas [SavID] - Mozgás / Elérhető sávok listázása");
         System.out.println("vasarlas [TermekID] - Vásárlás (csak Takarító) / Kínálat listázása");
-        System.out.println("allomas [BuszID] - Végállomások listázása (csak Buszvezető)");
+        System.out.println("allomas [BuszID] - Végállomások listázása (csak Buszvezeto)");
         System.out.println("segitseg - Ezen menü megnyitása");
     }
 
@@ -210,21 +268,31 @@ public class Jatekter {
 
         // Ha nincs játékos, nem tudunk elindítani egyetlen kört sem
         if (jatekosok.isEmpty()) return;
+
         // Kezdjük a játékot az első játékossal
         Jatekos aktivJatekos = jatekosok.get(aktualisJatekosIndex);
         System.out.println("\n>>> Jatek elindult!");
+
+        // Alapértelmezett jármű beállítása az aktív játékosnak
+        alapertelmezettJarmuBeallitasa(aktivJatekos);
         // Kiírjuk az első játékos típusát és akciópontjait
         kiirSoronLevo(aktivJatekos);
 
         while (true) {
-            System.out.print("> ");
+            // Kimenet prompttal, hogy lássuk, ki a soron következő játékos
+            System.out.print("[" + aktivJatekos.getNev() + "] > ");
+            // Bemenet olvasása a konzolról
             String bemenet = scanner.nextLine();
+            // Ha a bemenet üres vagy csak szóköz, akkor újra kérjük a parancsot
             if (bemenet == null || bemenet.trim().isEmpty()) continue;
 
+            // A bemenetet szóközök mentén daraboljuk, az első darab lesz a parancs, a többi pedig a paraméterek
             String[] darabok = bemenet.trim().split("\\s+");
             String parancs = darabok[0].toLowerCase();
 
+            // A parancs alapján meghívjuk a megfelelő metódust, vagy végrehajtjuk a logikát
             switch (parancs) {
+
                 //A tesztelés funkcióhoz szükséges, nem indít játékot, csak teszteteket lehet rajta futtatni.
                 case "betoltes":
                     // A dokumentáció szerint kötelező paraméter a <FajlNev>
@@ -261,13 +329,38 @@ public class Jatekter {
 
                 // A körvége parancs lezárja az aktuális játékos körét, és a következő játékosra vált
                 case "korvege":
-                    jatekosok.get(aktualisJatekosIndex).korVege(aktivJatekos);
+                    // 1. Az aktuális játékos lezárja a saját fordulóját (AP nullázás)
+                    aktivJatekos.korVege();
+                    aktivJarmu = null; // Elengedjük a kiválasztott jármű fókuszát
+                    
+                    // 2. Léptetjük az indexet a Játéktéren a KÖVETKEZŐ játékosra
+                    aktualisJatekosIndex++;
+                    
+                    // 3. Ellenőrizzük, hogy mindenki lépett-e már (GLOBÁLIS KÖR VÉGE)
+                    if (aktualisJatekosIndex >= jatekosok.size()) {
+                        ujKor(); // Meghívja az időjárást, levonja a mozgásképtelenséget és frissíti az AP-kat
+                        aktualisJatekosIndex = 0; // Visszaugrunk az első játékosra
+                    }
+                    
+                    // 4. Átváltunk az új soron lévő játékosra, és kiírjuk az adatait
+                    aktivJatekos = jatekosok.get(aktualisJatekosIndex);
+                    // Alapértelmezett jármű beállítása az új játékosnak
+                    alapertelmezettJarmuBeallitasa(aktivJatekos);
+
+                    System.out.println("SIKERES");
+                    kiirSoronLevo(aktivJatekos);
+                    break;
+
+                // A fordulóvége parancs lezárja az aktuális játékos teljes fordulóját, és visszaállítja a sorrendet a nulladik játékosra
+                case "fordulovege":
+                    jatekosok.get(aktualisJatekosIndex).forduloVege(aktivJatekos);
+                    aktualisJatekosIndex = 0;
                     aktivJatekos = jatekosok.get(aktualisJatekosIndex);
                     System.out.println("SIKERES");
                     kiirSoronLevo(aktivJatekos);
                     break;
 
-                case "teszt":                                                       //EZT MÉG MEG KELL CSINÁLNI
+                case "teszt":                                                       //Todo: EZT MÉG MEG KELL CSINÁLNI
                     System.out.println(">>> Tesztelő mód aktiválva.");
                     System.out.println("SIKERES");
                     break;
@@ -310,29 +403,104 @@ public class Jatekter {
                     System.out.println("SIKERES");
                     break;
 
+                // A választ parancs lehetővé teszi a játékos számára, hogy kiválassza a fókuszban lévő járművet vagy kotrófejet az ID alapján.
                 case "valaszt":
-                    if (darabok.length < 2) {
-                        System.out.println("HIBAS");
-                    } else {
-                        boolean talalt = false;
-                        for (Jarmu j : jarmuvek) {
-                            if (j instanceof Hokotro && ((Hokotro)j).getId().equals(darabok[1])) {
-                                aktivJarmu = j;
-                                talalt = true;
-                                break;
-                            } else if (j instanceof Busz && ((Busz)j).getId().equals(darabok[1])) {
-                                aktivJarmu = j;
-                                talalt = true;
-                                break;
+                    if (darabok.length == 1) {
+                        if (aktivJatekos instanceof Takarito) {
+                            Takarito t = (Takarito) aktivJatekos;
+                            List<Hokotro> hokotrok = t.getIranyitottHokotrok();
+                            if (hokotrok.isEmpty()) {
+                                System.out.println(">>> Nincs elérhető hókotró.");
+                            } else {
+                                System.out.println(">>> Elérhető hókotrók:");
+                                for (Hokotro h : hokotrok) {
+                                    System.out.println("    - " + h.getId());
+                                }
+                            }
+                        } else if (aktivJatekos instanceof Buszvezeto) {
+                            Buszvezeto bv = (Buszvezeto) aktivJatekos;
+                            List<Busz> buszok = bv.getIranyithatoBuszok();
+                            if (buszok.isEmpty()) {
+                                System.out.println(">>> Nincs elérhető busz.");
+                            } else {
+                                System.out.println(">>> Elérhető buszok:");
+                                for (Busz b : buszok) {
+                                    System.out.println("    - " + b.getId());
+                                }
                             }
                         }
+                        System.out.println("SIKERES");
+                    } else {
+                        boolean talalt = false;
+                        String keresettId = darabok[1];
+
+                        if (aktivJatekos instanceof Takarito) {
+                            Takarito t = (Takarito) aktivJatekos;
+
+                            for (Hokotro h : t.getIranyitottHokotrok()) {
+                                if (h.getId().equals(keresettId)) {
+                                    aktivJarmu = h;
+                                    talalt = true;
+                                    break;
+                                }
+                            }
+                        } else if (aktivJatekos instanceof Buszvezeto) {
+                            Buszvezeto bv = (Buszvezeto) aktivJatekos;
+
+                            for (Busz b : bv.getIranyithatoBuszok()) {
+                                if (b.getId().equals(keresettId)) {
+                                    aktivJarmu = b;
+                                    talalt = true;
+                                    break;
+                                }
+                            }
+                        }
+
                         if (talalt) {
-                            System.out.println(">>> Jármű kiválasztva: " + darabok[1]);
+                            System.out.println(">>> Jarmu kiválasztva: " + keresettId);
                             System.out.println("SIKERES");
                         } else {
                             System.out.println("HIBAS");
                         }
                     }
+                    break;
+
+                case "fejcsere":
+                    if (!(aktivJatekos instanceof Takarito)) {
+                        System.out.println("ROSSZ JATEKOS");
+                        break;
+                    }
+
+                    Takarito tak = (Takarito) aktivJatekos;
+
+                    // Paraméter nélkül listázza a saját eszköztárban lévő kotrófejeket
+                    if (darabok.length == 1) {
+                        tak.getEszkoztar().listazKotroFejek();
+                        System.out.println("SIKERES");
+                        break;
+                    }
+
+                    if (darabok.length < 2) {
+                        System.out.println("HIBAS");
+                        break;
+                    }
+
+                    // Kell hozzá egy kiválasztott hókotró
+                    if (!(aktivJarmu instanceof Hokotro)) {
+                        System.out.println("HIBAS");
+                        break;
+                    }
+
+                    Hokotro kivalasztottHokotro = (Hokotro) aktivJarmu;
+                    String fejNev = darabok[1];
+
+                    if (tak.kotrofejValt(kivalasztottHokotro, fejNev)) {
+                        System.out.println("SIKERES");
+                        aktivJatekos = leptetHaNincsAkcioPont(aktivJatekos);
+                    } else {
+                        System.out.println("HIBAS");
+                    }
+
                     break;
 
                 case "mozgas":
@@ -356,8 +524,9 @@ public class Jatekter {
                                 
                                 boolean siker = aktivJarmu.mozgas(celSav);
                                 if (siker) {
-                                    aktivJatekos.akcioPontKezelo(); // AP levonása
+                                    aktivJatekos.akcioPontKezelo();
                                     System.out.println("SIKERES");
+                                    aktivJatekos = leptetHaNincsAkcioPont(aktivJatekos);
                                 } else {
                                     System.out.println("HIBAS");
                                 }
@@ -368,6 +537,7 @@ public class Jatekter {
                     }
                     break;
 
+                // A vásárlás parancs lehetővé teszi a takarító játékos számára, hogy megvásároljon egy terméket a boltból, vagy listázza a kínálatot.
                 case "vasarlas":
                     // Ha nem takarító próbál vásárolni, az mindig hibás
                     if (!(aktivJatekos instanceof Takarito)) {
@@ -382,15 +552,17 @@ public class Jatekter {
                         } 
                         // Ha terméknevet is megadtak, megpróbáljuk megvásárolni azt a terméket
                         else {
-                            boolean siker = bolt.vasarlas(t, darabok[1]);
-                            // Ha a vásárlás sikeres volt, levonjuk az Akciópontokat és kiírjuk a sikeres üzenetet
-                            if (siker) {
-                                t.akcioPontKezelo();
-                                System.out.println("SIKERES");
-                            } 
-                            // Ha a vásárlás nem sikerült (pl. nincs elég pénz vagy a termék nem létezik), akkor hibás üzenetet írunk ki
-                            else {
+                            if (t.getAkcioPont() <= 0) {
                                 System.out.println("HIBAS");
+                            } else {
+                                boolean siker = bolt.vasarlas(t, darabok[1]);
+                                if (siker) {
+                                    t.akcioPontKezelo();
+                                    System.out.println("SIKERES");
+                                    aktivJatekos = leptetHaNincsAkcioPont(aktivJatekos);
+                                } else {
+                                    System.out.println("HIBAS");
+                                }
                             }
                         }
                     }
