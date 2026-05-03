@@ -161,7 +161,45 @@ public class Skeleton {
     }
 
     private static void tesztMod() {
-        System.out.println(">>> Teszt mod inicializalasa...");
-        System.out.println(">>> (Ide jon majd az XML parancsfajlok beolvasasa)");
+        System.out.println("\n>>> Teszt mod inicializalasa...");
+        System.out.println(">>> A 'teszt_terkep.xml' beolvasasanak ellenorzese...");
+    
+        // 1. Játéktér és térkép létrehozása a beolvasáshoz
+        Terkep tesztTerkep = new Terkep();
+        Jatekter tesztJatekter = new Jatekter(tesztTerkep);
+    
+        // 2. Automatikus beolvasás megkísérlése rögtön a belépéskor
+        boolean betoltesSikeres = tesztJatekter.betoltes("teszt_terkep.xml");
+    
+        // 3. Eredmény kiírása
+        if (betoltesSikeres) {
+            System.out.println(">>> [SIKER] A teszt_terkep.xml helyesen beolvasodott!");
+        } else {
+            System.out.println(">>> [HIBA] A teszt_terkep.xml beolvasasa sikertelen!");
+        }
+
+        // 4. Teszt menü indítása
+        while (true) {
+            System.out.println("\n--- TESZT MOD MENU ---");
+            System.out.println("1. Sikeres vásárlás tesztelése");
+            System.out.println("2. Fedezethiányos vásárlás");
+            System.out.println("3. Hókotró takarítás (Söprőfej)");
+            System.out.println("4. Busz mozgás és ütközés");
+            System.out.println("5. Globális körváltás és hóesés");
+            System.out.println("6. Vissza a főmenübe");
+
+            System.out.print("Válassz egy tesztet: ");
+            String valasztas = scanner.nextLine();
+
+            switch (valasztas.trim()) {
+                case "1": TesztKornyezet.Test2(); break;
+                case "2": TesztKornyezet.Test3(); break;
+                case "3": TesztKornyezet.Test4(); break;
+                case "4": TesztKornyezet.Test6(); break;
+                case "5": TesztKornyezet.Test7(); break;
+                case "6": return; // Kilépés a főmenübe
+                default: System.out.println(">>> Érvénytelen opció!");
+            }
+        }
     }
 }

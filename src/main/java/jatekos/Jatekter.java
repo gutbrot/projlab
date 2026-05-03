@@ -11,6 +11,13 @@ import terkep.*;
 import bolt.*;
 import kotrofej.*;
 
+import org.w3c.dom.*;
+import javax.xml.parsers.*;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Jatekter {
     
     // A játékosok listája, amelyben a játékban résztvevő összes játékos szerepel.
@@ -45,41 +52,106 @@ public class Jatekter {
         if (j != null) jarmuvek.add(j); 
     }
 
-    /*
-    * Egy elmentett játék állapot beolvasásának parancsa
-    * Alapértelmezetten sikertelen, és csak akkor válik sikeressé, ha a fájl létezik.
-    * 
-    * @param fajlNev A beolvasni kívánt fájl neve
-    * @return True, ha a fájl létezik és a betöltés elindulhat, különben false.
-    */
     public boolean betoltes(String fajlNev) {
-        // A siker értékét alapból false-ra állítjuk.
-        boolean siker = false;
+    String eleresiUt = "Betoltes/" + fajlNev;
+    File mentesFajl = new File(eleresiUt);
 
-        // Meghatározzuk az elérési utat a Betoltes mappán belül
-        String eleresiUt = "Betoltes/" + fajlNev;
-        File mentesFajl = new File(eleresiUt);
+    if (!mentesFajl.exists()) {
+        System.out.println(">>> [HIBA] A fájl nem létezik: " + eleresiUt);
+        return false;
+    }
 
-        // Ellenőrizzük, hogy a fájl létezik-e
-        if (mentesFajl.exists()) {
-            // Ha létezik, a siker értékét true-ra állítjuk
-            siker = true;
-        
-            System.out.println(">>> [SIKER] A(z) '" + fajlNev + "' fájl megtalálható, betöltés folyamatban...");
-        
-            // Itt hívódik meg a tényleges XML feldolgozás a jövőben
-        
-        
-            // Sikeres beolvasás után kiírja a játék állapotát a megfelelő formátumban
-            System.out.println(">>> [ÁLLAPOT] Játék adatai betöltve a(z) " + eleresiUt + " helyről.");
-        } else {
-            // Ha nem létezik, értesítjük a felhasználót
-            System.out.println(">>> [HIBA] A megadott fájl nem létezik a Betoltes mappában: " + eleresiUt);
+    try {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(mentesFajl);
+        doc.getDocumentElement().normalize();
+
+        // 1. Térkép betöltése a már meglévő Loaderrel
+        this.terkep = TerkepLoader.betolt(eleresiUt);
+        if (this.terkep == null) return false;
+
+        // Segéd-map a járműveknek az azonosításhoz (játékosok összekötéséhez)
+        Map<String, Jarmu> betoltottJarmuvek = new HashMap<>();
+
+        // 2. Hókotrók betöltése
+        NodeList hokotroNodes = doc.getElementsByTagName("Hokotro");
+        for (int i = 0; i < hokotroNodes.getLength(); i++) {
+            Element e = (Element) hokotroNodes.item(i);
+            String id = e.getAttribute("nev");
+            Element lok = (Element) e.getElementsByTagName("Lokacio").item(0);
+            
+            // Lokáció lekérése (Saját segédmetódussal, lásd lentebb)
+            Lokacio pos = parseLokacio(lok);
+            Hokotro h = new Hokotro(id, null, null); // Üresen hozzuk létre
+            h.setPozicio(pos);
+            if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
+            
+            this.hozzaadJarmu(h);
+            betoltottJarmuvek.put(id, h);
         }
 
-        // Visszatérünk a siker értékével
-        return siker;
+        // 3. Buszok betöltése
+        NodeList buszNodes = doc.getElementsByTagName("Busz");
+        for (int i = 0; i < buszNodes.getLength(); i++) {
+            Element e = (Element) buszNodes.item(i);
+            String id = e.getAttribute("nev");
+            Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0));
+            
+            Busz b = new Busz(id, pos, null, null);
+            if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
+            
+            this.hozzaadJarmu(b);
+            betoltottJarmuvek.put(id, b);
+        }
+
+        // 4. Játékosok betöltése (Takarítók és Buszvezetők)
+        NodeList takaritoNodes = doc.getElementsByTagName("Takarito");
+        for (int i = 0; i < takaritoNodes.getLength(); i++) {
+            Element e = (Element) takaritoNodes.item(i);
+            Takarito t = new Takarito(Integer.parseInt(e.getAttribute("akcio")), 
+                                     Integer.parseInt(e.getAttribute("penz")));
+            t.setNev(e.getAttribute("id"));
+            
+            // Hozzárendelt hókotrók összekötése
+            NodeList jarmuRefs = e.getElementsByTagName("Hokotro");
+            for (int j = 0; j < jarmuRefs.getLength(); j++) {
+                String refId = ((Element)jarmuRefs.item(j)).getAttribute("id");
+                if (betoltottJarmuvek.containsKey(refId)) {
+                    t.hozzaadHokotro((Hokotro) betoltottJarmuvek.get(refId));
+                }
+            }
+            this.hozzaadJatekos(t);
+        }
+
+        System.out.println(">>> [SIKER] Teljes játékállapot betöltve.");
+        return true;
+
+    } catch (Exception e) {
+        System.out.println(">>> [HIBA] Betöltési hiba: " + e.getMessage());
+        return false;
     }
+}
+
+// Segédmetódus a Lokáció XML-ből való kiolvasásához
+private Lokacio parseLokacio(Element el) {
+    if (el == null) return null;
+    String utNev = el.getAttribute("ut");
+    int szakaszIdx = Integer.parseInt(el.getAttribute("szakasz")) - 1;
+    int savIdx = Math.abs(Integer.parseInt(el.getAttribute("sav"))) - 1; // Kezeli a negatív sávszámot is
+
+    for (Ut ut : terkep.getTeljesHalozat()) {
+        if (ut.getNev().equals(utNev)) {
+            if (szakaszIdx >= 0 && szakaszIdx < ut.getSzakaszok().size()) {
+                List<Sav> szakasz = ut.getSzakaszok().get(szakaszIdx);
+                if (savIdx >= 0 && savIdx < szakasz.size()) {
+                    return new Lokacio(ut, szakasz, szakasz.get(savIdx));
+                }
+            }
+        }
+    }
+    return null;
+}
 
     /**
      * Az aktuális játék állapotot menti egy szöveges (XML) fájlba.
@@ -235,6 +307,18 @@ public class Jatekter {
         kiirSoronLevo(this.jatekosok.get(this.aktualisJatekosIndex));
 
         return true;
+    }
+
+    public Terkep getTerkep() {
+        return this.terkep;
+    }
+
+    public java.util.List<jarmu.Jarmu> getJarmuvek() {                                  //Ha fölös törökjük
+        return this.jarmuvek;
+    }
+
+    public java.util.List<Jatekos> getJatekosok() {
+        return this.jatekosok;
     }
 
     // A segítség parancs kiírja a lehetséges parancsokat és azok használatát
