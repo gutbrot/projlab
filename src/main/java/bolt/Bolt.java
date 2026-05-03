@@ -49,20 +49,26 @@ public class Bolt {
         }
     }
     
+    // A vásárlás logikája
     public boolean vasarlas(Takarito v, String termek) {
+        // Először megpróbáljuk lekérni a terméket a kínálatból
         IBoltiCikk cikk = kinalat.get(termek);
+        // Ha a termék nem található, visszajelzünk a vásárlónak és hamissal térünk vissza.
         if (cikk == null) {
             System.out.println("    [Bolt] A keresett termék nem található a kínálatban.");
             return false;
         }
-
+        // Ezután lekérjük a termék árát, és ellenőrizzük, hogy a vásárlónak van-e elég pénze.
         int ar = cikk.getAr();
 
+        // Ha a vásárlónak van elég pénze, akkor levonjuk a pénzt, átadjuk a terméket a vevőnek, és visszajelzünk a sikeres vásárlásról.
         if (v.getPenz() >= ar) {
             v.penztLevon(ar);
             cikk.atadVevonek(v);
             return true;
-        } else {
+        }
+        // Ha nincs elég pénze, akkor visszajelzünk a vásárlónak a sikertelenségről.
+        else {
             System.out.println("    [Bolt] Nincs elég pénz a vásárláshoz! (Ár: " + ar + ", Pénzed: " + v.getPenz() + ")");
             return false;
         }

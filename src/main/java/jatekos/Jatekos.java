@@ -55,9 +55,6 @@ public abstract class Jatekos {
     public void akcioPontKezelo() {
         if (this.akcioPont > 0) {
             this.akcioPont--;
-            if (this.akcioPont == 0) {
-                this.forduloVege(this);
-            }
         }
     }
     

@@ -124,9 +124,30 @@ public class Eszkoztar {
      * 
      * @return Az első elérhető kotrófej vagy null.
      */
-    public KotroFej kiveszFej() {
-        if (kotroFejek.isEmpty()) return null;
-        return kotroFejek.remove(0);
+    public KotroFej kiveszFej(String fejNev) {
+    if (fejNev == null) return null;
+
+        for (int i = 0; i < kotroFejek.size(); i++) {
+            KotroFej fej = kotroFejek.get(i);
+
+            if (fej.getClass().getSimpleName().equalsIgnoreCase(fejNev)) {
+                return kotroFejek.remove(i);
+            }
+        }
+
+        return null;
+    }
+
+    public void listazKotroFejek() {
+        if (kotroFejek.isEmpty()) {
+            System.out.println(">>> Nincs elerheto kotrofej az eszkoztarban.");
+            return;
+        }
+
+        System.out.println(">>> Elerheto kotrofejek:");
+        for (KotroFej fej : kotroFejek) {
+            System.out.println("    - " + fej.getClass().getSimpleName());
+        }
     }
 
     /**

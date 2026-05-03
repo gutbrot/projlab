@@ -29,11 +29,17 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
     @Override
     public void atadVevonek(Takarito v) {
         if (v != null) {
+            // Generálunk egy egyedi azonosítót a vásárolt hókotróhoz a számláló alapján.
             String ujAzonosito = "H_" + vasaroltSzamlalo++;
+            // Létrehozzuk a megvásárolt hókotró példányát a generált azonosítóval, és átadjuk a vevőnek.
             Hokotro megvasaroltHokotro = new Hokotro(ujAzonosito, null, null);
             v.hozzaadHokotro(megvasaroltHokotro);
+
+            // Kiírjuk a vásárlás sikerességét a konzolra, megjelenítve az új azonosítót.
             System.out.println(">>> [BOLT] Sikeres vásárlás: A(z) " + ujAzonosito + " azonosítójú hókotró átadva a játékosnak.");
-        } else {
+        } 
+        // Érvénytelen vevő esetén hibaüzenetet írunk ki a konzolra.
+        else {
             System.out.println(">>> [BOLT HIBA] Érvénytelen (null) játékos próbált járművet vásárolni!");
         }
     }
