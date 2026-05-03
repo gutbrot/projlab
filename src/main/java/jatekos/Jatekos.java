@@ -19,6 +19,8 @@ public abstract class Jatekos {
     public int aktualisJatekosIndex = 0;
     public Jarmu aktivJarmu = null;
 
+    private String nev = null;
+
     private Jatekter jatekter;
 
     protected Jatekos(int akcioPont) {
@@ -29,10 +31,10 @@ public abstract class Jatekos {
         this.jatekter = jatekter;
     }
     
-    public void korVege(Jatekos aktivJatekos) {
+    public void forduloVege(Jatekos aktivJatekos) {
         this.akcioPont = 0;
         aktivJarmu = null;
-        System.out.println(">>> [JÁTÉKOS] Befejezte a körét.");
+        System.out.println(">>> " + aktivJatekos.getNev() + " befejezte a koret.");
         
         aktualisJatekosIndex++;
         if (aktualisJatekosIndex >= jatekosok.size()) {
@@ -40,13 +42,19 @@ public abstract class Jatekos {
             aktualisJatekosIndex = 0;
         }
     }
+
+    public void korVege() {
+        // Ha a játékosnak volt még AP-ja, de kiadta a parancsot, 
+        // akkor is nullázzuk, így skippeli a körét.
+        if (this.akcioPont > 0) {
+            System.out.println("    >>> [INFO] Játékos skippelte a maradék " + this.akcioPont + " akciópontját.");
+        }
+        this.akcioPont = 0;
+    }
     
     public void akcioPontKezelo() {
         if (this.akcioPont > 0) {
             this.akcioPont--;
-            if (this.akcioPont == 0) {
-                this.korVege(this);
-            }
         }
     }
     
@@ -56,5 +64,13 @@ public abstract class Jatekos {
 
     public void setAkcioPont(int p) {
         this.akcioPont = Math.max(0, p);
+    }
+
+    public String getNev() {
+        return nev;
+    }
+
+    public void setNev(String nev) {
+        this.nev = nev;
     }
 }

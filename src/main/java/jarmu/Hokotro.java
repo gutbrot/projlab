@@ -17,21 +17,40 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
     private int ar = 50;
     private KotroFej felszereltFej;
     private Eszkoztar eszkoztar;
+    private static int vasaroltSzamlalo = 1; // Vásárlások számlálója a bolti azonosítóhoz
     
-    public Hokotro(String id, Lokacio pozicio, KotroFej felszereltFej) {
-        super(pozicio);
+    private static Terkep globalTerkep; 
+
+    // Statikus setter, hogy a játék elején rögzíthessük, hol van a világ
+    public static void setGlobalTerkep(Terkep terkep) {
+        globalTerkep = terkep;
+    }
+
+    public Hokotro(String id, Terkep terkep, KotroFej felszereltFej) {
+        // Meghívjuk a szülő Jarmu konstruktorát a térképből lekért random lokációval
+        super(terkep != null ? terkep.getRandomLokacio() : null);
         this.id = id;
         this.felszereltFej = felszereltFej;
         this.eszkoztar = new Eszkoztar();
+        
+        if (this.pozicio != null) {
+            System.out.println(">>> [RENDSZER] " + id + " elhelyezve: " 
+                + pozicio.getUt().getNev() + " út, " + pozicio.getSav().getSavSzama() + ". sáv");
+        }
     }
 
     @Override
     public void atadVevonek(Takarito v) {
-        if (v != null) {
-            v.hozzaadHokotro(this);
-            System.out.println(">>> [BOLT] Sikeres vásárlás: A(z) " + id + " azonosítójú hókotró átadva a játékosnak.");
+        if (v != null && globalTerkep != null) {
+            String ujAzonosito = "H_" + vasaroltSzamlalo++;
+            
+            // Itt is a globalTerkep-et adjuk át, a konstruktor pedig elintézi a random pozíciót
+            Hokotro megvasaroltHokotro = new Hokotro(ujAzonosito, globalTerkep, null);
+            v.hozzaadHokotro(megvasaroltHokotro);
+
+            System.out.println(">>> [BOLT] Sikeres vásárlás: " + ujAzonosito + " azonosítóval.");
         } else {
-            System.out.println(">>> [BOLT HIBA] Érvénytelen (null) játékos próbált járművet vásárolni!");
+            System.out.println(">>> [BOLT HIBA] Nincs térkép vagy érvénytelen vevő!");
         }
     }
 

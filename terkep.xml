@@ -1,0 +1,41 @@
+<Init>
+    <Terkep>
+        <Ut tipus="sima" nev="S1" hossz="5" pozsav="3" negsav="1">
+            <Elagazodas>
+                <Szomszed nev="H1" irany="1" />
+                <Szomszed nev="A1" irany="1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="hid" nev="H1" hossz="2" pozsav="1" negsav="1">
+            <Elagazodas>
+                <Szomszed nev="S1" irany="-1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="alagut" nev="A1" hossz="2" pozsav="1" negsav="1"> 
+            <Elagazodas>
+                <Szomszed nev="S1" irany="-1" />
+            </Elagazodas>
+        </Ut>
+    </Terkep>
+    <!-- alapbol minden utszakasz 0 0 0 0 -->
+    <Utviszonyok>
+        <!-- S1 -->
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="1" />
+            <Allapot athaladokszama="5" ho="30" so="0" zuzalek="0" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="2" />
+            <Allapot athaladokszama="2" ho="100" so="0" zuzalek="0" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="3" />
+            <Allapot athaladokszama="2" ho="100" so="0" zuzalek="0" />
+        </Sav>
+        <!-- H1 -->
+        <Sav>
+            <Lokacio ut="H1" szakasz="2" sav="1" />
+            <Allapot athaladokszama="0" ho="25" so="0" zuzalek="0" />
+        </Sav>
+    </Utviszonyok>
+</Init>

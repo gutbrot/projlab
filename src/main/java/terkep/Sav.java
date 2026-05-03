@@ -21,6 +21,22 @@ public class Sav {
         this.savSzama = savSzama;
     }
 
+    public Sav(int savSzama, int ho, int athaladok, int so, boolean zuzalek, boolean jeges) {
+        this.savSzama = savSzama;
+        this.hoVastagsag = ho;
+        this.athaladokSzama = athaladok;
+        this.soMennyiseg = so;
+        this.zuzalekosE = zuzalek;
+        this.jegesE = jeges;
+    }
+
+    public void adatokFrissitese(int ho, int athaladok, int so, boolean zuzalek, boolean jeges) {
+        this.hoVastagsag = ho;
+        this.athaladokSzama = athaladok;
+        this.soMennyiseg = so;
+        this.zuzalekosE = zuzalek;
+        this.jegesE = jeges;
+    }
     /**
      * Egy logikai függvény, amely eldönti, hogy egy jármű képes-e áthaladni a sávon.
      * @param j A belépni kívánó jármű.

@@ -10,14 +10,14 @@ import jatekos.*;
 import terkep.*;
 
 /**
- * A TesztKornyezet osztály átmeneti (stub) változata[cite: 12].
+ * A TesztKornyezet osztály átmeneti (stub) változata
  * Üres metódusokat tartalmaz, hogy a Skeleton osztály hiba nélkül leforduljon,
- * amíg a fejlesztőcsapat nem tisztázza a konstruktorok és a világépítés pontos részleteit[cite: 12].
+ * amíg a fejlesztőcsapat nem tisztázza a konstruktorok és a világépítés pontos részleteit
  */
 public abstract class TesztKornyezet {
 
     /**
-     * Ide kerül majd a világ felépítése (Térkép, Járművek, Szereplők inicializálása)[cite: 12].
+     * Ide kerül majd a világ felépítése (Térkép, Járművek, Szereplők inicializálása).
      */
     public static void initializeWorld() {
         Console.print(">>> [Figyelmeztetés] A világépítés (initializeWorld) metódus jelenleg üres! Beszélj a csapattal a konstruktorokról.");
