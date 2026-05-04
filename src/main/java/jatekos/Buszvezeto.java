@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 import jarmu.Busz;
 
-/**
- * A Buszvezeto osztály felelős a rendszerben lévő buszok irányításáért.
- */
+// A Buszvezeto osztály felelős a rendszerben lévő buszok irányításáért.
 public class Buszvezeto extends Jatekos {
     
     private final List<Busz> iranyithatoBuszok = new ArrayList<>();
@@ -23,9 +21,7 @@ public class Buszvezeto extends Jatekos {
         this(3); 
     }
     
-    /**
-     * Lehetővé teszi a buszvezető számára, hogy kiválasszon egy irányítható buszt a listából.
-     */
+     // Lehetővé teszi a buszvezető számára, hogy kiválasszon egy irányítható buszt a listából.
     public Busz busztValaszt() {
         //Ellenőrizzük, hogy van-e irányítható busz a listában
         if (iranyithatoBuszok.isEmpty()) {
@@ -70,17 +66,13 @@ public class Buszvezeto extends Jatekos {
         }
     }
 
-    /**
-     * Növeli a buszvezető pontjait, és kiírja az aktuális pontszámot.
-     */
+    // Növeli a buszvezető pontjait, és kiírja az aktuális pontszámot.
     public void pontotKap() {
         this.pont++;
         System.out.println(">>> [PONT] A buszvezető pontot kapott! (Összesen: " + this.pont + ")");
     }
     
-    /**
-     * Hozzáad egy buszt az irányítható buszok listájához, ha az még nincs benne.
-     */
+    // Hozzáad egy buszt az irányítható buszok listájához, ha az még nincs benne.
     public void hozzaadBusz(Busz busz) {
         //Ellenőrizzük, hogy a busz nem null és még nincs benne a listában
         if (busz != null && !iranyithatoBuszok.contains(busz)) {
