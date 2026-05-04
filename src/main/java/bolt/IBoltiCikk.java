@@ -15,16 +15,12 @@ public interface IBoltiCikk {
      * 
      * A metódus hívásakor a termék (legyen az KotroFej vagy FogyoAnyag) 
      * ténylegesen bekerül a játékos birtokába.
-     * 
-     * @param v A vásárlást végző Takarító játékos
      */
     void atadVevonek(Takarito v);
 
     /**
      * Visszaadja a termék aktuális vételárát.
      * A Bolt osztály ezen érték alapján ellenőrzi a vásárló egyenlegét.
-     * 
-     * @return A termék ára
      */
     int getAr();
 }

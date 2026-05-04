@@ -1,0 +1,5 @@
+vasarlas HanyoFej
+mozgas 5
+mozgas 5
+korvege
+mozgas 2

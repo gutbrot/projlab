@@ -1,55 +1,89 @@
 package skeleton;
 
-import jarmu.Busz;
-import jarmu.Hokotro;
-import jatekos.Buszvezeto;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import jatekos.Jatekter;
-import jatekos.Takarito;
-import jarmu.*;
-import jatekos.*;
-import terkep.*;
+import terkep.Terkep;
+import seged.TesztOsszehasonlito;
 
 /**
- * A TesztKornyezet osztály átmeneti (stub) változata
- * Üres metódusokat tartalmaz, hogy a Skeleton osztály hiba nélkül leforduljon,
- * amíg a fejlesztőcsapat nem tisztázza a konstruktorok és a világépítés pontos részleteit
+ * A TesztKornyezet osztály végzi az automatizált tesztesetek futtatását.
+ * Kicseréli a standard bemenetet a teszt fájlok tartalmára, majd ellenőrzi a kimenetet.
  */
-public abstract class TesztKornyezet {
+public class TesztKornyezet {
 
     /**
-     * Ide kerül majd a világ felépítése (Térkép, Járművek, Szereplők inicializálása).
+     * Univerzális tesztfuttató metódus, amely automatizálja a folyamatot.
      */
-    public static void initializeWorld() {
-        Console.print(">>> [Figyelmeztetés] A világépítés (initializeWorld) metódus jelenleg üres! Beszélj a csapattal a konstruktorokról.");
-    }
+    public static void futtatTeszt(int tesztSzam) {
+        // Elérési utak beállítása a képen látható mappa struktúra alapján
+        String bemenetFajl = "tesztek/teszt" + tesztSzam + ".txt";
+        String elvartFajl = "Elvart/teszt" + tesztSzam + "_elvart.xml";
+        
+        // A MentesKezelo a Betoltes/ mappába ment és hozzáadja a .xml kiterjesztést
+        String kimenetFajlNev = "teszt" + tesztSzam + "_kimenet"; 
+        String tenylegesKimenetUt = "Betoltes/" + kimenetFajlNev + ".xml";
 
-    public static void Test1() { Console.print(">>> [Figyelmeztetés] A 2. teszt (Sikeres vásárlás) jelenleg üres!"); }
+        // Térkép kiválasztása a teszt sorszáma alapján (22-es és 48-as teszthez egyedi)
+        String terkepFajl = (tesztSzam == 22 || tesztSzam == 48) ? "teszt_terkep_penz.xml" : "teszt_terkep.xml";
 
-    public static void Test2() {
-        Console.print(">>> [Figyelmeztetés] A 2. teszt (Sikeres vásárlás) jelenleg üres!");
-    }
+        Console.print("\n=========================================");
+        Console.print(">>> TESZT " + tesztSzam + " FUTTATÁSA...");
+        Console.print(">>> Használt alap térkép: " + terkepFajl);
+        Console.print("=========================================");
 
-    public static void Test3() {
-        Console.print(">>> [Figyelmeztetés] A 3. teszt (Fedezethiány) jelenleg üres!");
-    }
+        // Eredeti System.in kimentése, hogy a teszt után a menü továbbra is működjön
+        InputStream eredetiIn = System.in;
 
-    public static void Test4() {
-        Console.print(">>> [Figyelmeztetés] A 4. teszt (Takarítás) jelenleg üres!");
-    }
+        try {
+            // 1. Bemeneti fájl ellenőrzése
+            File bemenet = new File(bemenetFajl);
+            if (!bemenet.exists()) {
+                Console.print(">>> [HIBA] Nem található a bemeneti fájl: " + bemenetFajl);
+                return;
+            }
 
-    public static void Test5() {
-        Console.print(">>> [Figyelmeztetés] Az 5. teszt (Eszközváltás) jelenleg üres!");
-    }
+            // 2. Bemenet beolvasása és "kilepes" parancs hozzáfűzése a végtelen ciklus megtöréséhez
+            String bemenetTartalom = new String(Files.readAllBytes(Paths.get(bemenetFajl))) + "\nkilepes\n";
+            ByteArrayInputStream bais = new ByteArrayInputStream(bemenetTartalom.getBytes());
+            System.setIn(bais);
 
-    public static void Test6() {
-        Console.print(">>> [Figyelmeztetés] A 6. teszt (Busz mozgás) jelenleg üres!");
-    }
+            // 3. Játéktér példányosítása (ITT kapja meg az új System.in-t a Scanner-e)
+            Jatekter jatekter = new Jatekter(new Terkep());
 
-    public static void Test7() {
-        Console.print(">>> [Figyelmeztetés] A 7. teszt (Körváltás) jelenleg üres!");
-    }
+            // 4. A kiválasztott teszt térkép betöltése a Betoltes/ mappából
+            boolean betoltve = jatekter.betoltes(terkepFajl);
+            if (!betoltve) {
+                Console.print(">>> [HIBA] " + terkepFajl + " betöltése sikertelen! Ellenőrizd a Betoltes/ mappát.");
+                return;
+            }
 
-    public static void Test8() {
-        Console.print(">>> [Figyelmeztetés] A 8. teszt (Alagút) jelenleg üres!");
+            // Globális térkép statikus beállítása a Hókotróknak
+            jarmu.Hokotro.setGlobalTerkep(jatekter.getTerkep());
+
+            // 5. Parancsok futtatása a txt fájlból
+            Console.print(">>> [FUTTATÁS] Parancsok végrehajtása a(z) " + bemenetFajl + " alapján...");
+            jatekter.startCommandLoop(jatekter.getJatekosok());
+
+            // 6. Futás utáni állapot kimentése
+            Console.print(">>> [MENTÉS] Állapot mentése ide: " + tenylegesKimenetUt);
+            jatekter.mentes(kimenetFajlNev);
+
+            // 7. Tényleges és elvárt kimenet összehasonlítása
+            File elvart = new File(elvartFajl);
+            if (!elvart.exists()) {
+                Console.print(">>> [FIGYELMEZTETÉS] Nincs elvárt kimenet fájl: " + elvartFajl + " - Csak a kimenet lett legenerálva.");
+            } else {
+                TesztOsszehasonlito.fajlokatOsszehasonlit(elvartFajl, tenylegesKimenetUt);
+            }
+
+        } catch (Exception e) {
+            Console.print(">>> [KIVÉTEL] Hiba a teszt futtatása közben: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Visszaállítjuk az eredeti System.in-t
+            System.setIn(eredetiIn);
+        }
     }
 }

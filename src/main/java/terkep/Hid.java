@@ -7,10 +7,15 @@ import java.util.List;
  */
 public class Hid extends Ut {
     
+    //KONSTRUKTOR
     public Hid(String nev, int hossz, int pozSavokSzama, int negSavokSzama) { 
         super(nev, hossz, pozSavokSzama, negSavokSzama); 
     }
 
+    /**
+     * A havazik metódus, amely a Hid osztályban implementálva van, 
+     * és növeli a hó mennyiségét minden sávban.
+     */
     @Override
     public void havazik(int h) {
         for (List<Sav> szakasz : szakaszok) {

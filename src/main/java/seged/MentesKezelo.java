@@ -11,17 +11,25 @@ import java.util.List;
 
 public class MentesKezelo {
 
+    /**
+     * Ez a metódus egy teljes játékállapotot ment egy XML fájlba a megadott formátumban.
+     * A bemeneti Jatekter objektumból kiolvassa a térképet, járműveket, játékosokat és azok állapotát,
+     * majd egy jól strukturált XML fájlt hoz létre, amely tartalmazza ezeket az információkat.
+     * A fájl neve a paraméterben megadott string lesz.
+     */
     public static boolean allapototMent(Jatekter jatekter, String fajlNev) {
+        //A PrintWriter használata biztosítja, hogy a fájl megfelelően legyen megnyitva és zárva, még hiba esetén is.
         try (PrintWriter writer = new PrintWriter(fajlNev, "UTF-8")) {
             writer.println("<Init>");
             writer.println("    <Jatekallapot korok=\"1\" />");
             writer.println();
             
-            // --- 1. TÉRKÉP ---
+            //TÉRKÉP
             writer.println("    <Terkep>");
             List<Ut> utak = new ArrayList<>(jatekter.getTerkep().getTeljesHalozat());
             utak.sort(Comparator.comparing(Ut::getNev));
             
+            //Az utak kiírása a megadott XML struktúrában, beleértve a típusukat és a szomszédos utak irányát
             for (Ut ut : utak) {
                 String tipus = (ut instanceof SimaUt) ? "sima" : (ut instanceof Hid) ? "hid" : "alagut";
                 writer.printf("        <Ut tipus=\"%s\" nev=\"%s\" hossz=\"%d\" pozsav=\"%d\" negsav=\"0\">\n", 
@@ -40,7 +48,7 @@ public class MentesKezelo {
             writer.println("    </Terkep>");
             writer.println();
             
-            // --- 2. ÚTVISZONYOK ---
+            //ÚTVISZONYOK
             writer.println("    <!-- alapbol minden utszakasz 0 0 0 0 -->");
             writer.println("    <Utviszonyok>");
             for (Ut ut : utak) {
@@ -75,13 +83,12 @@ public class MentesKezelo {
             writer.println("    </Utviszonyok>");
             writer.println();
             
-            // --- 3. JÁRMŰVEK ÉS JÁTÉKOSOK GENERÁLÁSA ---
-            
+            //JÁRMŰVEK ÉS JÁTÉKOSOK GENERÁLÁSA
             List<Hokotro> hokotrok = new ArrayList<>();
             List<Busz> buszok = new ArrayList<>();
             List<Auto> autok = new ArrayList<>();
             
-            // Szétválogatjuk a járműveket
+            //Szétválogatjuk a járműveket
             if (jatekter.getJarmuvek() != null) {
                 for (Jarmu j : jatekter.getJarmuvek()) {
                     if (j instanceof Hokotro) hokotrok.add((Hokotro) j);
@@ -97,7 +104,7 @@ public class MentesKezelo {
             
             writer.println("    <Jarmuvek>");
             
-            // HÓKOTRÓK kiírása
+            //Hókotrók kiírása
             if (!hokotrok.isEmpty()) {
                 writer.println("        <Hokotrok>");
                 for (Hokotro h : hokotrok) {
@@ -106,10 +113,10 @@ public class MentesKezelo {
                     writer.println("                <Eszkoztar>");
                     writer.println("                    <!-- 0=nincs ilyen 1=van ilyen 2=felszerelt -->");
                     
-                    // Kotrófejek állapotának kiszámítása (0, 1 vagy 2)
+                    //Kotrófejek állapotának kiszámítása
                     int sop = 0, han = 0, sar = 0, jeg = 0, sos = 0, zuz = 0;
                     
-                    // Felszerelt fej (2-es érték)
+                    //Felszerelt fej
                     KotroFej felsz = h.getFelszereltFej();
                     if (felsz instanceof SoproFej) sop = 2;
                     else if (felsz instanceof HanyoFej) han = 2;
@@ -118,7 +125,7 @@ public class MentesKezelo {
                     else if (felsz instanceof SoszoroFej) sos = 2;
                     else if (felsz instanceof ZuzottFej) zuz = 2;
                     
-                    // Eszköztárban lévő fejek (1-es érték, ha még nem 2)
+                    //Eszköztárban lévő fejek
                     if (h.getEszkoztar() != null) {
                         for (KotroFej f : h.getEszkoztar().getKotroFejek()) {
                             if (f instanceof SoproFej && sop == 0) sop = 1;
@@ -144,19 +151,19 @@ public class MentesKezelo {
                 writer.println("        </Hokotrok>");
             }
             
-            // BUSZOK kiírása
+            //Buszok kiírása
             if (!buszok.isEmpty()) {
                 writer.println("        <Buszok>");
                 for (Busz b : buszok) {
                     writer.printf("            <Busz nev=\"%s\" mozgaskeptelen=\"%d\">\n", b.getId(), b.getMozgaskeptelenKorokSzama());
                     kiirLokacio(writer, "Lokacio", b.getPozicio(), "                ");
-                    // Opcionálisan: Célok/Végállomások kiírása, ha azok le vannak mentve
+                    //Célok/Végállomások kiírása, ha azok le vannak mentve
                     writer.println("            </Busz>");
                 }
                 writer.println("        </Buszok>");
             }
             
-            // AUTÓK kiírása
+            //Autók kiírása
             if (!autok.isEmpty()) {
                 writer.println("        <Autok>");
                 for (Auto a : autok) {
@@ -173,8 +180,7 @@ public class MentesKezelo {
             }
             writer.println("    </Jarmuvek>");
             
-            // --- JÁTÉKOSOK KIÍRÁSA ---
-            
+            //Játékosok kiírása
             List<Takarito> takaritok = new ArrayList<>();
             List<Buszvezeto> vezetok = new ArrayList<>();
             
@@ -185,7 +191,6 @@ public class MentesKezelo {
                 }
             }
             
-            // A Játékosok ősosztályában lévő getNev()-re érdemes rendezni, ha van ID, azt vedd
             takaritok.sort(Comparator.comparing(t -> t.getNev() != null ? t.getNev() : "T"));
             vezetok.sort(Comparator.comparing(b -> b.getNev() != null ? b.getNev() : "B"));
             
@@ -239,12 +244,12 @@ public class MentesKezelo {
             int szakaszIdx = -1;
             int savIdx = -1;
 
-            // ROBUSZTUS KERESÉS: Végignézzük az egész utat objektum szinten
+            //Végignézzük az egész utat objektum szinten
             List<List<Sav>> szakaszok = ut.getSzakaszok();
             for (int i = 0; i < szakaszok.size(); i++) {
                 List<Sav> sávok = szakaszok.get(i);
                 for (int j = 0; j < sávok.size(); j++) {
-                    // Ha megvan a pontos sáv objektum a memóriában
+                    //Ha megvan a pontos sáv objektum a memóriában
                     if (sávok.get(j) == keresettSav) { 
                         szakaszIdx = i + 1;
                         savIdx = j + 1;

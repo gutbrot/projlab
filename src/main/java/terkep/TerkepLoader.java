@@ -5,18 +5,28 @@ import javax.xml.parsers.*;
 import java.io.File;
 import java.util.*;
 
+/**
+ * A TerkepLoader osztály felelős a térkép XML fájlból történő betöltéséért.
+ * A fájlban meghatározott utak, elágazások és útviszonyok alapján létrehozza a Terkep objektumot.
+ */
 public class TerkepLoader {
+
+    /**
+     * Betölti a térképet egy XML fájlból.
+     */
     public static Terkep betolt(String fajlNev) {
         String eleresiUt = "Betoltes/" + fajlNev;
         Terkep terkep = new Terkep();
         Map<String, Ut> utMap = new HashMap<>();
 
         try {
+            //XML fájl beolvasása és normalizálása
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(eleresiUt));
             doc.getDocumentElement().normalize();
 
-            // 1. Utak létrehozása
+            //Utak létrehozása
             NodeList nList = doc.getElementsByTagName("Ut");
+            //Az XML-ben található minden "Ut" elem feldolgozása
             for (int i = 0; i < nList.getLength(); i++) {
                 Element e = (Element) nList.item(i);
                 String nev = e.getAttribute("nev");
@@ -33,10 +43,6 @@ public class TerkepLoader {
                 utMap.put(nev, ujUt);
                 terkep.addUt(ujUt);
             }
-
-            // 2. Elágazások és 3. Útviszonyok (a negatív sáv logikájával frissítve)
-            // ... (A sávok frissítésénél a Betolteskezelo parseLokacio logikáját használja) ...
-
         } catch (Exception e) { e.printStackTrace(); }
         return terkep;
     }

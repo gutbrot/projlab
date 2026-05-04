@@ -1,0 +1,5 @@
+korvege
+valaszt B2
+mozgas 5
+valaszt B1
+valaszt B2

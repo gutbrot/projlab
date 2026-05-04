@@ -1,0 +1,3 @@
+korvege
+mozgas 5
+mozgas 4

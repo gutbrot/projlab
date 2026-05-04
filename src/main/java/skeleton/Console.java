@@ -8,35 +8,33 @@ import java.util.Scanner;
  */
 public class Console {
 
-    /** Statikus beolvasó a standard bemenethez (System.in). */
+    //Statikus beolvasó a standard bemenethez
     private static final Scanner scanner = new Scanner(System.in);
 
     /**
-     * Egységesített konzol kiíró metódus.
-     * @param msg A kiírandó üzenet.
+     * Egységesített konzol kiíró metódus
      */
     public static void print(String msg) {
         System.out.println(msg);
     }
 
     /**
-     * Szöveges üzenet kiírása soremelés nélkül (prompt).
-     * @param msg A kiírandó üzenet.
+     * Szöveges üzenet kiírása soremelés nélkül
      */
     public static void printInline(String msg) {
         System.out.print(msg);
     }
 
     /**
-     * Bemenet beolvasása a felhasználótól.
-     * @param prompt Opcionális üzenet, amit beolvasás előtt kiír.
-     * @return A felhasználó által begépelt szöveg.
+     * Bemenet beolvasása a felhasználótól
      */
     public static String readLine(String prompt) {
+        //Ha van prompt, akkor kiírjuk a konzolra
         if (prompt != null && !prompt.isEmpty()) {
             System.out.print(prompt);
         }
         
+        //Megpróbáljuk beolvasni a következő sort a konzolról
         try {
             if (scanner.hasNextLine()) {
                 return scanner.nextLine();
@@ -48,8 +46,7 @@ public class Console {
     }
     
     /**
-     * Túlterhelt beolvasó metódus prompt nélkül.
-     * @return A felhasználó által begépelt szöveg.
+     * Túlterhelt beolvasó metódus prompt nélkül
      */
     public static String readLine() {
         return readLine("");

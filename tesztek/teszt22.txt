@@ -1,0 +1,6 @@
+vasarlas SarkanyFej
+vasarlas BiokerozinCsomag 1
+0
+fejcsere SarkanyFej
+korvege
+mozgas 5

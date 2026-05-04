@@ -17,36 +17,35 @@ import kotrofej.*;
 public class Betolteskezelo {
 
     /**
-     * Betölti a megadott XML fájlból a játék teljes állapotát a Játéktérbe.
-     * * @param fajlNev A betöltendő XML fájl neve a Betoltes/ mappában.
-     * @param jatekter A cél Jatekter objektum.
-     * @return True, ha a betöltés sikeres volt.
+     * Betölti a megadott XML fájlból a játék teljes állapotát a Játéktérbe
      */
     public boolean betolt(String fajlNev, Jatekter jatekter) {
         String eleresiUt = "Betoltes/" + fajlNev;
         File mentesFajl = new File(eleresiUt);
 
+        //Fájl létezésének ellenőrzése
         if (!mentesFajl.exists()) {
             System.out.println(">>> [HIBA] A mentési fájl nem található: " + eleresiUt);
             return false;
         }
 
+        //XML feldolgozás
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(mentesFajl);
             doc.getDocumentElement().normalize();
 
-            // 1. TÉRKÉP ÉS ÚTVISZONYOK BETÖLTÉSE
-            // A TerkepLoader végzi az utak és a sávok alapállapotának beállítását
+            //TÉRKÉP ÉS ÚTVISZONYOK BETÖLTÉSE
+            //A TerkepLoader végzi az utak és a sávok alapállapotának beállítását
             Terkep ujTerkep = TerkepLoader.betolt(fajlNev);
             if (ujTerkep == null) return false;
             jatekter.setTerkep(ujTerkep);
 
-            // Jármű adattár az ID alapú referenciák későbbi feloldásához
+            //Jármű adattár az ID alapú referenciák későbbi feloldásához
             Map<String, Jarmu> jarmuAdattar = new HashMap<>();
 
-            // 2. JÁRMŰVEK BEOLVASÁSA ÉS INICIALIZÁLÁSA
+            //JÁRMŰVEK BEOLVASÁSA ÉS INICIALIZÁLÁSA
             NodeList jarmuvekNode = doc.getElementsByTagName("Jarmuvek");
             if (jarmuvekNode.getLength() > 0) {
                 Element jarmuElem = (Element) jarmuvekNode.item(0);
@@ -56,7 +55,7 @@ public class Betolteskezelo {
                 processAutok(jarmuElem, ujTerkep, jatekter, jarmuAdattar);
             }
 
-            // 3. JÁTÉKOSOK BEOLVASÁSA ÉS ÖSSZEKÖTÉSE
+            //JÁTÉKOSOK BEOLVASÁSA ÉS ÖSSZEKÖTÉSE
             processJatekosok(doc, ujTerkep, jatekter, jarmuAdattar);
 
             System.out.println(">>> [BETÖLTÉS] Adatok sikeresen feldolgozva: " + jarmuAdattar.size() + " jármű.");
@@ -69,6 +68,10 @@ public class Betolteskezelo {
         }
     }
 
+    /**
+     * Járműtípusonkénti feldolgozás külön metódusokban a kód tisztasága és karbantarthatósága érdekében.
+     * Minden járműtípusnál kezeljük a pozíciót, eszköztárat, mozgásképtelenséget és egyéb specifikus attribútumokat.
+     */
     private void processHokotrok(Element root, Terkep terkep, Jatekter jatekter, Map<String, Jarmu> jarmuAdattar) {
         NodeList nodes = root.getElementsByTagName("Hokotro");
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -84,7 +87,7 @@ public class Betolteskezelo {
                 pos.getSav().setVanEJarmu(true);
             }
 
-            // Eszköztár és fejek (0: nincs, 1: raktár, 2: felszerelt)
+            //Eszköztár és fejek (0: nincs, 1: raktár, 2: felszerelt)
             NodeList eszNodes = e.getElementsByTagName("Eszkoztar");
             if (eszNodes.getLength() > 0) {
                 Element esz = (Element) eszNodes.item(0);
@@ -109,6 +112,7 @@ public class Betolteskezelo {
         }
     }
 
+    
     private void processBuszok(Element root, Terkep terkep, Jatekter jatekter, Map<String, Jarmu> jarmuAdattar) {
         NodeList nodes = root.getElementsByTagName("Busz");
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -162,14 +166,14 @@ public class Betolteskezelo {
     }
 
     private void processJatekosok(Document doc, Terkep terkep, Jatekter jatekter, Map<String, Jarmu> jarmuAdattar) {
-    // --- Takarítók ---
+    //Takarítók
     NodeList takNodes = doc.getElementsByTagName("Takarito");
     for (int i = 0; i < takNodes.getLength(); i++) {
         Element e = (Element) takNodes.item(i);
         Takarito t = new Takarito(Integer.parseInt(e.getAttribute("akcio")), Integer.parseInt(e.getAttribute("penz")));
         t.setNev(e.getAttribute("id"));
         
-        // Fontos: ürítjük az alapértelmezett listát, hogy csak az kerüljön bele, ami az XML-ben van
+        //ürítjük az alapértelmezett listát, hogy csak az kerüljön bele, ami az XML-ben van
         t.getIranyitottHokotrok().clear(); 
 
         NodeList hRefs = e.getElementsByTagName("Hokotro");
@@ -193,11 +197,7 @@ public class Betolteskezelo {
         int pontok = e.hasAttribute("pont") ? Integer.parseInt(e.getAttribute("pont")) : 0;
         for (int p = 0; p < pontok; p++) bv.pontotKap();
 
-        // --- JAVÍTÁS: Buszok listájának kezelése ---
-        // Ha a Buszvezeto konstruktora alapból létrehoz buszt, azt itt érdemes törölni:
-        // bv.getBuszok().clear(); 
-
-        NodeList bRefs = e.getElementsByTagName("Busz"); // Ellenőrizd, hogy az XML-ben "Bus" vagy "Busz" a tag neve!
+        NodeList bRefs = e.getElementsByTagName("Busz"); 
         for (int j = 0; j < bRefs.getLength(); j++) {
             String refId = ((Element) bRefs.item(j)).getAttribute("id");
             

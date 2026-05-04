@@ -23,28 +23,26 @@ public class BiokerozinCsomag extends FogyoAnyag {
      */
     @Override
     public void atadVevonek(Takarito v) {
-        // 1. Biztonsági ellenőrzés: Létezik-e egyáltalán a vevő?
+        //Létezik-e egyáltalán a vevő?
         if (v != null) {
             
-            // 2. A UML alapján a Takarító maga nem tárol anyagot, a Hókotrók igen.
-            // Lekérjük a Takarító által jelenleg aktívan irányított hókotrót.
+            //Lekérjük a Takarító által jelenleg aktívan irányított hókotrót.
             Hokotro aktivHokotro = v.hokotrotValaszt();
             
-            // 3. Ellenőrizzük, hogy van-e aktív hókotrója, és annak van-e eszköztára.
+            //Ellenőrizzük, hogy van-e aktív hókotrója, és annak van-e eszköztára.
             if (aktivHokotro != null && aktivHokotro.getEszkoztar() != null) {
                 
-                // 4. Ha minden rendben, a hókotró eszköztárához adjuk a kerozint.
-                // Fontos a "biokerozin" string kulcs pontos használata az Eszkoztar miatt!
+                //Ha minden rendben, a hókotró eszköztárához adjuk a kerozint.
                 aktivHokotro.getEszkoztar().hozzaad("biokerozin", mennyiseg);
                 
-                // Narratív visszajelzés a játékosnak a konzolon.
+                //Visszajelzés a játékosnak a konzolon.
                 System.out.println(">>> [BOLT] Sikeres vásárlás: " + mennyiseg + " egység biokerozin betöltve a Hókotró tartályába.");
             } else {
-                // Ha a játékos úgy vásárol, hogy nincs beállítva hókotrója.
+                //Ha a játékos úgy vásárol, hogy nincs beállítva hókotrója.
                 System.out.println(">>> [BOLT HIBA] A játékosnak nincs aktív hókotrója, amibe tankolhatna!");
             }
         } else {
-            // NullPointerException elkerülése, ha hibás a metódushívás a Bolt részéről.
+            //NullPointerException elkerülése, ha hibás a metódushívás a Bolt részéről.
             System.out.println(">>> [BOLT HIBA] Érvénytelen (null) játékos próbált vásárolni!");
         }
     }

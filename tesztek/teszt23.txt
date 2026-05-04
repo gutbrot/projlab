@@ -1,0 +1,3 @@
+vasarlas SarkanyFej
+fejcsere SarkanyFej
+mozgas 5

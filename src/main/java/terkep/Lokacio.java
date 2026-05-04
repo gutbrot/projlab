@@ -10,30 +10,23 @@ import java.util.List;
  */
 public class Lokacio {
     
-    /** Az út nevét/referenciáját tárolja */
+    //Az út nevét/referenciáját tárolja
     private Ut ut;
     
-    /** A szakaszokat tárolja. */
+    //A szakaszokat tárolja
     private List<Sav> szakasz;
     
-    /** A sávok számát/referenciáját tárolja. */
+    //A sávok számát/referenciáját tárolja
     private Sav sav;
 
-    /**
-     * Konstruktor a helymeghatározási adatok inicializálásához.
-     * 
-     * @param ut Az út.
-     * @param szakasz Az útszakasz (sávok listája).
-     * @param sav A konkrét sáv.
-     */
+    //KONSTRUKTOR
     public Lokacio(Ut ut, List<Sav> szakasz, Sav sav) {
         this.ut = ut;
         this.szakasz = szakasz;
         this.sav = sav;
     }
-
-    // --- LEKÉRDEZŐK (SZÜKSÉGESEK A RENDSZER MŰKÖDÉSÉHEZ) ---
-
+    
+    //GETTEREK ÉS SETTEREK
     public Ut getUt() { 
         return ut; 
     }
@@ -49,4 +42,5 @@ public class Lokacio {
     public void setSav(Sav sav) {
         this.sav = sav;
     }
+
 }
