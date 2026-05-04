@@ -163,6 +163,8 @@ public class Jatekter {
     public void ujKor() {
         // Időjárás frissítése a térképen
         if (terkep != null) terkep.idojarasFrissites();
+
+        //npcAutokMozgatasa();                                  //!!!!!!!
         
         // Minden jármű új körének indítása
         for (Jarmu j : jarmuvek) {
@@ -176,6 +178,33 @@ public class Jatekter {
         }
         System.out.println("\n>>> --- ÚJ GLOBÁLIS KÖR KEZDŐDÖTT ---");
     }
+    //todo: Ezen dolgozni kell még
+    /*private void npcAutokMozgatasa() {
+        System.out.println(">>> [RENDSZER] NPC autók automatikus mozgatása...");
+        seged.Navigacio navigacio = new seged.Navigacio();
+
+        for (Jarmu j : jarmuvek) {
+            if (j instanceof Auto) {
+                Auto auto = (Auto) j;
+                
+                if (auto.getMozgaskeptelenKorokSzama() > 0) continue;
+
+                // Az Auto 1-es indexű végállomása a munkahely/cél (a 0-ás a kiinduló lakás)
+                if (auto.getVegallomasok() != null && auto.getVegallomasok().length > 1) {
+                    Lokacio cel = auto.getVegallomasok()[1]; 
+                    
+                    if (cel != null && !auto.vegallomasraErt()) {
+                        Sav kovetkezoSav = navigacio.kovetkezoLepes(auto.getPozicio(), cel);
+                        
+                        if (kovetkezoSav != null) {
+                            // Itt hívjuk a frissen létrehozott direkt metódust!
+                            auto.mozgasDirekt(kovetkezoSav);
+                        }
+                    }
+                }
+            }
+        }
+    }*/
 
     /**
      * Játék inicializálása megadott paraméterekkel.

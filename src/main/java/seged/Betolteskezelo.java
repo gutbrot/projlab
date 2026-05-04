@@ -8,6 +8,7 @@ import java.util.*;
 import jarmu.*;
 import terkep.*;
 import jatekos.*;
+import kotrofej.*;
 
 public class Betolteskezelo {
 
@@ -26,161 +27,165 @@ public class Betolteskezelo {
             Document doc = dBuilder.parse(mentesFajl);
             doc.getDocumentElement().normalize();
 
-            // 1. TÉRKÉP (Kötelező)
+            // 1. TÉRKÉP betöltése (TerkepLoader használatával)
             Terkep ujTerkep = TerkepLoader.betolt(fajlNev);
             if (ujTerkep == null) return false;
             jatekter.setTerkep(ujTerkep);
 
-            Map<String, Jarmu> betoltottJarmuvek = new HashMap<>();
+            // Járművek gyűjtője az ID alapú összekötéshez
+            Map<String, Jarmu> jarmuAdattar = new HashMap<>();
 
             // 2. JÁRMŰVEK BEOLVASÁSA
-            NodeList jarmuvekNode = doc.getElementsByTagName("Jarmuvek");
-            if (jarmuvekNode.getLength() > 0) {
-                
-                // --- Hókotrók ---
-                NodeList hokotroNodes = doc.getElementsByTagName("Hokotro");
-                for (int i = 0; i < hokotroNodes.getLength(); i++) {
-                    Element e = (Element) hokotroNodes.item(i);
-                    // Szűrés, hogy ne a Játékosok alatti referenciákat vegyük
-                    if (e.getParentNode().getNodeName().equals("Hokotrok")) { 
-                        String id = e.getAttribute("nev");
-                        Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
-                        
-                        Hokotro h = new Hokotro(id, ujTerkep, null); 
-                        h.setPozicio(pos);
+            
+            // --- HÓKOTRÓK ---
+            NodeList hokotroNodes = doc.getElementsByTagName("Hokotro");
+            for (int i = 0; i < hokotroNodes.getLength(); i++) {
+                Element e = (Element) hokotroNodes.item(i);
+                if (e.getParentNode().getNodeName().equals("Hokotrok")) {
+                    String id = e.getAttribute("nev");
+                    Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
+                    Hokotro h = new Hokotro(id, ujTerkep, null);
+                    h.setPozicio(pos);
+                    if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
 
-                        if (pos != null && pos.getSav() != null) {
-                            pos.getSav().setVanEJarmu(true);
-                            // (Ha van rá külön metódusod, hogy a sáv is tudjon a járműről, azt itt hívd meg! pl: pos.getSav().setJarmu(h); )
+                    // Eszköztár (Kotrófejek + Fogyóanyagok)
+                    Element eszElem = (Element) e.getElementsByTagName("Eszkoztar").item(0);
+                    if (eszElem != null) {
+                        Element fejek = (Element) eszElem.getElementsByTagName("Kotrofejek").item(0);
+                        if (fejek != null) {
+                            setupFej(h, "sopro", fejek, new SoproFej(30));
+                            setupFej(h, "hanyo", fejek, new HanyoFej(40));
+                            setupFej(h, "sarkany", fejek, new SarkanyFej(100, 10));
+                            setupFej(h, "jegtoro", fejek, new JegtoroFej(60));
+                            setupFej(h, "soszoro", fejek, new SoszoroFej(50, 5));
+                            setupFej(h, "zuzott", fejek, new ZuzottFej(50, 5));
                         }
-
-                        jatekter.hozzaadJarmu(h);
-                        betoltottJarmuvek.put(id, h);
-                    }
-                }
-                
-                // --- Buszok ---
-                NodeList buszNodes = doc.getElementsByTagName("Busz");
-                for (int i = 0; i < buszNodes.getLength(); i++) {
-                    Element e = (Element) buszNodes.item(i);
-                    if (e.getParentNode().getNodeName().equals("Buszok")) {
-                        String id = e.getAttribute("nev");
-                        Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
-                        
-                        // Végállomás vagy Cél megkeresése
-                        Lokacio cel = null;
-                        if (e.getElementsByTagName("Vegallomas").getLength() > 0) {
-                            cel = parseLokacio((Element) e.getElementsByTagName("Vegallomas").item(0), ujTerkep);
-                        } else if (e.getElementsByTagName("Cel").getLength() > 0) {
-                            cel = parseLokacio((Element) e.getElementsByTagName("Cel").item(0), ujTerkep);
+                        Element fogyo = (Element) eszElem.getElementsByTagName("Fogyoanyagok").item(0);
+                        if (fogyo != null) {
+                            h.getEszkoztar().hozzaad("so", Integer.parseInt(fogyo.getAttribute("so")));
+                            h.getEszkoztar().hozzaad("biokerozin", Integer.parseInt(fogyo.getAttribute("biokerozin")));
+                            h.getEszkoztar().hozzaad("zuzalek", Integer.parseInt(fogyo.getAttribute("zuzalek")));
                         }
-                        
-                        Busz b = new Busz(id, pos, cel, null); 
-                        if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
-                        
-                        jatekter.hozzaadJarmu(b);
-                        betoltottJarmuvek.put(id, b);
                     }
-                }
-                
-                // --- Autók (NPC) ---
-                NodeList autoNodes = doc.getElementsByTagName("Auto");
-                for (int i = 0; i < autoNodes.getLength(); i++) {
-                    Element e = (Element) autoNodes.item(i);
-                    if (e.getParentNode().getNodeName().equals("Autok")) {
-                        String id = e.getAttribute("id");
-                        Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
-                        Lokacio lakas = parseLokacio((Element) e.getElementsByTagName("Lakas").item(0), ujTerkep);
-                        Lokacio munkahely = parseLokacio((Element) e.getElementsByTagName("Munkahely").item(0), ujTerkep);
-                        
-                        Auto a = new Auto(id, lakas, munkahely, pos);
-                        if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
-                        
-                        jatekter.hozzaadJarmu(a);
-                        betoltottJarmuvek.put(id, a);
-                    }
+                    jatekter.hozzaadJarmu(h);
+                    jarmuAdattar.put(id, h);
                 }
             }
 
-            // 3. JÁTÉKOSOK BEOLVASÁSA
-            NodeList jatekosokNode = doc.getElementsByTagName("Jatekosok");
-            if (jatekosokNode.getLength() > 0) {
-                
-                // --- Takarítók ---
-                NodeList takaritoNodes = doc.getElementsByTagName("Takarito");
-                for (int i = 0; i < takaritoNodes.getLength(); i++) {
-                    Element e = (Element) takaritoNodes.item(i);
-                    Takarito t = new Takarito(
-                        Integer.parseInt(e.getAttribute("akcio")), 
-                        Integer.parseInt(e.getAttribute("penz"))
-                    );
-                    t.setNev(e.getAttribute("id"));
+            // --- BUSZOK ---
+            NodeList buszNodes = doc.getElementsByTagName("Busz");
+            for (int i = 0; i < buszNodes.getLength(); i++) {
+                Element e = (Element) buszNodes.item(i);
+                if (e.getParentNode().getNodeName().equals("Buszok")) {
+                    String id = e.getAttribute("nev");
+                    Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
                     
-                    // JAVÍTÁS: Töröljük a konstruktor által generált "H_alap" hókotrót!
-                    t.getIranyitottHokotrok().clear(); 
+                    // Végállomások keresése (Vegallomas vagy Cel tag alatt)
+                    Lokacio v1 = parseLokacio((Element) e.getElementsByTagName("Vegallomas").item(0), ujTerkep);
+                    if (v1 == null) v1 = parseLokacio((Element) e.getElementsByTagName("Cel").item(0), ujTerkep);
                     
-                    // Járművek hozzárendelése
-                    NodeList hRefs = e.getElementsByTagName("Hokotro");
-                    for (int j = 0; j < hRefs.getLength(); j++) {
-                        String refId = ((Element)hRefs.item(j)).getAttribute("id");
-                        if (betoltottJarmuvek.containsKey(refId)) {
-                            t.hozzaadHokotro((Hokotro) betoltottJarmuvek.get(refId));
-                        }
+                    Busz b = new Busz(id, pos, v1, null);
+                    if (e.hasAttribute("mozgaskeptelen")) {
+                        int mk = Integer.parseInt(e.getAttribute("mozgaskeptelen"));
+                        for(int k=0; k<mk; k++) b.mozgasKeptelen();
                     }
-                    jatekter.hozzaadJatekos(t);
-                }
-                
-                // --- Buszvezetők ---
-                NodeList buszvezetoNodes = doc.getElementsByTagName("Buszvezeto");
-                for (int i = 0; i < buszvezetoNodes.getLength(); i++) {
-                    Element e = (Element) buszvezetoNodes.item(i);
-                    Buszvezeto b = new Buszvezeto(Integer.parseInt(e.getAttribute("akcio")));
-                    b.setNev(e.getAttribute("id"));
-                    
-                    // Járművek hozzárendelése
-                    NodeList bRefs = e.getElementsByTagName("Busz");
-                    for (int j = 0; j < bRefs.getLength(); j++) {
-                        String refId = ((Element)bRefs.item(j)).getAttribute("id");
-                        if (betoltottJarmuvek.containsKey(refId)) {
-                            Busz busz = (Busz) betoltottJarmuvek.get(refId);
-                            b.hozzaadBusz(busz);
-                            busz.setVezeto(b); // Oda-vissza összekötés
-                        }
-                    }
-                    jatekter.hozzaadJatekos(b);
+                    if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
+                    jatekter.hozzaadJarmu(b);
+                    jarmuAdattar.put(id, b);
                 }
             }
 
-            System.out.println(">>> [BETÖLTÉS] XML feldolgozva. Talált adatok: " + 
-                betoltottJarmuvek.size() + " jármű, " + jatekter.getJatekosok().size() + " játékos.");
+            // --- NPC AUTÓK (ÚJ!) ---
+            NodeList autoNodes = doc.getElementsByTagName("Auto");
+            for (int i = 0; i < autoNodes.getLength(); i++) {
+                Element e = (Element) autoNodes.item(i);
+                if (e.getParentNode().getNodeName().equals("Autok")) {
+                    String id = e.getAttribute("id");
+                    Lokacio pos = parseLokacio((Element) e.getElementsByTagName("Lokacio").item(0), ujTerkep);
+                    Lokacio lakas = parseLokacio((Element) e.getElementsByTagName("Lakas").item(0), ujTerkep);
+                    Lokacio munka = parseLokacio((Element) e.getElementsByTagName("Munkahely").item(0), ujTerkep);
+                    
+                    Auto a = new Auto(id, lakas, munka, pos);
+                    if (e.hasAttribute("mozgaskeptelen")) {
+                        int mk = Integer.parseInt(e.getAttribute("mozgaskeptelen"));
+                        for(int k=0; k<mk; k++) a.mozgasKeptelen();
+                    }
+                    if (pos != null && pos.getSav() != null) pos.getSav().setVanEJarmu(true);
+                    jatekter.hozzaadJarmu(a);
+                    jarmuAdattar.put(id, a);
+                }
+            }
+
+            // 3. JÁTÉKOSOK ÉS ÖSSZEKÖTÉSEK
+            
+            // --- TAKARÍTÓK ---
+            NodeList takNodes = doc.getElementsByTagName("Takarito");
+            for (int i = 0; i < takNodes.getLength(); i++) {
+                Element e = (Element) takNodes.item(i);
+                Takarito t = new Takarito(Integer.parseInt(e.getAttribute("akcio")), Integer.parseInt(e.getAttribute("penz")));
+                t.setNev(e.getAttribute("id"));
+                t.getIranyitottHokotrok().clear();
+
+                NodeList refs = e.getElementsByTagName("Hokotro");
+                for (int j = 0; j < refs.getLength(); j++) {
+                    String refId = ((Element)refs.item(j)).getAttribute("id");
+                    if (jarmuAdattar.containsKey(refId)) t.hozzaadHokotro((Hokotro) jarmuAdattar.get(refId));
+                }
+                jatekter.hozzaadJatekos(t);
+            }
+
+            // --- BUSZVEZETŐK ---
+            NodeList bvNodes = doc.getElementsByTagName("Buszvezeto");
+            for (int i = 0; i < bvNodes.getLength(); i++) {
+                Element e = (Element) bvNodes.item(i);
+                Buszvezeto bv = new Buszvezeto(Integer.parseInt(e.getAttribute("akcio")));
+                bv.setNev(e.getAttribute("id"));
+                
+                // Pontok visszaállítása (ciklussal, mert nincs közvetlen setter)
+                int pont = Integer.parseInt(e.getAttribute("pont"));
+                for(int p=0; p<pont; p++) bv.pontotKap();
+
+                NodeList refs = e.getElementsByTagName("Bus");
+                for (int j = 0; j < refs.getLength(); j++) {
+                    String refId = ((Element)refs.item(j)).getAttribute("id");
+                    if (jarmuAdattar.containsKey(refId)) {
+                        Busz busz = (Busz) jarmuAdattar.get(refId);
+                        bv.hozzaadBusz(busz);
+                        busz.setVezeto(bv); // Oda-vissza összekötés
+                    }
+                }
+                jatekter.hozzaadJatekos(bv);
+            }
+
             return true;
-
         } catch (Exception e) {
-            System.out.println(">>> [HIBA] Hiba a betöltés során: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println(">>> [BETÖLTÉS HIBA] " + e.getMessage());
             return false;
         }
     }
 
-     private Lokacio parseLokacio(Element el, Terkep terkep) {
+    private void setupFej(Hokotro h, String tipus, Element fejekElem, KotroFej ujFej) {
+        int kod = Integer.parseInt(fejekElem.getAttribute(tipus));
+        if (kod == 1) h.getEszkoztar().hozzaadFej(ujFej);
+        else if (kod == 2) h.fejcsere(ujFej);
+    }
+
+    private Lokacio parseLokacio(Element el, Terkep terkep) {
         if (el == null) return null;
         try {
             String utNev = el.getAttribute("ut");
-            int szakaszIdx = Integer.parseInt(el.getAttribute("szakasz")) - 1;
-            // CSAK SIMA KIVONÁS, MERT A JAVA 0-TÓL INDEXEL:
+            int szakIdx = Integer.parseInt(el.getAttribute("szakasz")) - 1;
             int savIdx = Integer.parseInt(el.getAttribute("sav")) - 1;
-
             for (Ut ut : terkep.getTeljesHalozat()) {
                 if (ut.getNev().equals(utNev)) {
-                    if (szakaszIdx >= 0 && szakaszIdx < ut.getSzakaszok().size()) {
-                        List<Sav> szakasz = ut.getSzakaszok().get(szakaszIdx);
-                        if (savIdx >= 0 && savIdx < szakasz.size()) {
-                            return new Lokacio(ut, szakasz, szakasz.get(savIdx));
-                        }
+                    List<List<Sav>> szakaszok = ut.getSzakaszok();
+                    if (szakIdx >= 0 && szakIdx < szakaszok.size()) {
+                        List<Sav> savok = szakaszok.get(szakIdx);
+                        if (savIdx >= 0 && savIdx < savok.size()) return new Lokacio(ut, savok, savok.get(savIdx));
                     }
                 }
             }
-        } catch (Exception e) { return null; }
+        } catch (Exception ex) { return null; }
         return null;
     }
 }
