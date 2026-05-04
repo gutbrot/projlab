@@ -162,45 +162,54 @@ public class Betolteskezelo {
     }
 
     private void processJatekosok(Document doc, Terkep terkep, Jatekter jatekter, Map<String, Jarmu> jarmuAdattar) {
-        // --- Takarítók ---
-        NodeList takNodes = doc.getElementsByTagName("Takarito");
-        for (int i = 0; i < takNodes.getLength(); i++) {
-            Element e = (Element) takNodes.item(i);
-            Takarito t = new Takarito(Integer.parseInt(e.getAttribute("akcio")), Integer.parseInt(e.getAttribute("penz")));
-            t.setNev(e.getAttribute("id"));
-            t.getIranyitottHokotrok().clear(); // Konstruktor által generált alapjárat törlése
+    // --- Takarítók ---
+    NodeList takNodes = doc.getElementsByTagName("Takarito");
+    for (int i = 0; i < takNodes.getLength(); i++) {
+        Element e = (Element) takNodes.item(i);
+        Takarito t = new Takarito(Integer.parseInt(e.getAttribute("akcio")), Integer.parseInt(e.getAttribute("penz")));
+        t.setNev(e.getAttribute("id"));
+        
+        // Fontos: ürítjük az alapértelmezett listát, hogy csak az kerüljön bele, ami az XML-ben van
+        t.getIranyitottHokotrok().clear(); 
 
-            NodeList hRefs = e.getElementsByTagName("Hokotro");
-            for (int j = 0; j < hRefs.getLength(); j++) {
-                String refId = ((Element)hRefs.item(j)).getAttribute("id");
-                if (jarmuAdattar.containsKey(refId)) t.hozzaadHokotro((Hokotro) jarmuAdattar.get(refId));
+        NodeList hRefs = e.getElementsByTagName("Hokotro");
+        for (int j = 0; j < hRefs.getLength(); j++) {
+            String refId = ((Element) hRefs.item(j)).getAttribute("id");
+            if (jarmuAdattar.containsKey(refId)) {
+                t.hozzaadHokotro((Hokotro) jarmuAdattar.get(refId));
             }
-            jatekter.hozzaadJatekos(t);
         }
-
-        // --- Buszvezetők ---
-        NodeList bvNodes = doc.getElementsByTagName("Buszvezeto");
-        for (int i = 0; i < bvNodes.getLength(); i++) {
-            Element e = (Element) bvNodes.item(i);
-            Buszvezeto bv = new Buszvezeto(Integer.parseInt(e.getAttribute("akcio")));
-            bv.setNev(e.getAttribute("id"));
-            
-            // Pontszámok visszaállítása
-            int pontok = e.hasAttribute("pont") ? Integer.parseInt(e.getAttribute("pont")) : 0;
-            for(int p=0; p<pontok; p++) bv.pontotKap();
-
-            NodeList bRefs = e.getElementsByTagName("Bus");
-            for (int j = 0; j < bRefs.getLength(); j++) {
-                String refId = ((Element)bRefs.item(j)).getAttribute("id");
-                if (jarmuAdattar.containsKey(refId)) {
-                    Busz busz = (Busz) jarmuAdattar.get(refId);
-                    bv.hozzaadBusz(busz);
-                    busz.setVezeto(bv); // Oda-vissza linkelés
-                }
-            }
-            jatekter.hozzaadJatekos(bv);
-        }
+        jatekter.hozzaadJatekos(t);
     }
+
+    // --- Buszvezetők ---
+    NodeList bvNodes = doc.getElementsByTagName("Buszvezeto");
+    for (int i = 0; i < bvNodes.getLength(); i++) {
+        Element e = (Element) bvNodes.item(i);
+        Buszvezeto bv = new Buszvezeto(Integer.parseInt(e.getAttribute("akcio")));
+        bv.setNev(e.getAttribute("id"));
+        
+        // Pontszámok visszaállítása
+        int pontok = e.hasAttribute("pont") ? Integer.parseInt(e.getAttribute("pont")) : 0;
+        for (int p = 0; p < pontok; p++) bv.pontotKap();
+
+        // --- JAVÍTÁS: Buszok listájának kezelése ---
+        // Ha a Buszvezeto konstruktora alapból létrehoz buszt, azt itt érdemes törölni:
+        // bv.getBuszok().clear(); 
+
+        NodeList bRefs = e.getElementsByTagName("Busz"); // Ellenőrizd, hogy az XML-ben "Bus" vagy "Busz" a tag neve!
+        for (int j = 0; j < bRefs.getLength(); j++) {
+            String refId = ((Element) bRefs.item(j)).getAttribute("id");
+            
+            if (jarmuAdattar.containsKey(refId)) {
+                Busz busz = (Busz) jarmuAdattar.get(refId);
+                bv.hozzaadBusz(busz);
+                busz.setVezeto(bv); // Kétirányú kapcsolat beállítása
+            }
+        }
+        jatekter.hozzaadJatekos(bv);
+    }
+}
 
     private void setupFej(Hokotro h, String tipus, Element fejekElem, KotroFej ujFej) {
         if (!fejekElem.hasAttribute(tipus)) return;
