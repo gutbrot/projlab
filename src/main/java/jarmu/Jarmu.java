@@ -20,10 +20,11 @@ public abstract class Jarmu {
     public boolean mozgas(Sav ujSav) {
         // --- 1. Elérhető sávok dinamikus kigyűjtése a lokáció alapján ---
         List<Sav> elerhetoSavok = new ArrayList<>();
+        List<Sav> jelenlegiSzakasz = null; // Kimentjük a kiíráshoz
         
         if (pozicio != null && pozicio.getUt() != null && pozicio.getSzakasz() != null) {
             Ut ut = pozicio.getUt();
-            List<Sav> jelenlegiSzakasz = pozicio.getSzakasz();
+            jelenlegiSzakasz = pozicio.getSzakasz();
             int szakaszIndex = ut.getSzakaszok().indexOf(jelenlegiSzakasz);
             
             // a) Sávváltás (ugyanabban a szakaszban lévő többi sáv)
@@ -49,44 +50,47 @@ public abstract class Jarmu {
 
         // --- 2. Paraméter nélküli hívás lekezelése (Elérhető sávok listázása) ---
         if (ujSav == null) {
-            System.out.println(">>> Elérhető sávok a mozgáshoz:");
+            System.out.println(">>> Elérhető irányok a mozgáshoz:");
             if (elerhetoSavok.isEmpty()) {
                 System.out.println("    [HIBA] Nincs elérhető sáv, vagy a járműnek nincs érvényes pozíciója a térképen.");
             } else {
-                for (Sav s : elerhetoSavok) {
-                    // CSENDES ELLENŐRZÉS: Nem hívjuk meg az atjarhatoE()-t, hogy ne szemetelje tele a konzolt
+                for (int i = 0; i < elerhetoSavok.size(); i++) {
+                    Sav s = elerhetoSavok.get(i);
+                    // Csendes ellenőrzés
                     boolean jarhato = (s.getHo() < 30 && !s.isVanEJarmu());
-                    System.out.println("    - Sáv ID: " + s.getSavSzama() + " (Járható: " + (jarhato ? "Igen" : "Nem") + ")");
+                    
+                    // Helyzet meghatározása a játékos számára
+                    String irany = (jelenlegiSzakasz != null && jelenlegiSzakasz.contains(s)) 
+                                    ? "Sávváltás oldalra" 
+                                    : "Előrehaladás";
+                    
+                    System.out.println("    [" + i + "] Sáv ID: " + s.getSavSzama() + " (" + irany + ") - Járható: " + (jarhato ? "Igen" : "Nem"));
                 }
-                System.out.println("    - (A mozgáshoz használd: mozgas <SavID>)");
+                System.out.println("    - (A mozgáshoz használd az opció számát, pl: mozgas 0)");
             }
             return true; 
         }
 
         // --- 3. Tényleges mozgás logikája és validációja ---
         
-        // VALÓDI SÁV KERESÉSE: Mivel a Jatekter egy "new Sav(ID)" példányt küldött, 
-        // megkeressük az elerhetoSavok között azt a valódi sávot, aminek egyezik az ID-ja.
-        Sav valodiCelSav = null;
-        for (Sav s : elerhetoSavok) {
-            if (s.getSavSzama() == ujSav.getSavSzama()) {
-                valodiCelSav = s;
-                break;
-            }
-        }
-
-        // Ha nincs ilyen ID-jű sáv a közelben, elutasítjuk
-        if (valodiCelSav == null) {
-            System.out.println("    >>> [KUDARC] A megadott sáv (ID: " + ujSav.getSavSzama() + ") nem érhető el a jármű jelenlegi pozíciójából!");
+        // Mivel a Jatekter egy "new Sav(ID)"-t küld be nekünk, a kapott "ID"-t most INDEXKÉNT kezeljük!
+        int valasztottIndex = ujSav.getSavSzama();
+        
+        // Ellenőrizzük, hogy létezik-e ilyen sorszám a listában
+        if (valasztottIndex < 0 || valasztottIndex >= elerhetoSavok.size()) {
+            System.out.println("    >>> [KUDARC] Érvénytelen opció! Kérlek a listából válassz (0-" + (elerhetoSavok.size() - 1) + ").");
             return false;
         }
+
+        // Kiválasztjuk a tényleges sávot az index alapján
+        Sav valodiCelSav = elerhetoSavok.get(valasztottIndex);
 
         if (mozgaskeptelenKorokSzama > 0) {
             System.out.println("    >>> [KUDARC] A jármű mozgásképtelen még " + mozgaskeptelenKorokSzama + " körig.");
             return false;
         }
 
-        // Itt már a valódi sávra hívjuk az atjarhatoE()-t. Ha hiba van, most jogosan írja ki a konzolra!
+        // Átjárhatóság vizsgálata a VALÓDI sávon (itt már kiírja a hibát, ha van)
         if (!valodiCelSav.atjarhatoE(this)) {
             if (valodiCelSav.isVanEJarmu()) {
                 this.utkozos();
@@ -111,7 +115,6 @@ public abstract class Jarmu {
             Ut aktUt = pozicio.getUt();
             boolean megtalaltuk = false;
             
-            // Megkeressük, melyik szakaszba lépett át a jelenlegi úton
             for (List<Sav> szakasz : aktUt.getSzakaszok()) {
                 if (szakasz.contains(valodiCelSav)) {
                     this.pozicio = new Lokacio(aktUt, szakasz, valodiCelSav);
@@ -120,7 +123,6 @@ public abstract class Jarmu {
                 }
             }
             
-            // Ha nem az aktuális úton van, akkor kereszteződésen ment át
             if (!megtalaltuk) {
                 for (Ut kovUt : aktUt.getSzomszedok(1)) {
                     if (!kovUt.getSzakaszok().isEmpty() && kovUt.getSzakaszok().get(0).contains(valodiCelSav)) {
