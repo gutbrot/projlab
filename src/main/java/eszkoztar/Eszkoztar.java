@@ -86,9 +86,7 @@ public class Eszkoztar {
         }
     }
 
-    /**
-     * Ellenőrzi, hogy rendelkezésre áll-e a kért mennyiség az adott fogyóanyagból
-     */
+    // Ellenőrzi, hogy rendelkezésre áll-e a kért mennyiség az adott fogyóanyagból
     public boolean vanE(String tipus, int mennyiseg) {
         if (mennyiseg < 0) return false;
         switch (tipus.toLowerCase()) {
@@ -99,18 +97,14 @@ public class Eszkoztar {
         }
     }
 
-    /**
-     * Új kotrófej hozzáadása a raktárhoz (vásárlás után)
-     */
+    // Új kotrófej hozzáadása a raktárhoz (vásárlás után)
     public void hozzaadFej(KotroFej fej) {
         if (fej != null) {
             kotroFejek.add(fej);
         }
     }
 
-    /**
-     * Kivesz egy kotrófejet a raktárból felszereléshez.
-     */
+    // Kivesz egy kotrófejet a raktárból felszereléshez.
     public KotroFej kiveszFej(String fejNev) {
         if (fejNev == null) return null;
 
@@ -128,9 +122,7 @@ public class Eszkoztar {
         return null;
     }
 
-    /**
-     * Kiírja a raktáron lévő kotrófejek listáját a konzolra.
-     */
+    //Kiírja a raktáron lévő kotrófejek listáját a konzolra.
     public void listazKotroFejek() {
         //Ha nincs egyetlen kotrófej sem, jelezzük a játékosnak
         if (kotroFejek.isEmpty()) {
@@ -145,9 +137,7 @@ public class Eszkoztar {
         }
     }
 
-    /**
-     * Visszaadja a raktáron lévő kotrófejek módosíthatatlan listáját.
-     */
+    // Visszaadja a raktáron lévő kotrófejek módosíthatatlan listáját.
     public List<KotroFej> getKotroFejek() {
         return Collections.unmodifiableList(kotroFejek);
     }
