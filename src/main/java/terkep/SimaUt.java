@@ -7,8 +7,8 @@ import java.util.List;
  */
 public class SimaUt extends Ut {
     
-    public SimaUt(String nev, int hossz, int savokSzama) { 
-        super(nev, hossz, savokSzama); 
+    public SimaUt(String nev, int hossz, int pozSavokSzama, int negSavokSzama) { 
+        super(nev, hossz, pozSavokSzama, negSavokSzama); 
     }
 
     @Override

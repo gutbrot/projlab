@@ -7,8 +7,8 @@ import java.util.List;
  */
 public class Hid extends Ut {
     
-    public Hid(String nev, int hossz, int savokSzama) { 
-        super(nev, hossz, savokSzama); 
+    public Hid(String nev, int hossz, int pozSavokSzama, int negSavokSzama) { 
+        super(nev, hossz, pozSavokSzama, negSavokSzama); 
     }
 
     @Override

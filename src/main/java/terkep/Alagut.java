@@ -5,8 +5,8 @@ package terkep;
  */
 public class Alagut extends Ut {
     
-    public Alagut(String nev, int hossz, int savokSzama) { 
-        super(nev, hossz, savokSzama); 
+    public Alagut(String nev, int hossz, int pozSavokSzama, int negSavokSzama) { 
+        super(nev, hossz, pozSavokSzama, negSavokSzama); 
     }
 
     @Override
