@@ -9,16 +9,12 @@ import jatekos.Takarito;
  */
 public class zuzalekCsomag extends FogyoAnyag {
 
-    /**
-     * Konstruktor az ár és a mennyiség beállításához.
-     */
+    // Konstruktor az ár és a mennyiség beállításához.
     public zuzalekCsomag(int mennyiseg, int ar) {
         super(mennyiseg, ar);
     }
 
-    /**
-     * A vásárláskor lefutó átadási logika, amely a zúzalékot betölti a hókotróba.
-     */
+    // A vevőnek átadja a vásárolt terméket
     @Override
     public void atadVevonek(Takarito v) {
         //Létező vevő ellenőrzése.
@@ -41,9 +37,7 @@ public class zuzalekCsomag extends FogyoAnyag {
         }
     }
 
-    /**
-     * Visszaadja a termék nevét listázáshoz.
-     */
+    // A név getterje
     public String getNev() {
         return "ZuzalekCsomag";
     }
