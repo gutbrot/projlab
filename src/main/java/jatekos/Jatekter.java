@@ -30,6 +30,8 @@ public class Jatekter {
     // Az aktuális játékos indexe a jatekosok listájában, amely meghatározza, hogy ki a soron következő játékos.
     private int aktualisJatekosIndex = 0;
     private Scanner scanner = new Scanner(System.in);
+
+    private static Terkep globalTerkep;
     
     // A bolt, amelyből a takarító játékosok vásárolhatnak eszközöket és járműveket.
     private Bolt bolt = new Bolt();
@@ -42,6 +44,11 @@ public class Jatekter {
 
     public void setTerkep(Terkep terkep) {
         this.terkep = terkep;
+        globalTerkep = terkep; // Itt állítjuk be a statikus referenciát!
+    }
+
+    public static Terkep getGlobalTerkep() {
+        return globalTerkep;
     }
 
     // Játékos hozzáadása a játéktérhez, amely egyben összeköti a játékost a játéktérrel is.
@@ -159,25 +166,46 @@ public class Jatekter {
         return ujAktivJatekos;
     }
 
-    // Új kör kezdése: időjárás frissítése, járművek és játékosok körének indítása, AP-k visszaállítása
     public void ujKor() {
-        // Időjárás frissítése a térképen
         if (terkep != null) terkep.idojarasFrissites();
 
-        //npcAutokMozgatasa();                                  //!!!!!!!
-        
-        // Minden jármű új körének indítása
+        System.out.println("\n>>> [RENDSZER] NPC autók automatikus mozgatása...");
+        Navigacio navigacio = new Navigacio();
+
         for (Jarmu j : jarmuvek) {
-            j.ujKor();
+            if (j instanceof Auto) {
+                Auto auto = (Auto) j;
+                
+                // Ha balesetet szenvedett, pihen és gyógyul
+                if (auto.getMozgaskeptelenKorokSzama() > 0) {
+                    auto.ujKor();
+                    continue;
+                }
+
+                // Cél meghatározása: ha végállomáson van, forduljon meg
+                Lokacio[] vegallomasok = auto.getVegallomasok();
+                Lokacio cel = auto.vegallomasraErt() ? 
+                    (auto.getPozicio().getSav() == vegallomasok[0].getSav() ? vegallomasok[1] : vegallomasok[0]) 
+                    : vegallomasok[1];
+
+                // Útvonaltervezés és közvetlen mozgatás
+                Sav kovetkezoSav = navigacio.kovetkezoLepes(auto.getPozicio(), cel);
+                if (kovetkezoSav != null) {
+                    auto.mozgasDirekt(kovetkezoSav);
+                }
+            } else {
+                // Más járművek (hókotró, busz) baleseti számlálójának csökkentése
+                j.ujKor();
+            }
         }
 
-        // Minden játékos AP-jának visszaállítása
-        for (Jatekos j : jatekosok) {
-            if (j instanceof Takarito) j.setAkcioPont(3);
-            else j.setAkcioPont(3); 
+        // Akciópontok visszaállítása a kör elején
+        for (Jatekos jatekos : jatekosok) {
+            jatekos.setAkcioPont(3); 
         }
-        System.out.println("\n>>> --- ÚJ GLOBÁLIS KÖR KEZDŐDÖTT ---");
+        System.out.println(">>> --- ÚJ GLOBÁLIS KÖR KEZDŐDÖTT ---\n");
     }
+
     //todo: Ezen dolgozni kell még
     /*private void npcAutokMozgatasa() {
         System.out.println(">>> [RENDSZER] NPC autók automatikus mozgatása...");

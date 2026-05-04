@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import terkep.*;
+import jatekos.Jatekter;
 
 /**
  * A Jarmu egy absztrakt osztály, amely a játékban közlekedő járműveket reprezentálja.
@@ -162,4 +163,40 @@ public abstract class Jarmu {
             mozgaskeptelenKorokSzama--;
         }
     }
+
+    public boolean mozgasDirekt(Sav celSav) {
+    if (celSav == null || mozgaskeptelenKorokSzama > 0) return false;
+
+    // Csak akkor lépünk be, ha a sáv átjárható (nincs benne más jármű és nincs 30cm+ hó)
+    if (!celSav.atjarhatoE(this)) {
+        if (celSav.isVanEJarmu()) this.utkozos(); // Ha jármű van benne, ütközünk
+        return false;
+    }
+
+    // Régi sáv felszabadítása
+    if (pozicio != null && pozicio.getSav() != null) {
+        pozicio.getSav().setVanEJarmu(false);
+    }
+
+    // Új pozíció elfoglalása
+    celSav.setVanEJarmu(true);
+    celSav.novelAthaladok();
+    
+    // Lokáció objektum frissítése (megkeressük melyik úthoz tartozik a sáv)
+    frissitLokaciot(celSav);
+    
+    return true;
+}
+
+private void frissitLokaciot(Sav ujSav) {
+    // Ez a segédmetódus frissíti a 'pozicio' attribútumot a térkép alapján
+    for (Ut ut : Jatekter.getGlobalTerkep().getTeljesHalozat()) {
+        for (List<Sav> szakasz : ut.getSzakaszok()) {
+            if (szakasz.contains(ujSav)) {
+                this.pozicio = new Lokacio(ut, szakasz, ujSav);
+                return;
+            }
+        }
+    }
+}
 }
