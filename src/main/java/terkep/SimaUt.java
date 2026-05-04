@@ -7,12 +7,17 @@ import java.util.List;
  */
 public class SimaUt extends Ut {
     
-    public SimaUt(String nev, int hossz, int savokSzama) { 
-        super(nev, hossz, savokSzama); 
+    //KONSTRUKTOR
+    public SimaUt(String nev, int hossz, int pozSavokSzama, int negSavokSzama) { 
+        super(nev, hossz, pozSavokSzama, negSavokSzama); 
     }
 
+    /**
+     * A havazik metódus frissíti az út minden sávjának hóvastagságát a megadott érték szerint.
+     */
     @Override
     public void havazik(int h) {
+        //Minden szakasz minden sávjának hóvastagságát növeljük a megadott értékkel
         for (List<Sav> szakasz : szakaszok) {
             for (Sav sav : szakasz) {
                 int jelenlegiHo = sav.getHo();

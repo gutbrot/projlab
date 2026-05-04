@@ -1,0 +1,3 @@
+# Teszt8: Autó sikeres mozgása
+korvege
+korvege

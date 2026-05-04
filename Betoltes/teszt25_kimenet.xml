@@ -1,0 +1,90 @@
+<Init>
+    <Jatekallapot korok="1" />
+
+    <Terkep>
+        <Ut tipus="alagut" nev="A1" hossz="2" pozsav="2" negsav="0">
+            <Elagazodas>
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="hid" nev="H1" hossz="2" pozsav="2" negsav="0">
+            <Elagazodas>
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="sima" nev="S1" hossz="5" pozsav="4" negsav="0">
+            <Elagazodas>
+            </Elagazodas>
+        </Ut>
+    </Terkep>
+
+    <!-- alapbol minden utszakasz 0 0 0 0 -->
+    <Utviszonyok>
+        <!-- S1 -->
+        <Sav>
+            <Lokacio ut="S1" szakasz="4" sav="3" />
+            <Allapot athaladokszama="1" ho="0" so="0" zuzalek="0" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="S1" szakasz="5" sav="3" />
+            <Allapot athaladokszama="1" ho="0" so="0" zuzalek="0" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="S1" szakasz="5" sav="4" />
+            <Allapot athaladokszama="1" ho="0" so="0" zuzalek="0" />
+        </Sav>
+    </Utviszonyok>
+
+    <Jarmuvek>
+        <Hokotrok>
+            <Hokotro nev="H1">
+                <Lokacio ut="S1" szakasz="5" sav="4" />
+                <Eszkoztar>
+                    <!-- 0=nincs ilyen 1=van ilyen 2=felszerelt -->
+                    <Kotrofejek sopro="2" hanyo="0" sarkany="0" jegtoro="0" soszoro="0" zuzott="0" />
+                    <Fogyoanyagok so="0" biokerozin="0" zuzalek="0" />
+                </Eszkoztar>
+             </Hokotro>
+            <Hokotro nev="H2">
+                <Lokacio ut="S1" szakasz="4" sav="4" />
+                <Eszkoztar>
+                    <!-- 0=nincs ilyen 1=van ilyen 2=felszerelt -->
+                    <Kotrofejek sopro="2" hanyo="0" sarkany="0" jegtoro="0" soszoro="0" zuzott="0" />
+                    <Fogyoanyagok so="0" biokerozin="0" zuzalek="0" />
+                </Eszkoztar>
+             </Hokotro>
+        </Hokotrok>
+        <Buszok>
+            <Busz nev="B1" mozgaskeptelen="0">
+                <Lokacio ut="S1" szakasz="2" sav="2" />
+            </Busz>
+            <Busz nev="B2" mozgaskeptelen="0">
+                <Lokacio ut="H1" szakasz="1" sav="1" />
+            </Busz>
+        </Buszok>
+        <Autok>
+            <Auto id="A1" mozgaskeptelen="0">
+                <Lokacio ut="S1" szakasz="1" sav="1" />
+                <Lakas ut="S1" szakasz="1" sav="1" />
+                <Munkahely ut="S1" szakasz="5" sav="3" />
+            </Auto>
+            <Auto id="A2" mozgaskeptelen="0">
+                <Lokacio ut="A1" szakasz="2" sav="2" />
+                <Lakas ut="A1" szakasz="2" sav="2" />
+                <Munkahely ut="A1" szakasz="1" sav="2" />
+            </Auto>
+        </Autok>
+    </Jarmuvek>
+    <Jatekosok>
+        <Takaritok>
+            <Takarito id="T1" akcio="0" penz="100">
+                <Hokotro id="H1" />
+                <Hokotro id="H2" />
+            </Takarito>
+        </Takaritok>
+        <Buszvezetok>
+            <Buszvezeto id="B1" akcio="3" pont="0">
+                <Busz id="B1" />
+                <Busz id="B2" />
+            </Buszvezeto>
+        </Buszvezetok>
+    </Jatekosok>
+</Init>

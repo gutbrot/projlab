@@ -1,0 +1,2 @@
+mozgas 4
+mozgas 5

@@ -1,0 +1,7 @@
+#Teszt7: A havas úton 5 jármű halad át
+korvege
+korvege
+korvege
+korvege
+korvege
+korvege

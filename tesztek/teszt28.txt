@@ -1,0 +1,6 @@
+vasarlas JegtoroFej
+fejcsere JegtoroFej
+mozgas 5
+korvege
+mozgas 5
+mozgas 2

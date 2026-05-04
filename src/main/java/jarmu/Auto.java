@@ -10,6 +10,7 @@ public class Auto extends Jarmu {
     private final String id;
     private final Lokacio[] vegallomasok = new Lokacio[2];
 
+    //Konstruktor, amely inicializálja az autó azonosítóját, a két végállomást és a kezdő pozíciót.
     public Auto(String id, Lokacio v1, Lokacio v2, Lokacio kezdo) {
         super(kezdo);
         this.id = id;
@@ -17,22 +18,30 @@ public class Auto extends Jarmu {
         this.vegallomasok[1] = v2;
     }
 
+    /**
+     * Az autó ütközését figyelő metódus, amely kiírja a baleset tényét és az autó azonosítóját, 
+     * majd mozgásképtelenné teszi a járművet.
+     */
     @Override
     public void utkozos() {
         System.out.println(">>> [BALESET] Ütközés történt: Az " + id + " azonosítójú autó balesetet szenvedett!");
         mozgasKeptelen();
     }
 
+    /**
+     * Ellenőrzi, hogy az autó elérte-e valamelyik végállomást. Ha igen, akkor a jármű mozgásképtelenné válik.
+     */
     public boolean vegallomasraErt() {
         if (pozicio == null) return false;
         return pozicio.getSav() == vegallomasok[0].getSav() || 
                pozicio.getSav() == vegallomasok[1].getSav();
     }
 
+    // --- GETTEREK ---
     public String getId() { 
         return id; 
     }
-
+    
     public Lokacio[] getVegallomasok() { 
         return vegallomasok.clone(); 
     }

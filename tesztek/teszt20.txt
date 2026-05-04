@@ -1,0 +1,6 @@
+vasarlas SoszoroFej
+vasarlas SoCsomag
+0
+fejcsere SoszoroFej
+korvege
+mozgas 5

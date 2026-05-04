@@ -1,0 +1,8 @@
+vasarlas ZuzottFej
+vasarlas ZuzalekCsomag
+1
+mozgas 5
+korvege
+fejcsere ZuzottFej
+mozgas 6
+mozgas 2

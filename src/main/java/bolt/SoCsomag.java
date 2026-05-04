@@ -20,19 +20,17 @@ public class SoCsomag extends FogyoAnyag {
      */
     @Override
     public void atadVevonek(Takarito v) {
-        // Null check a játékosra.
+        //Null check a játékosra.
         if (v != null) {
-            // Aktív hókotró lekérdezése (ide kerül a só, nem közvetlenül a játékoshoz).
+            //Aktív hókotró lekérdezése (ide kerül a só, nem közvetlenül a játékoshoz).
             Hokotro aktivHokotro = v.hokotrotValaszt();
             
-            // Annak ellenőrzése, hogy létezik-e a hókotró és a benne lévő eszköztár.
+            //Annak ellenőrzése, hogy létezik-e a hókotró és a benne lévő eszköztár.
             if (aktivHokotro != null && aktivHokotro.getEszkoztar() != null) {
                 
-                // A só tényleges hozzáadása az Eszköztárhoz a "so" kulcsszóval.
-                // A maximális kapacitás ellenőrzését az Eszkoztar.hozzaad() metódus fogja elvégezni.
+                //A maximális kapacitás ellenőrzését az Eszkoztar.hozzaad() metódus fogja elvégezni.
                 aktivHokotro.getEszkoztar().hozzaad("so", mennyiseg);
                 
-                // Narratív logolás
                 System.out.println(">>> [BOLT] Sikeres vásárlás: " + mennyiseg + " egység só betöltve a Hókotró eszköztárába.");
             } else {
                 System.out.println(">>> [BOLT HIBA] A játékosnak nincs aktív hókotrója a só fogadásához!");

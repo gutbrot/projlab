@@ -10,6 +10,14 @@ import jarmu.*;
 import terkep.*;
 import bolt.*;
 import kotrofej.*;
+import seged.*;
+
+import org.w3c.dom.*;
+import javax.xml.parsers.*;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Jatekter {
     
@@ -22,6 +30,8 @@ public class Jatekter {
     // Az aktuális játékos indexe a jatekosok listájában, amely meghatározza, hogy ki a soron következő játékos.
     private int aktualisJatekosIndex = 0;
     private Scanner scanner = new Scanner(System.in);
+
+    private static Terkep globalTerkep;
     
     // A bolt, amelyből a takarító játékosok vásárolhatnak eszközöket és járműveket.
     private Bolt bolt = new Bolt();
@@ -30,6 +40,15 @@ public class Jatekter {
     // Konstruktor, amely inicializálja a játéktér térképét.
     public Jatekter(Terkep terkep) {
         this.terkep = terkep;
+    }
+
+    public void setTerkep(Terkep terkep) {
+        this.terkep = terkep;
+        globalTerkep = terkep; // Itt állítjuk be a statikus referenciát!
+    }
+
+    public static Terkep getGlobalTerkep() {
+        return globalTerkep;
     }
 
     // Játékos hozzáadása a játéktérhez, amely egyben összeköti a játékost a játéktérrel is.
@@ -45,39 +64,17 @@ public class Jatekter {
         if (j != null) jarmuvek.add(j); 
     }
 
-    /*
-    * Egy elmentett játék állapot beolvasásának parancsa
-    * Alapértelmezetten sikertelen, és csak akkor válik sikeressé, ha a fájl létezik.
-    * 
-    * @param fajlNev A beolvasni kívánt fájl neve
-    * @return True, ha a fájl létezik és a betöltés elindulhat, különben false.
-    */
     public boolean betoltes(String fajlNev) {
-        // A siker értékét alapból false-ra állítjuk.
-        boolean siker = false;
-
-        // Meghatározzuk az elérési utat a Betoltes mappán belül
-        String eleresiUt = "Betoltes/" + fajlNev;
-        File mentesFajl = new File(eleresiUt);
-
-        // Ellenőrizzük, hogy a fájl létezik-e
-        if (mentesFajl.exists()) {
-            // Ha létezik, a siker értékét true-ra állítjuk
-            siker = true;
+        // Tiszta lappal indulunk betöltéskor
+        this.jatekosok.clear();
+        this.jarmuvek.clear();
         
-            System.out.println(">>> [SIKER] A(z) '" + fajlNev + "' fájl megtalálható, betöltés folyamatban...");
+        seged.Betolteskezelo bekezelo = new seged.Betolteskezelo();
+        boolean siker = bekezelo.betolt(fajlNev, this);
         
-            // Itt hívódik meg a tényleges XML feldolgozás a jövőben
-        
-        
-            // Sikeres beolvasás után kiírja a játék állapotát a megfelelő formátumban
-            System.out.println(">>> [ÁLLAPOT] Játék adatai betöltve a(z) " + eleresiUt + " helyről.");
-        } else {
-            // Ha nem létezik, értesítjük a felhasználót
-            System.out.println(">>> [HIBA] A megadott fájl nem létezik a Betoltes mappában: " + eleresiUt);
+        if (siker) {
+            System.out.println(">>> [SIKER] Játékállapot betöltve a Játéktérbe.");
         }
-
-        // Visszatérünk a siker értékével
         return siker;
     }
 
@@ -88,24 +85,30 @@ public class Jatekter {
      * @return True, ha a mentés sikeres volt.
      */
     public boolean mentes(String fajlNev) {
-        boolean siker = false;
-        
-        // Fájlnév megtisztítása a biztonság kedvéért (kettőspontok cseréje)
-        String tisztaFajlNev = fajlNev.replace(":", "-") + ".xml";
+        // Fájlnév megtisztítása a biztonság kedvéért (kettőspontok cseréje, kiterjesztés hozzáadása)
+        String tisztaFajlNev = fajlNev.replace(":", "-");
+        if (!tisztaFajlNev.endsWith(".xml")) {
+            tisztaFajlNev += ".xml";
+        }
         String eleresiUt = "Betoltes/" + tisztaFajlNev;
         
         System.out.println(">>> [XML RENDSZER] Játék állapotának mentése előkészítve...");
         System.out.println(">>> [XML RENDSZER] Célfájl: " + eleresiUt);
         
-        // --- ITT TÖRTÉNNE A TÉNYLEGES XML GENERÁLÁS ÉS FÁJLBA ÍRÁS ---
-        // A placeholder kedvéért most egyből true-ra állítjuk
-        siker = true; 
-        //=============================================================
+        // BIZTONSÁG: Ellenőrizzük, hogy létezik-e a "Betoltes" mappa, és ha nem, létrehozzuk!
+        File mappa = new File("Betoltes");
+        if (!mappa.exists()) {
+            mappa.mkdir();
+            System.out.println(">>> [XML RENDSZER] Létrehozva a hiányzó 'Betoltes' könyvtár.");
+        }
+
+        // Tényleges mentés meghívása a MentesKezelo segítségével
+        boolean siker = seged.MentesKezelo.allapototMent(this, eleresiUt);
         
         if (siker) {
             System.out.println(">>> [SIKER] A játékállapot sikeresen kimentve az XML fájlba.");
         } else {
-            System.out.println(">>> [HIBA] Mentés sikertelen! Nincs írási jogosultság vagy hiányzó mappa.");
+            System.out.println(">>> [HIBA] Mentés sikertelen! Nincs írási jogosultság vagy hiba lépett fel.");
         }
         
         return siker;
@@ -163,23 +166,73 @@ public class Jatekter {
         return ujAktivJatekos;
     }
 
-    // Új kör kezdése: időjárás frissítése, járművek és játékosok körének indítása, AP-k visszaállítása
     public void ujKor() {
-        // Időjárás frissítése a térképen
         if (terkep != null) terkep.idojarasFrissites();
-        
-        // Minden jármű új körének indítása
+
+        System.out.println("\n>>> [RENDSZER] NPC autók automatikus mozgatása...");
+        Navigacio navigacio = new Navigacio();
+
         for (Jarmu j : jarmuvek) {
-            j.ujKor();
+            if (j instanceof Auto) {
+                Auto auto = (Auto) j;
+                
+                // Ha balesetet szenvedett, pihen és gyógyul
+                if (auto.getMozgaskeptelenKorokSzama() > 0) {
+                    auto.ujKor();
+                    continue;
+                }
+
+                // Cél meghatározása: ha végállomáson van, forduljon meg
+                Lokacio[] vegallomasok = auto.getVegallomasok();
+                Lokacio cel = auto.vegallomasraErt() ? 
+                    (auto.getPozicio().getSav() == vegallomasok[0].getSav() ? vegallomasok[1] : vegallomasok[0]) 
+                    : vegallomasok[1];
+
+                // Útvonaltervezés és közvetlen mozgatás
+                Sav kovetkezoSav = navigacio.kovetkezoLepes(auto.getPozicio(), cel);
+                if (kovetkezoSav != null) {
+                    auto.mozgasDirekt(kovetkezoSav);
+                }
+            } else {
+                // Más járművek (hókotró, busz) baleseti számlálójának csökkentése
+                j.ujKor();
+            }
         }
 
-        // Minden játékos AP-jának visszaállítása
-        for (Jatekos j : jatekosok) {
-            if (j instanceof Takarito) j.setAkcioPont(3);
-            else j.setAkcioPont(3); 
+        // Akciópontok visszaállítása a kör elején
+        for (Jatekos jatekos : jatekosok) {
+            jatekos.setAkcioPont(3); 
         }
-        System.out.println("\n>>> --- ÚJ GLOBÁLIS KÖR KEZDŐDÖTT ---");
+        System.out.println(">>> --- ÚJ GLOBÁLIS KÖR KEZDŐDÖTT ---\n");
     }
+
+    //todo: Ezen dolgozni kell még
+    /*private void npcAutokMozgatasa() {
+        System.out.println(">>> [RENDSZER] NPC autók automatikus mozgatása...");
+        seged.Navigacio navigacio = new seged.Navigacio();
+
+        for (Jarmu j : jarmuvek) {
+            if (j instanceof Auto) {
+                Auto auto = (Auto) j;
+                
+                if (auto.getMozgaskeptelenKorokSzama() > 0) continue;
+
+                // Az Auto 1-es indexű végállomása a munkahely/cél (a 0-ás a kiinduló lakás)
+                if (auto.getVegallomasok() != null && auto.getVegallomasok().length > 1) {
+                    Lokacio cel = auto.getVegallomasok()[1]; 
+                    
+                    if (cel != null && !auto.vegallomasraErt()) {
+                        Sav kovetkezoSav = navigacio.kovetkezoLepes(auto.getPozicio(), cel);
+                        
+                        if (kovetkezoSav != null) {
+                            // Itt hívjuk a frissen létrehozott direkt metódust!
+                            auto.mozgasDirekt(kovetkezoSav);
+                        }
+                    }
+                }
+            }
+        }
+    }*/
 
     /**
      * Játék inicializálása megadott paraméterekkel.
@@ -237,6 +290,18 @@ public class Jatekter {
         return true;
     }
 
+    public Terkep getTerkep() {
+        return this.terkep;
+    }
+
+    public java.util.List<jarmu.Jarmu> getJarmuvek() {                                  //Ha fölös törökjük
+        return this.jarmuvek;
+    }
+
+    public java.util.List<Jatekos> getJatekosok() {
+        return this.jatekosok;
+    }
+
     // A segítség parancs kiírja a lehetséges parancsokat és azok használatát
     private void kiirSegitseg() {
         System.out.println("--- ELÉRHETŐ PARANCSOK ---");
@@ -279,6 +344,7 @@ public class Jatekter {
         kiirSoronLevo(aktivJatekos);
 
         while (true) {
+            alapertelmezettJarmuBeallitasa(aktivJatekos);
             // Kimenet prompttal, hogy lássuk, ki a soron következő játékos
             System.out.print("[" + aktivJatekos.getNev() + "] > ");
             // Bemenet olvasása a konzolról
@@ -356,6 +422,7 @@ public class Jatekter {
                     jatekosok.get(aktualisJatekosIndex).forduloVege(aktivJatekos);
                     aktualisJatekosIndex = 0;
                     aktivJatekos = jatekosok.get(aktualisJatekosIndex);
+                    alapertelmezettJarmuBeallitasa(aktivJatekos);
                     System.out.println("SIKERES");
                     kiirSoronLevo(aktivJatekos);
                     break;
