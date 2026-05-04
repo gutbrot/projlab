@@ -8,9 +8,7 @@ import jarmu.Hokotro;
 import kotrofej.*;
 import bolt.Bolt;
 
-/**
- * A Takarito osztály felelős a rendszerben lévő hókotrók irányításáért.
- */
+ // A Takarito osztály felelős a rendszerben lévő hókotrók irányításáért.
 public class Takarito extends Jatekos {
 
     private List<Hokotro> iranyitottHokotrok = new ArrayList<>();
@@ -19,7 +17,7 @@ public class Takarito extends Jatekos {
     private Scanner scanner = new Scanner(System.in);
     private static int alapHokotroSzamlalo = 1;
 
-    //KONSTRUKTOROK
+    // KONSTRUKTOROK
     public Takarito(int akcioPont, int penz) {
         super(akcioPont);
         this.penz = penz;
@@ -29,14 +27,12 @@ public class Takarito extends Jatekos {
         this(akcioPont, 100); // Alapértelmezett kezdőtőke
     }
 
-    //GETTEREK
+    // GETTEREK
     public int getPenz() { return penz; }
     public Eszkoztar getEszkoztar() { return eszkoztar; }
     public List<Hokotro> getIranyitottHokotrok() { return iranyitottHokotrok; }
 
-    /**
-     * Lehetővé teszi a játékos számára, hogy kiválasszon egy irányítható hókotrót.
-     */
+    // Lehetővé teszi a játékos számára, hogy kiválasszon egy irányítható hókotrót.
     public Hokotro hokotrotValaszt() {
         //Csak azokat a hókotrókat listázza, amelyek irányíthatók
         if (iranyitottHokotrok.isEmpty()) {
@@ -65,19 +61,15 @@ public class Takarito extends Jatekos {
         return null;
     }
 
-    /**
-     * Akciópontot használ a hókotró mozgatására.
-     */
+    // A hókotró mozgatása
     public void hokotrotMozgat(Hokotro h) {
         //Csak akkor engedélyezi a mozgást, ha van elég akciópont és a hókotró nem null
         if (getAkcioPont() > 0 && h != null) {
-            akcioPontKezelo();
+            akcioPontKezelo(); // Akicópontot von le a játékosnak
         }
     }
 
-    /**
-     * Lehetővé teszi a játékos számára, hogy egy új kotrófejet szereljen fel egy irányítható hókotróra.
-     */
+    // Lehetővé teszi a játékos számára, hogy egy új kotrófejet szereljen fel egy irányítható hókotróra.
     public boolean kotrofejValt(Hokotro h, String fejNev) {
         //Csak akkor engedélyezi a fejváltást, ha van elég akciópont, a hókotró és a fej neve nem null, és a hókotró irányítható
         if (getAkcioPont() <= 0) {
@@ -115,9 +107,7 @@ public class Takarito extends Jatekos {
     }
 
 
-    /**
-     * Lehetővé teszi a játékos számára, hogy egy terméket vásároljon egy boltból.
-     */
+    // Lehetővé teszi a játékos számára, hogy egy terméket vásároljon egy boltból.
     public void vasarol(Bolt bolt, String termekNev) {
         //Csak akkor engedélyezi a vásárlást, ha van elég akciópont, a bolt nem null, és a termék neve nem null
         if (getAkcioPont() > 0 && bolt != null) {
@@ -126,24 +116,18 @@ public class Takarito extends Jatekos {
         }
     }
 
-    /**
-     * Lehetővé teszi a játékos számára, hogy egy terméket eladjon egy boltnak.
-     */
+    // A játékosnak pénzt kap
     public void penztKap(int p) {
         this.penz += p;
         System.out.println(">>> [FIZETES] A takaríto " + p + " penzt kapott! (Osszesen: " + this.penz + ")");
     }
     
-    /**
-     * Lehetővé teszi a játékos számára, hogy egy terméket eladjon egy boltnak.
-     */
+    // A játékostól pénzt von le
     public void penztLevon(int osszeg) {
         this.penz -= osszeg;
     }
 
-    /**
-     * Lehetővé teszi a játékos számára, hogy egy terméket eladjon egy boltnak.
-     */
+    // A játékoshoz hókotrót rendel
     public void hozzaadHokotro(Hokotro h) {
         if (h != null) iranyitottHokotrok.add(h);
     }
