@@ -12,6 +12,7 @@ import jatekos.Buszvezeto;
 import jatekos.Jatekos;
 import jatekos.Jatekter;
 import jatekos.Takarito;
+import jarmu.Busz;
 import jarmu.Hokotro;
 import terkep.Terkep;
 import terkep.TerkepLoader;
@@ -326,15 +327,23 @@ public class MenuFrame extends JFrame {
     private void jatekInditasa(Jatekter jatekter) {
         // A felvett játékosokat bevezetjük a Játéktérbe
         int hokotroCounter = 1;
+        int buszCounter = 1;
         for (Jatekos j : ideiglenesJatekosok) {
             jatekter.hozzaadJatekos(j);
-            
+
             // Ha takarító, adunk neki egy kezdő hókotrót, hogy legyen mivel mozognia
             if (j instanceof Takarito) {
                 Takarito t = (Takarito) j;
                 Hokotro h = new Hokotro("Hokotro_" + hokotroCounter++, jatekter.getTerkep(), null);
                 t.hozzaadHokotro(h);
                 jatekter.hozzaadJarmu(h);
+            } else if (j instanceof Buszvezeto) {
+                Buszvezeto bv = (Buszvezeto) j;
+                Busz b = new Busz("Busz_" + buszCounter++,
+                        jatekter.getTerkep().getRandomLokacio(), null, null);
+                b.setVezeto(bv);
+                bv.hozzaadBusz(b);
+                jatekter.hozzaadJarmu(b);
             }
         }
 

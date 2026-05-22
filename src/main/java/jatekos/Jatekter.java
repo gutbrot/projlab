@@ -308,6 +308,49 @@ public class Jatekter {
         return this.jatekosok;
     }
 
+    public Jatekos getAktivJatekos() {
+        if (jatekosok.isEmpty()) return null;
+        return jatekosok.get(aktualisJatekosIndex);
+    }
+
+    public Bolt getBolt() {
+        return bolt;
+    }
+
+    /**
+     * Ha az aktuális játékos AP-ja 0, automatikusan lezárja a körét.
+     * @return true, ha körváltás történt
+     */
+    public boolean autoKorvaltas() {
+        Jatekos akt = getAktivJatekos();
+        if (akt != null && akt.getAkcioPont() <= 0) {
+            korVegeVegrehajtas();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * GUI-ból hívható körváltó logika: lezárja az aktuális játékos körét,
+     * lépteti az indexet, és szükség esetén új globális kört indít.
+     */
+    public void korVegeVegrehajtas() {
+        if (jatekosok.isEmpty()) return;
+        Jatekos aktJatekos = jatekosok.get(aktualisJatekosIndex);
+        aktJatekos.korVege();
+        this.aktivJarmu = null;
+
+        aktualisJatekosIndex++;
+        if (aktualisJatekosIndex >= jatekosok.size()) {
+            ujKor();
+            aktualisJatekosIndex = 0;
+        }
+
+        Jatekos ujAktiv = jatekosok.get(aktualisJatekosIndex);
+        alapertelmezettJarmuBeallitasa(ujAktiv);
+        kiirSoronLevo(ujAktiv);
+    }
+
     // A segítség parancs kiírja a lehetséges parancsokat és azok használatát
     private void kiirSegitseg() {
         System.out.println("--- ELÉRHETŐ PARANCSOK ---");
