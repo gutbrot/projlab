@@ -130,7 +130,7 @@
                 <Eszkoztar>
                     <!-- 0=nincs ilyen 1=van ilyen 2=felszerelt -->
                     <Kotrofejek sopro="0" hanyo="0" sarkany="2" jegtoro="0" soszoro="0" zuzott="0" />
-                    <Fogyoanyagok so="0" biokerozin="0" zuzalek="0" />
+                    <Fogyoanyagok so="0" biokerozin="10" zuzalek="0" />
                 </Eszkoztar>
              </Hokotro>
             <Hokotro nev="H2">
