@@ -9,18 +9,12 @@ import jatekos.Takarito;
  */
 public class BiokerozinCsomag extends FogyoAnyag {
     
-    /**
-     * Konstruktor, ami beállítja a kerozin mennyiségét és árát 
-     * az ősosztály (FogyoAnyag) konstruktorának segítségével.
-     */
+    // Konstruktor, ami beállítja a kerozin mennyiségét és árát 
     public BiokerozinCsomag(int mennyiseg, int ar) {
         super(mennyiseg, ar);
     }
 
-    /**
-     * A tényleges vásárlási tranzakció befejezése. 
-     * Itt dől el, hova kerül a megvásárolt anyag a UML diagram alapján.
-     */
+    // A vevőnek átadja a vásárolt terméket
     @Override
     public void atadVevonek(Takarito v) {
         //Létezik-e egyáltalán a vevő?
@@ -47,10 +41,7 @@ public class BiokerozinCsomag extends FogyoAnyag {
         }
     }
 
-    /**
-     * Segédmetódus a menürendszer és a Bolt számára, hogy 
-     * ki tudja írni a termék nevét a kínálatban.
-     */
+    // Név getterje
     public String getNev() {
         return "BiokerozinCsomag";
     }

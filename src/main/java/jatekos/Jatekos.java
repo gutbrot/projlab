@@ -49,11 +49,7 @@ public abstract class Jatekos {
         this.nev = nev;
     }
     
-    /**
-     * Ez a metódus felelős a kör végének kezeléséért. 
-     * Amikor egy játékos befejezi a körét, ez a metódus hívódik meg, 
-     * amely nullázza az akciópontokat, és előkészíti a következő játékost a kör megkezdésére.
-     */
+    // Ez a metódus felelős a foduló végének kezeléséért.  
     public void forduloVege(Jatekos aktivJatekos) {
         this.akcioPont = 0;
         aktivJarmu = null;

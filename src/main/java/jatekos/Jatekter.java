@@ -42,11 +42,13 @@ public class Jatekter {
         this.terkep = terkep;
     }
 
+    // A térkép beállítása és a globális térkép frissítése.
     public void setTerkep(Terkep terkep) {
         this.terkep = terkep;
         globalTerkep = terkep; // Itt állítjuk be a statikus referenciát!
     }
 
+    // A globális térkép lekérdezése.
     public static Terkep getGlobalTerkep() {
         return globalTerkep;
     }
@@ -166,12 +168,15 @@ public class Jatekter {
         return ujAktivJatekos;
     }
 
+    // Új kör kezdése
     public void ujKor() {
+        // Térkép frissítése
         if (terkep != null) terkep.idojarasFrissites();
 
         System.out.println("\n>>> [RENDSZER] NPC autók automatikus mozgatása...");
         Navigacio navigacio = new Navigacio();
 
+        // Végigmegyünk a járművek listáján
         for (Jarmu j : jarmuvek) {
             if (j instanceof Auto) {
                 Auto auto = (Auto) j;
@@ -290,6 +295,7 @@ public class Jatekter {
         return true;
     }
 
+    // A globális térkép lekérdezése
     public Terkep getTerkep() {
         return this.terkep;
     }
@@ -473,6 +479,7 @@ public class Jatekter {
                 // A választ parancs lehetővé teszi a játékos számára, hogy kiválassza a fókuszban lévő járművet vagy kotrófejet az ID alapján.
                 case "valaszt":
                     if (darabok.length == 1) {
+                        // Ha nincs paraméter: csak listázzuk az elérhető járműveket
                         if (aktivJatekos instanceof Takarito) {
                             Takarito t = (Takarito) aktivJatekos;
                             List<Hokotro> hokotrok = t.getIranyitottHokotrok();
@@ -481,7 +488,7 @@ public class Jatekter {
                             } else {
                                 System.out.println(">>> Elérhető hókotrók:");
                                 for (Hokotro h : hokotrok) {
-                                    System.out.println("    - " + h.getId());
+                                    System.out.println("    - " + h.getId()); // ID-k listázása
                                 }
                             }
                         } else if (aktivJatekos instanceof Buszvezeto) {
@@ -498,17 +505,19 @@ public class Jatekter {
                         }
                         System.out.println("SIKERES");
                     } else {
+                        // Paraméteres eset: konkrét jármű kiválasztása ID alapján
                         boolean talalt = false;
                         String keresettId = darabok[1];
 
                         if (aktivJatekos instanceof Takarito) {
                             Takarito t = (Takarito) aktivJatekos;
 
+                            // Végigmegyünk az összes irányított hókotrón
                             for (Hokotro h : t.getIranyitottHokotrok()) {
                                 if (h.getId().equals(keresettId)) {
-                                    aktivJarmu = h;
+                                    aktivJarmu = h; // Kiválasztjuk aktív járműnek
                                     talalt = true;
-                                    break;
+                                    break;  // Megtaláltuk, nem kell tovább keresni
                                 }
                             }
                         } else if (aktivJatekos instanceof Buszvezeto) {
@@ -523,16 +532,19 @@ public class Jatekter {
                             }
                         }
 
+                        // Visszajelzés a keresés eredményéről
                         if (talalt) {
                             System.out.println(">>> Jarmu kiválasztva: " + keresettId);
                             System.out.println("SIKERES");
                         } else {
-                            System.out.println("HIBAS");
+                            System.out.println("HIBAS");    // Nem létező ID vagy nem a játékoshoz tartozik
                         }
                     }
                     break;
 
+                // Fejcsere parancs
                 case "fejcsere":
+                    // Csak takarító használhatja
                     if (!(aktivJatekos instanceof Takarito)) {
                         System.out.println("ROSSZ JATEKOS");
                         break;
@@ -547,12 +559,13 @@ public class Jatekter {
                         break;
                     }
 
+                     // Hibás paraméterezés (pl. túl kevés adat)
                     if (darabok.length < 2) {
                         System.out.println("HIBAS");
                         break;
                     }
 
-                    // Kell hozzá egy kiválasztott hókotró
+                    // Csak akkor lehet fejet cserélni, ha egy hókotró van kiválasztva
                     if (!(aktivJarmu instanceof Hokotro)) {
                         System.out.println("HIBAS");
                         break;
@@ -561,18 +574,21 @@ public class Jatekter {
                     Hokotro kivalasztottHokotro = (Hokotro) aktivJarmu;
                     String fejNev = darabok[1];
 
+                    // Fejcsere logika delegálva a Takarito osztálynak
                     if (tak.kotrofejValt(kivalasztottHokotro, fejNev)) {
                         System.out.println("SIKERES");
+                        // Akciópont csökkentése és esetleges körváltás
                         aktivJatekos = leptetHaNincsAkcioPont(aktivJatekos);
                     } else {
-                        System.out.println("HIBAS");
+                        System.out.println("HIBAS"); // Nincs ilyen fej
                     }
 
                     break;
 
+                // Mozgás parancs eset
                 case "mozgas":
                     if (aktivJarmu == null) {
-                        // Ha a játékos még nem választott járművet a 'valaszt' paranccsal
+                        // Ha a játékos még nem választott járművet a 'valaszt' paranccsal, akkor nem tud mozogni
                         System.out.println("HIBAS");
                     } else {
                         if (darabok.length == 1) {
@@ -591,14 +607,14 @@ public class Jatekter {
                                 
                                 boolean siker = aktivJarmu.mozgas(celSav);
                                 if (siker) {
-                                    aktivJatekos.akcioPontKezelo();
+                                    aktivJatekos.akcioPontKezelo(); // Akciópont levonás
                                     System.out.println("SIKERES");
                                     aktivJatekos = leptetHaNincsAkcioPont(aktivJatekos);
                                 } else {
-                                    System.out.println("HIBAS");
+                                    System.out.println("HIBAS");    // Nem elérhető vagy tiltott mozgás
                                 }
                             } catch (NumberFormatException e) {
-                                System.out.println("HIBAS");
+                                System.out.println("HIBAS");    // Nem szám típusú paraméter
                             }
                         }
                     }

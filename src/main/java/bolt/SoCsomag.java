@@ -8,16 +8,12 @@ import jatekos.Takarito;
  */
 public class SoCsomag extends FogyoAnyag {
     
-    /**
-     * Konstruktor, ami az ősosztály (FogyoAnyag) segítségével beállítja az árat és mennyiséget.
-     */
+    // Konstruktor, ami az ősosztály (FogyoAnyag) segítségével beállítja az árat és mennyiséget.
     public SoCsomag(int mennyiseg, int ar) {
         super(mennyiseg, ar);
     }
 
-    /**
-     * Megvalósítja a só átadását a játékos hókotrójának eszköztárába.
-     */
+    // A vevőnek átadja a vásárolt terméket
     @Override
     public void atadVevonek(Takarito v) {
         //Null check a játékosra.
@@ -40,9 +36,7 @@ public class SoCsomag extends FogyoAnyag {
         }
     }
 
-    /**
-     * A termék azonosító neve a menükhöz.
-     */
+    // A név getterje
     public String getNev() {
         return "SoCsomag";
     }
