@@ -8,6 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import jatekos.Jatekter;
+import jatekos.Jatekos;
+import jatekos.Takarito;
+import jarmu.Hokotro;
+import kotrofej.KotroFej;
 import bolt.Bolt;
 
 /**
@@ -161,11 +165,22 @@ public class TakaritoPanel extends JPanel {
      */
     private void vasarlasTranzakcio(String termekID) {
         System.out.println(">>> [TakaritoPanel] Tranzakció indítása: " + termekID);
-        // Itt a háttérben futó bolt.vasarlas(aktivTakarito, termekID) hívódik meg
-        
-        // Tranzakció után azonnal frissítjük a kijelzőket
+        Jatekos aktJatekos = jatekter.getAktivJatekos();
+        if (aktJatekos instanceof Takarito) {
+            Takarito takarito = (Takarito) aktJatekos;
+            if (takarito.getAkcioPont() <= 0) {
+                System.out.println(">>> [TakaritoPanel] Nincs elég akciópont!");
+            } else {
+                boolean siker = jatekter.getBolt().vasarlas(takarito, termekID);
+                if (siker) {
+                    takarito.akcioPontKezelo();
+                }
+                System.out.println(">>> [TakaritoPanel] Tranzakció: " + (siker ? "SIKERES" : "SIKERTELEN"));
+            }
+        }
+        jatekter.autoKorvaltas();
         feluletAdatFrissites();
-        mainFrame.terkepFrissites();
+        mainFrame.korFrissites();
     }
 
     /**
@@ -174,11 +189,18 @@ public class TakaritoPanel extends JPanel {
      */
     private void fejCsereVégrehajtas(String fejTipus) {
         System.out.println(">>> [TakaritoPanel] Fejcsere indítása: " + fejTipus);
-        // Itt az aktív takarító kotrofejValt() metódusa hívódik meg a modellben
-        
-        // Szerelés után újratöltjük az adatokat
+        Jatekos aktJatekos = jatekter.getAktivJatekos();
+        if (aktJatekos instanceof Takarito) {
+            Takarito takarito = (Takarito) aktJatekos;
+            if (!takarito.getIranyitottHokotrok().isEmpty()) {
+                Hokotro hokotro = takarito.getIranyitottHokotrok().get(0);
+                boolean siker = takarito.kotrofejValt(hokotro, fejTipus);
+                System.out.println(">>> [TakaritoPanel] Fejcsere: " + (siker ? "SIKERES" : "SIKERTELEN"));
+            }
+        }
+        jatekter.autoKorvaltas();
         feluletAdatFrissites();
-        mainFrame.terkepFrissites();
+        mainFrame.korFrissites();
     }
 
     /**
@@ -186,19 +208,32 @@ public class TakaritoPanel extends JPanel {
      * és naprakészen tartja a gombokat, feliratokat, legördülő listákat.
      */
     public void feluletAdatFrissites() {
-        // Biztonsági ellenőrzés a null referenciák elkerülésére
         if (jatekter == null) return;
 
-        // Példaként beállítunk fix értékeket, amíg a futtató hurok teljesen össze nem áll a backenddel
-        penzInfoLabel.setText("Egyenleg: 100 pénz");
-        aktivFejInfoLabel.setText("Aktív eszköz: SoproFej");
+        Jatekos aktJatekos = jatekter.getAktivJatekos();
+        if (!(aktJatekos instanceof Takarito)) {
+            penzInfoLabel.setText("Egyenleg: —");
+            aktivFejInfoLabel.setText("Aktív eszköz: —");
+            raktarFejekDoboz.removeAllItems();
+            felszerelesGomb.setEnabled(false);
+            return;
+        }
 
-        // Raktár legördülő listájának dinamikus tisztítása és újratöltése
+        Takarito takarito = (Takarito) aktJatekos;
+        penzInfoLabel.setText("Egyenleg: " + takarito.getPenz() + " pénz");
+
+        if (!takarito.getIranyitottHokotrok().isEmpty()) {
+            Hokotro h = takarito.getIranyitottHokotrok().get(0);
+            KotroFej fej = h.getFelszereltFej();
+            aktivFejInfoLabel.setText("Aktív eszköz: " + (fej != null ? fej.getClass().getSimpleName() : "Nincs"));
+        } else {
+            aktivFejInfoLabel.setText("Aktív eszköz: Nincs hókotró");
+        }
+
         raktarFejekDoboz.removeAllItems();
-        raktarFejekDoboz.addItem("HanyoFej");
-        raktarFejekDoboz.addItem("JegtoroFej");
-        
-        // Ha üres a raktár, a gombot inaktívvá tesszük
+        for (KotroFej fej : takarito.getEszkoztar().getKotroFejek()) {
+            raktarFejekDoboz.addItem(fej.getClass().getSimpleName());
+        }
         felszerelesGomb.setEnabled(raktarFejekDoboz.getItemCount() > 0);
     }
 }

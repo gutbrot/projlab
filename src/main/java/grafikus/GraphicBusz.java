@@ -3,8 +3,11 @@ package grafikus;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Font;
+import java.util.List;
 import jarmu.Busz;
+import jatekos.Jatekter;
 import terkep.Sav;
+import terkep.Terkep;
 import terkep.Ut;
 
 /**
@@ -68,12 +71,19 @@ public class GraphicBusz extends GraphicObject {
             Sav sav = busz.getPozicio().getSav();
             Ut ut = busz.getPozicio().getUt();
 
-            int utIndex = ut.getNev().hashCode() % 5;
+            int utIndex = 0;
+            Terkep globalTerkep = Jatekter.getGlobalTerkep();
+            if (globalTerkep != null) {
+                List<Ut> halozat = globalTerkep.getTeljesHalozat();
+                int idx = halozat.indexOf(ut);
+                if (idx >= 0) utIndex = idx;
+            }
+
             int savIndex = sav.getSavSzama();
 
-            // A buszok kicsit elcsúsztatva jelennek meg, hogy ne fedjék egymást teljesen
-            this.x = 135 + (utIndex * 140);
-            this.y = 80 + (savIndex * 35);
+            // TerkepPanel képletével azonos, kis x-eltolás a hokotróhoz képest
+            this.x = 100 + (utIndex * 150) + 35;
+            this.y = 80 + (savIndex * 35) + 5;
         }
     }
 }

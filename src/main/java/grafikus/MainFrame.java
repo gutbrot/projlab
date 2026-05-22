@@ -117,7 +117,12 @@ public class MainFrame extends JFrame {
                 takaritoPanel.feluletAdatFrissites();
             }
         }
-        
+
+        // Mozgáspanel dropdownjainak frissítése (jármű- és sávlista az új játékoshoz)
+        if (mozgasPanel != null) {
+            mozgasPanel.frissit();
+        }
+
         // Térkép vizuális újrarajzolása
         terkepFrissites();
     }

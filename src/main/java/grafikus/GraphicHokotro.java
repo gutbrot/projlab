@@ -2,8 +2,11 @@ package grafikus;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.List;
 import jarmu.Hokotro;
+import jatekos.Jatekter;
 import terkep.Sav;
+import terkep.Terkep;
 import terkep.Ut;
 
 /**
@@ -76,14 +79,21 @@ public class GraphicHokotro extends GraphicObject {
         if (hokotro != null && hokotro.getPozicio() != null) {
             Sav sav = hokotro.getPozicio().getSav();
             Ut ut = hokotro.getPozicio().getUt();
-            
-            // Egyszerűsített dinamikus koordináta-leképezés az úthálózat alapján
-            int utIndex = ut.getNev().hashCode() % 5; 
+
+            // Az út indexét a globális térképből olvassuk (hashCode negatív is lehet!)
+            int utIndex = 0;
+            Terkep globalTerkep = Jatekter.getGlobalTerkep();
+            if (globalTerkep != null) {
+                List<Ut> halozat = globalTerkep.getTeljesHalozat();
+                int idx = halozat.indexOf(ut);
+                if (idx >= 0) utIndex = idx;
+            }
+
             int savIndex = sav.getSavSzama();
-            
-            // Kiszámítjuk a pixel-pozíciókat a térképen
-            this.x = 120 + (utIndex * 140);
-            this.y = 80 + (savIndex * 35);
+
+            // TerkepPanel képletével azonos: xOffset = 100 + i*150, út szélessége 120px
+            this.x = 100 + (utIndex * 150) + 40;
+            this.y = 80 + (savIndex * 35) + 5;
         }
     }
 

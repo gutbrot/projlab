@@ -175,6 +175,34 @@ public abstract class Jarmu {
         }
     }
 
+    /**
+     * Visszaadja az aktuális pozícióból elérhető sávok listáját (sávváltás + előrehaladás).
+     * Ugyanaz a logika, mint a mozgas(null), de GUI számára listát ad vissza.
+     */
+    public List<Sav> getElerhetoSavok() {
+        List<Sav> elerhetoSavok = new ArrayList<>();
+        if (pozicio == null || pozicio.getUt() == null || pozicio.getSzakasz() == null) {
+            return elerhetoSavok;
+        }
+        Ut ut = pozicio.getUt();
+        List<Sav> jelenlegiSzakasz = pozicio.getSzakasz();
+        int szakaszIndex = ut.getSzakaszok().indexOf(jelenlegiSzakasz);
+
+        for (Sav s : jelenlegiSzakasz) {
+            if (s != pozicio.getSav()) elerhetoSavok.add(s);
+        }
+        if (szakaszIndex >= 0 && szakaszIndex + 1 < ut.getSzakaszok().size()) {
+            elerhetoSavok.addAll(ut.getSzakaszok().get(szakaszIndex + 1));
+        } else if (szakaszIndex != -1 && szakaszIndex + 1 == ut.getSzakaszok().size()) {
+            for (Ut kovUt : ut.getSzomszedok(1)) {
+                if (!kovUt.getSzakaszok().isEmpty()) {
+                    elerhetoSavok.addAll(kovUt.getSzakaszok().get(0));
+                }
+            }
+        }
+        return elerhetoSavok;
+    }
+
     //GETTEREK ÉS SETTEREK
     public Lokacio getPozicio() { return pozicio; }
     public int getMozgaskeptelenKorokSzama() { return mozgaskeptelenKorokSzama; }
