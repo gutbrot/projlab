@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import grafikus.GraphicsApp;
 import jarmu.Hokotro;
 import jatekos.Buszvezeto;
 import jatekos.Takarito;
@@ -21,9 +22,7 @@ public class Skeleton {
     private static List<Buszvezeto> tempBuszvezetok = new ArrayList<>();
     private static Scanner scanner = new Scanner(System.in);
 
-    /**
-     * A fő belépési pont a programba. Itt jelenik meg a főmenü, és innen lehet elindítani a különböző módokat.
-     */
+    /*
     public static void main(String[] args) {
         System.out.println("====================================");
         System.out.println("   HOKOTRO SZIMULATOR PROTOTIPUS    ");
@@ -61,6 +60,15 @@ public class Skeleton {
                     System.out.println(">>> Ervenytelen opcio!");
             }
         }
+    }
+**/
+
+    /**
+     * A grafikus változat belépési pontja.
+     */
+    public static void main(String[] args){
+            // A GUI indítása a Singleton GraphicsApp-on keresztül
+            GraphicsApp.getInstance().start();
     }
 
     /**

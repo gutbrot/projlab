@@ -34,6 +34,16 @@ public class Takarito extends Jatekos {
 
     // Lehetővé teszi a játékos számára, hogy kiválasszon egy irányítható hókotrót.
     public Hokotro hokotrotValaszt() {
+        
+        if (this.aktivJarmu instanceof Hokotro) {
+            return (Hokotro) this.aktivJarmu;
+        }
+
+        if (iranyitottHokotrok.size() == 1) {
+            this.aktivJarmu = iranyitottHokotrok.get(0);
+            return iranyitottHokotrok.get(0);
+        }
+
         //Csak azokat a hókotrókat listázza, amelyek irányíthatók
         if (iranyitottHokotrok.isEmpty()) {
             System.out.println("    [KUDARC] Nincs iranyithato hokotro a listaban!");
@@ -47,19 +57,17 @@ public class Takarito extends Jatekos {
         }
 
         //Kiválasztás index alapján
-        System.out.print("? Valasszon indexet: ");
+        String sor = skeleton.Console.readLine("? Valasszon indexet: ");
         try {
-            int index = Integer.parseInt(scanner.nextLine());
-            //Csak akkor adja vissza a hókotró objektumot, ha az index érvényes
+            int index = Integer.parseInt(sor.trim());
             if (index >= 0 && index < iranyitottHokotrok.size()) {
                 return iranyitottHokotrok.get(index);
             }
         } catch (Exception e) {
             System.out.println(">>> Ervenytelen valasztas.");
         }
-
         return null;
-    }
+        }
 
     // A hókotró mozgatása
     public void hokotrotMozgat(Hokotro h) {

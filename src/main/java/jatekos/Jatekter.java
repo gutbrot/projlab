@@ -28,7 +28,7 @@ public class Jatekter {
     // A térkép, amelyen a játék zajlik.
     private Terkep terkep;
     // Az aktuális játékos indexe a jatekosok listájában, amely meghatározza, hogy ki a soron következő játékos.
-    private int aktualisJatekosIndex = 0;
+    public int aktualisJatekosIndex = 0;
     private Scanner scanner = new Scanner(System.in);
 
     private static Terkep globalTerkep;
@@ -124,7 +124,7 @@ public class Jatekter {
     }
 
     private void alapertelmezettJarmuBeallitasa(Jatekos jatekos) {
-        aktivJarmu = null;
+        jatekos.aktivJarmu = null;
 
         if (jatekos instanceof Takarito) {
             Takarito t = (Takarito) jatekos;
