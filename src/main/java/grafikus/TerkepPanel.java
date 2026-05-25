@@ -16,8 +16,7 @@ public class TerkepPanel extends JPanel {
     private Jatekter jatekter;
     private List<GraphicObject> rajzolandoObjektumok;
     
-    // --- KONSTANSOK A DINAMIKUS MÉRETEZÉSHEZ ---
-    // Ezeket használják a GraphicAuto, GraphicBusz és GraphicHokotro osztályok!
+    // Konstansok a dinamikus méretezéshez
     public static final int SAV_SZELESSEG = 40;
     public static final int SZAKASZ_MAGASSAG = 50;
 
@@ -37,7 +36,7 @@ public class TerkepPanel extends JPanel {
         poziciok.put("KeletiHid", new Point(700, 350));
         poziciok.put("DeliAlagut", new Point(400, 600));
 
-        // A rajzodon lévő számos nevek alapján is (biztonságból)
+        // A rajzodon lévő számos nevek alapján is
         poziciok.put("67", new Point(400, 50));   
         poziciok.put("1",  new Point(100, 350));  
         poziciok.put("99", new Point(400, 350));  
@@ -46,24 +45,17 @@ public class TerkepPanel extends JPanel {
         poziciok.put("11", new Point(400, 750));
     }
 
-    // Régi visszakompatibilitás miatt (hogy más osztályok se adjanak hibát, ha használják)
     public static Point getUtAlapPozicio(String nev) {
         return poziciok.getOrDefault(nev, new Point(50, 50));
     }
 
-    /**
-     * Kiszámolja a cella pontos koordinátáját (ahová a járművek rajzolódnak).
-     * EZT A METÓDUST KERESTE A FORDÍTÓ!
-     */
     public static Point getPontosCellaPozicio(Ut ut, List<Sav> szakasz, Sav sav) {
         Point alap = poziciok.get(ut.getNev());
-        if (alap == null) return new Point(50, 50); // Biztonsági alapérték
+        if (alap == null) return new Point(50, 50);
 
-        // Megkeressük a szakasz sorszámát (Y tengely eltolás)
         int szakaszIdx = ut.getSzakaszok().indexOf(szakasz);
         if (szakaszIdx == -1) szakaszIdx = 0;
 
-        // Megkeressük a sáv sorszámát a szakaszon belül (X tengely eltolás)
         int savIdx = -1;
         if (szakasz != null) {
             savIdx = szakasz.indexOf(sav);
@@ -95,7 +87,7 @@ public class TerkepPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         List<Ut> halozat = jatekter.getTerkep().getTeljesHalozat();
 
-        // 1. ÖSSZEKÖTŐ VONALAK RAJZOLÁSA (Az utak mögé)
+        // 1. ÖSSZEKÖTŐ VONALAK RAJZOLÁSA
         g2d.setStroke(new BasicStroke(6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2d.setColor(new Color(52, 152, 219, 150)); 
         
@@ -119,19 +111,47 @@ public class TerkepPanel extends JPanel {
             }
         }
 
-        // 2. UTAK, SZAKASZOK ÉS SÁVOK RAJZOLÁSA
+        // 2. UTAK, SZAKASZOK, SÁVOK ÉS IRÁNYOK RAJZOLÁSA
         for (Ut ut : halozat) {
             Point p = poziciok.get(ut.getNev());
             if (p == null) continue;
 
-            int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
+            int pozSav = ut.getPozSavokSzama();
+            int negSav = ut.getNegSavokSzama();
+            int osszSav = pozSav + negSav;
             int utSzelesseg = osszSav * SAV_SZELESSEG;
             int utMagassag = ut.getHossz() * SZAKASZ_MAGASSAG;
 
+            // Aszfalt alap
             g2d.setColor(new Color(149, 165, 166));
             g2d.fillRoundRect(p.x, p.y, utSzelesseg, utMagassag, 10, 10);
             g2d.setColor(Color.DARK_GRAY);
             g2d.drawRoundRect(p.x, p.y, utSzelesseg, utMagassag, 10, 10);
+
+            // --- ÚJ: IRÁNYJELZŐ NYILAK MINDEN CELLÁBA ---
+            for (int szakaszIdx = 0; szakaszIdx < ut.getHossz(); szakaszIdx++) {
+                for (int savIdx = 0; savIdx < osszSav; savIdx++) {
+                    int cx = p.x + (savIdx * SAV_SZELESSEG) + (SAV_SZELESSEG / 2);
+                    int cy = p.y + (szakaszIdx * SZAKASZ_MAGASSAG) + (SZAKASZ_MAGASSAG / 2);
+                    boolean isPositive = (savIdx < pozSav);
+
+                    // Halvány, átlátszó fehér nyíl
+                    g2d.setColor(new Color(255, 255, 255, 90)); 
+                    int size = 8; // Nyíl mérete
+
+                    if (isPositive) {
+                        // Pozitív irány: Lefelé mutató háromszög (mert nő a szakasz index)
+                        int[] xPoints = {cx - size, cx + size, cx};
+                        int[] yPoints = {cy - size, cy - size, cy + size};
+                        g2d.fillPolygon(xPoints, yPoints, 3);
+                    } else {
+                        // Negatív irány: Felfelé mutató háromszög (mert csökken a szakasz index)
+                        int[] xPoints = {cx - size, cx + size, cx};
+                        int[] yPoints = {cy + size, cy + size, cy - size};
+                        g2d.fillPolygon(xPoints, yPoints, 3);
+                    }
+                }
+            }
 
             // Szakaszok elválasztó vonalai (vízszintes)
             g2d.setColor(new Color(127, 140, 141, 100));
@@ -145,16 +165,19 @@ public class TerkepPanel extends JPanel {
             Stroke dashed = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
             for (int i = 1; i < osszSav; i++) {
                 int x = p.x + (i * SAV_SZELESSEG);
-                if (i == ut.getPozSavokSzama()) {
+                if (i == pozSav) {
+                    // Elválasztó vonal a pozitív és negatív sávok között (Záróvonal)
                     g2d.setColor(new Color(241, 196, 15));
                     g2d.setStroke(new BasicStroke(3));
                 } else {
+                    // Sima sávelválasztó
                     g2d.setColor(Color.WHITE);
                     g2d.setStroke(dashed);
                 }
                 g2d.drawLine(x, p.y, x, p.y + utMagassag);
             }
 
+            // Út neve
             g2d.setColor(Color.BLACK);
             g2d.setFont(new Font("Arial", Font.BOLD, 14));
             g2d.drawString("Út: " + ut.getNev(), p.x, p.y - 5);
