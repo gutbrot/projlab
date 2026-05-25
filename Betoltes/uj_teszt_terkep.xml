@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Init>
+    <Jatekallapot korok="1" />
+    
+    <!-- TÉRKÉP HÁLÓZAT: A hálózat egy teljesen zárt, körkörös gráf. 
+         Minden út kölcsönösen kapcsolódik a szomszédaihoz irany="1" értékkel, 
+         így a járművek az út végére érve garantáltan megtalálják a következő útvonalat. -->
+    <Terkep>
+        <Ut tipus="sima" nev="EszakUt" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="KeletUt" irany="1" />
+                <Szomszed nev="NyugatUt" irany="1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="hid" nev="KeletUt" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="EszakUt" irany="1" />
+                <Szomszed nev="DelUt" irany="1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="sima" nev="DelUt" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="KeletUt" irany="1" />
+                <Szomszed nev="NyugatUt" irany="1" />
+            </Elagazodas>
+        </Ut>
+        <Ut tipus="alagut" nev="NyugatUt" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="DelUt" irany="1" />
+                <Szomszed nev="EszakUt" irany="1" />
+            </Elagazodas>
+        </Ut>
+    </Terkep>
+
+    <!-- ÚTVISZONYOK: Példa állapotok -->
+    <Utviszonyok>
+        <Sav>
+            <Lokacio ut="EszakUt" szakasz="2" sav="1" />
+            <Allapot athaladokszama="0" ho="30" so="0" zuzalek="0" jeges="false" />
+        </Sav>
+        <Sav>
+            <Lokacio ut="KeletUt" szakasz="1" sav="1" />
+            <Allapot athaladokszama="0" ho="0" so="0" zuzalek="0" jeges="true" />
+        </Sav>
+    </Utviszonyok>
+
+    <!-- JÁRMŰVEK: Kezdőpozíciók a frissített hálózathoz igazítva -->
+    <Jarmuvek>
+        <Hokotrok>
+            <Hokotro id="H1" mozgaskeptelen="0">
+                <Lokacio ut="EszakUt" szakasz="1" sav="1" />
+                <Felszereles tipus="SoproFej" />
+                <Eszkoztar so="20" biokerozin="10" zuzalek="15" />
+            </Hokotro>
+        </Hokotrok>
+        <Buszok>
+            <Busz id="B1" mozgaskeptelen="0">
+                <Lokacio ut="EszakUt" szakasz="2" sav="1" />
+                <Vegallomas1 ut="EszakUt" szakasz="1" sav="1" />
+                <Vegallomas2 ut="DelUt" szakasz="3" sav="1" />
+            </Busz>
+        </Buszok>
+        <Autok>
+            <Auto id="A1" mozgaskeptelen="0">
+                <Lokacio ut="NyugatUt" szakasz="2" sav="1" />
+                <Lakas ut="NyugatUt" szakasz="2" sav="1" />
+                <Munkahely ut="KeletUt" szakasz="2" sav="1" />
+            </Auto>
+        </Autok>
+    </Jarmuvek>
+
+    <!-- JÁTÉKOSOK -->
+    <Jatekosok>
+        <Takaritok>
+            <Takarito nev="Takarito_1" penz="500" akcioPont="5">
+                <Eszkoztar so="0" biokerozin="0" zuzalek="0">
+                    <KotroFejek>
+                        <Fej tipus="SoszoroFej" />
+                    </KotroFejek>
+                </Eszkoztar>
+                <Hokotrok>
+                    <Ref id="H1" />
+                </Hokotrok>
+            </Takarito>
+        </Takaritok>
+        <Buszvezetok>
+            <Buszvezeto nev="Buszvezeto_1" pont="0" akcioPont="4">
+                <Buszok>
+                    <Ref id="B1" />
+                </Buszok>
+            </Buszvezeto>
+        </Buszvezetok>
+    </Jatekosok>
+</Init>

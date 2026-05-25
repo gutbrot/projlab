@@ -219,7 +219,7 @@ public class MenuFrame extends JFrame {
         panel.add(startGomb);
 
         // Térképválasztó ComboBox feltöltése alapértelmezett fájlokkal
-        String[] terkepek = {"teszt_terkep.xml", "teszt_terkep_penz.xml"};
+        String[] terkepek = {"teszt_terkep.xml", "teszt_terkep_penz.xml", "uj_teszt_terkep.xml"};
         terkepValaszto = new JComboBox<>(terkepek);
         terkepValaszto.setFont(new Font("Arial", Font.BOLD, 16));
         panel.add(terkepValaszto);

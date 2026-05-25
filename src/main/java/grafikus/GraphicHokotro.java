@@ -2,6 +2,7 @@ package grafikus;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.util.List;
 import jarmu.Hokotro;
 import jatekos.Jatekter;
@@ -9,100 +10,70 @@ import terkep.Sav;
 import terkep.Terkep;
 import terkep.Ut;
 
-/**
- * A hókotró járművek grafikus reprezentációjáért felelős osztály.
- * Kirajzolja a hókotró testét és jelzi annak aktuális felszereltségi állapotát.
- */
 public class GraphicHokotro extends GraphicObject {
 
-    /** A reprezentált hókotró modell-szintű objektuma. */
     private Hokotro hokotro;
-
-    /** Jelzi, hogy a hókotrón van-e jelenleg működő, felszerelt kotrófej. */
     private boolean vanKotrofej;
 
-    /**
-     * A GraphicHokotro konstruktora.
-     * Összeköti a grafikus reprezentációt a valós hókotró modellel.
-     *
-     * @param hokotro A kirajzolni kívánt hókotró jármű referenciája.
-     */
     public GraphicHokotro(Hokotro hokotro) {
         super();
         this.hokotro = hokotro;
         frissitPozicio();
     }
 
-    /**
-     * Kirajzolja a hókotrót a megadott grafikus kontextusra.
-     * Egy sötétkék téglalapként jelenik meg, elején egy narancssárga/sárga kotrófej-jelzéssel.
-     *
-     * @param g A Swing grafikus objektuma.
-     */
     @Override
     public void rajzol(Graphics g) {
-        // Pozíció frissítése a biztonság kedvéért a kirajzolás előtt
         frissitPozicio();
+        vanKotrofej = (hokotro.getFelszereltFej() != null);
 
-        // Hókotró alaptestének színezése (Sötét acélkék a télies hangulathoz)
-        g.setColor(new Color(41, 128, 185));
-        g.fillRect(x + 5, y + 5, 30, 20);
+        // Hókotró test (Sötétsárga/narancs masszív blokk)
+        g.setColor(new Color(230, 126, 34));
+        g.fillRect(x + 5, y + 2, 30, 26);
 
-        // Kerekek kirajzolása (fekete kis téglalapok)
+        // Vezérlő fülke (Szürke)
+        g.setColor(new Color(127, 140, 141));
+        g.fillRect(x + 12, y + 6, 12, 18);
+
+        // Kerekek
         g.setColor(Color.BLACK);
-        g.fillRect(x + 8, y + 2, 8, 4);
-        g.fillRect(x + 24, y + 2, 8, 4);
-        g.fillRect(x + 8, y + 24, 8, 4);
-        g.fillRect(x + 24, y + 24, 8, 4);
+        g.fillRoundRect(x + 8, y + 0, 8, 4, 2, 2);
+        g.fillRoundRect(x + 24, y + 0, 8, 4, 2, 2);
+        g.fillRoundRect(x + 8, y + 26, 8, 4, 2, 2);
+        g.fillRoundRect(x + 24, y + 26, 8, 4, 2, 2);
 
-        // Ablak/Szélvédő (világoskék)
-        g.setColor(new Color(174, 214, 241));
-        g.fillRect(x + 25, y + 8, 5, 14);
-
-        // Ha van felszerelt kotrófej, húzunk az elejére egy narancssárga tolólapot
-        frissitAllapot();
+        // Kotrófej jelzése (ha van felszerelve)
         if (vanKotrofej) {
-            g.setColor(new Color(230, 126, 34)); // Specifikáció szerinti narancssárga
+            g.setColor(new Color(192, 57, 43)); // Jól látható narancssárga/piros fej
             g.fillRect(x + 35, y + 2, 4, 26);
         }
 
-        // Jármű azonosítójának kiírása a tetőre fehér színnel
+        // Jármű azonosítójának kiírása
         g.setColor(Color.WHITE);
         g.drawString(hokotro.getId(), x + 7, y + 19);
     }
 
-    /**
-     * Kiszámítja és frissíti a képernyő-koordinátákat a hókotró sávhelyzete alapján.
-     */
-    @Override
+   @Override
     public void frissitPozicio() {
-        if (hokotro != null && hokotro.getPozicio() != null) {
-            Sav sav = hokotro.getPozicio().getSav();
-            Ut ut = hokotro.getPozicio().getUt();
+        if (hokotro == null || hokotro.getPozicio() == null || hokotro.getPozicio().getUt() == null) return;
 
-            // Az út indexét a globális térképből olvassuk (hashCode negatív is lehet!)
-            int utIndex = 0;
-            Terkep globalTerkep = Jatekter.getGlobalTerkep();
-            if (globalTerkep != null) {
-                List<Ut> halozat = globalTerkep.getTeljesHalozat();
-                int idx = halozat.indexOf(ut);
-                if (idx >= 0) utIndex = idx;
-            }
+        Sav sav = hokotro.getPozicio().getSav();
+        Ut ut = hokotro.getPozicio().getUt();
+        List<Sav> szakasz = hokotro.getPozicio().getSzakasz();
 
-            int savIndex = sav.getSavSzama();
+        if (sav == null || ut == null || szakasz == null) return;
 
-            // TerkepPanel képletével azonos: xOffset = 100 + i*150, út szélessége 120px
-            this.x = 100 + (utIndex * 150) + 40;
-            this.y = 80 + (savIndex * 35) + 5;
-        }
-    }
+        // JAVÍTÁS: Lekérjük a TerkepPanel közös statikus koordinátáját!
+        Point alapPoz = TerkepPanel.getUtAlapPozicio(ut.getNev());
 
-    /**
-     * Frissíti a hókotró belső grafikus állapotát (pl. kotrófej megléte) a modell alapján.
-     */
-    public void frissitAllapot() {
-        if (hokotro != null) {
-            this.vanKotrofej = (hokotro.getFelszereltFej() != null);
-        }
+        int szakaszIndex = ut.getSzakaszok().indexOf(szakasz);
+        int savIndex = sav.getSavSzama();
+
+        int szakaszMagassag = ut.getSzakaszok().size() > 0 ? 400 / ut.getSzakaszok().size() : 400;
+        int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
+        int savSzelesseg = osszSav > 0 ? 120 / osszSav : 120;
+
+        // Kiszámítjuk a pontos X és Y pozíciót a kiválasztott úthoz képest
+        this.x = alapPoz.x + (savIndex * savSzelesseg) + 10; 
+        this.y = alapPoz.y + (szakaszIndex * szakaszMagassag) + 15; 
     }
 }

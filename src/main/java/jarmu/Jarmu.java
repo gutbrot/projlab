@@ -79,7 +79,8 @@ public abstract class Jarmu {
         }
 
         //Tényleges mozgás logikája és validációja
-
+        //Régi verzió, de azért bent hagyom!!!!!!!!!!!!
+        /* 
         int valasztottIndex = ujSav.getSavSzama();
         
         //Ellenőrizzük, hogy létezik-e ilyen sorszám a listában
@@ -90,6 +91,29 @@ public abstract class Jarmu {
 
         //Kiválasztjuk a tényleges sávot az index alapján
         Sav valodiCelSav = elerhetoSavok.get(valasztottIndex);
+        */
+        
+        //////////////// Új verzó
+        Sav valodiCelSav = null;
+
+        // 1. ESET: GRAFIKUS MÓD - Az átadott sáv egy valódi sáv a térképről, ami már benne van az elérhető sávok listájában.
+        if (elerhetoSavok.contains(ujSav)) {
+            valodiCelSav = ujSav;
+        } 
+        // 2. ESET: KONZOL MÓD - Egy "fantom" sávot kaptunk, aminek a sávszáma valójában a menüből választott lista-index.
+        else {
+            int valasztottIndex = ujSav.getSavSzama();
+            if (valasztottIndex >= 0 && valasztottIndex < elerhetoSavok.size()) {
+                valodiCelSav = elerhetoSavok.get(valasztottIndex);
+            }
+        }
+
+        // Ha sem valós sávként, sem indexként nem értelmezhető
+        if (valodiCelSav == null) {
+            System.out.println("    >>> [KUDARC] Érvénytelen opció! A sáv nem elérhető.");
+            return false;
+        }
+        /// ////////////
 
         if (mozgaskeptelenKorokSzama > 0) {
             System.out.println("    >>> [KUDARC] A jármű mozgásképtelen még " + mozgaskeptelenKorokSzama + " körig.");

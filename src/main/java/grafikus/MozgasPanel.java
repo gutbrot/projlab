@@ -165,7 +165,9 @@ public class MozgasPanel extends JPanel {
 
         Jarmu kivalasztott = aktualisJarmuvek.get(jarmuIdx);
         // A mozgas() a Sav.savSzama értékét indexként használja az elerhetoSavok listában
-        boolean siker = kivalasztott.mozgas(new Sav(savIdx));
+        //boolean siker = kivalasztott.mozgas(new Sav(savIdx));
+        Sav valodiSav = elerhetoSavok.get(savIdx);
+        boolean siker = kivalasztott.mozgas(valodiSav);
         System.out.println(">>> [MozgasPanel] Mozgás: " + (siker ? "SIKERES" : "SIKERTELEN"));
 
         if (siker) {
