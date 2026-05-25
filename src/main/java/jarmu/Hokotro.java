@@ -3,6 +3,7 @@ package jarmu;
 import jatekos.Takarito;
 import eszkoztar.Eszkoztar;
 import kotrofej.KotroFej;
+import kotrofej.SoproFej;
 import bolt.IBoltiCikk;
 import terkep.*;
 import java.util.List;
@@ -57,7 +58,7 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
             String ujAzonosito = "H_" + vasaroltSzamlalo++;
             
             //Itt is a globalTerkep-et adjuk át, a konstruktor pedig elintézi a random pozíciót
-            Hokotro megvasaroltHokotro = new Hokotro(ujAzonosito, globalTerkep, null);
+            Hokotro megvasaroltHokotro = new Hokotro(ujAzonosito, globalTerkep, new SoproFej(30));
             //A vásárlás után a megvásárolt hókotrót hozzáadjuk a vevő eszköztárához
             v.hozzaadHokotro(megvasaroltHokotro);
 

@@ -14,6 +14,7 @@ import jatekos.Jatekter;
 import jatekos.Takarito;
 import jarmu.Busz;
 import jarmu.Hokotro;
+import kotrofej.SoproFej;
 import terkep.Terkep;
 import terkep.TerkepLoader;
 
@@ -334,7 +335,7 @@ public class MenuFrame extends JFrame {
             // Ha takarító, adunk neki egy kezdő hókotrót, hogy legyen mivel mozognia
             if (j instanceof Takarito) {
                 Takarito t = (Takarito) j;
-                Hokotro h = new Hokotro("Hokotro_" + hokotroCounter++, jatekter.getTerkep(), null);
+                Hokotro h = new Hokotro("Hokotro_" + hokotroCounter++, jatekter.getTerkep(), new SoproFej(30));
                 t.hozzaadHokotro(h);
                 jatekter.hozzaadJarmu(h);
             } else if (j instanceof Buszvezeto) {

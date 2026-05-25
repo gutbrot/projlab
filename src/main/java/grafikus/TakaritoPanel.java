@@ -13,6 +13,9 @@ import jatekos.Takarito;
 import jarmu.Hokotro;
 import kotrofej.KotroFej;
 import bolt.Bolt;
+import bolt.FogyoAnyag;
+import bolt.IBoltiCikk;
+import java.util.List;
 
 /**
  * A Takarító játékosok speciális interakcióit (vásárlás, fejcsere) kezelő vezérlőpanel.
@@ -166,21 +169,68 @@ public class TakaritoPanel extends JPanel {
     private void vasarlasTranzakcio(String termekID) {
         System.out.println(">>> [TakaritoPanel] Tranzakció indítása: " + termekID);
         Jatekos aktJatekos = jatekter.getAktivJatekos();
-        if (aktJatekos instanceof Takarito) {
-            Takarito takarito = (Takarito) aktJatekos;
-            if (takarito.getAkcioPont() <= 0) {
-                System.out.println(">>> [TakaritoPanel] Nincs elég akciópont!");
-            } else {
-                boolean siker = jatekter.getBolt().vasarlas(takarito, termekID);
-                if (siker) {
-                    takarito.akcioPontKezelo();
+        if (!(aktJatekos instanceof Takarito)) return;
+
+        Takarito takarito = (Takarito) aktJatekos;
+        if (takarito.getAkcioPont() <= 0) {
+            System.out.println(">>> [TakaritoPanel] Nincs elég akciópont!");
+            return;
+        }
+
+        // Ha fogyóanyagot vásárol és több hókotrója is van, popup segít kiválasztani
+        IBoltiCikk cikk = jatekter.getBolt().getKinalat().get(termekID);
+        if (cikk instanceof FogyoAnyag && takarito.getIranyitottHokotrok().size() > 1) {
+            Hokotro kivalasztott = hokotroValasztasDialog(takarito);
+            if (kivalasztott == null) return; // felhasználó megszakította
+            takarito.aktivJarmu = kivalasztott;
+        }
+
+        // Hokotró vásárlásnál jegyezzük meg az előtti méretet
+        int hokotrokElotte = takarito.getIranyitottHokotrok().size();
+
+        boolean siker = jatekter.getBolt().vasarlas(takarito, termekID);
+        if (siker) {
+            takarito.akcioPontKezelo();
+
+            // Ha hókotrót vett, az újonnan létrehozott példányt regisztrálni kell a játéktérre
+            if (termekID.equals("Hokotro")) {
+                List<Hokotro> hokotrok = takarito.getIranyitottHokotrok();
+                if (hokotrok.size() > hokotrokElotte) {
+                    jatekter.hozzaadJarmu(hokotrok.get(hokotrok.size() - 1));
                 }
-                System.out.println(">>> [TakaritoPanel] Tranzakció: " + (siker ? "SIKERES" : "SIKERTELEN"));
             }
         }
+        System.out.println(">>> [TakaritoPanel] Tranzakció: " + (siker ? "SIKERES" : "SIKERTELEN"));
+
         jatekter.autoKorvaltas();
         feluletAdatFrissites();
         mainFrame.korFrissites();
+    }
+
+    /**
+     * Popup dialog, amellyel a játékos kiválaszthatja, melyik hókotrójához rendelje a fogyóanyagot.
+     * @return A kiválasztott Hokotro, vagy null ha a felhasználó bezárta az ablakot.
+     */
+    private Hokotro hokotroValasztasDialog(Takarito takarito) {
+        List<Hokotro> hokotrok = takarito.getIranyitottHokotrok();
+        String[] options = new String[hokotrok.size()];
+        for (int i = 0; i < hokotrok.size(); i++) {
+            options[i] = hokotrok.get(i).getId();
+        }
+        String kivalasztott = (String) JOptionPane.showInputDialog(
+            this,
+            "Melyik hókotróhoz rendeljük a fogyóanyagot?",
+            "Hókotró kiválasztása",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        if (kivalasztott == null) return null;
+        for (Hokotro h : hokotrok) {
+            if (h.getId().equals(kivalasztott)) return h;
+        }
+        return null;
     }
 
     /**
@@ -190,14 +240,23 @@ public class TakaritoPanel extends JPanel {
     private void fejCsereVégrehajtas(String fejTipus) {
         System.out.println(">>> [TakaritoPanel] Fejcsere indítása: " + fejTipus);
         Jatekos aktJatekos = jatekter.getAktivJatekos();
-        if (aktJatekos instanceof Takarito) {
-            Takarito takarito = (Takarito) aktJatekos;
-            if (!takarito.getIranyitottHokotrok().isEmpty()) {
-                Hokotro hokotro = takarito.getIranyitottHokotrok().get(0);
-                boolean siker = takarito.kotrofejValt(hokotro, fejTipus);
-                System.out.println(">>> [TakaritoPanel] Fejcsere: " + (siker ? "SIKERES" : "SIKERTELEN"));
-            }
+        if (!(aktJatekos instanceof Takarito)) return;
+
+        Takarito takarito = (Takarito) aktJatekos;
+        List<Hokotro> hokotrok = takarito.getIranyitottHokotrok();
+        if (hokotrok.isEmpty()) return;
+
+        Hokotro hokotro;
+        if (hokotrok.size() == 1) {
+            hokotro = hokotrok.get(0);
+        } else {
+            hokotro = hokotroValasztasDialog(takarito);
+            if (hokotro == null) return;
         }
+
+        boolean siker = takarito.kotrofejValt(hokotro, fejTipus);
+        System.out.println(">>> [TakaritoPanel] Fejcsere: " + (siker ? "SIKERES" : "SIKERTELEN"));
+
         jatekter.autoKorvaltas();
         feluletAdatFrissites();
         mainFrame.korFrissites();

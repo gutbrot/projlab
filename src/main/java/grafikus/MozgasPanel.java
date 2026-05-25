@@ -199,12 +199,28 @@ public class MozgasPanel extends JPanel {
         if (siker) {
             System.out.println(">>> [MozgasPanel] Mozgás sikeres!");
             aktJatekos.akcioPontKezelo();
+
+            // Ha hókotró lépett, automatikusan takarít és a takarító pénzt kap
+            if (kivalasztott instanceof Hokotro && aktJatekos instanceof Takarito) {
+                Hokotro hokotro = (Hokotro) kivalasztott;
+                Takarito takarito = (Takarito) aktJatekos;
+                Sav ujSav = hokotro.getPozicio().getSav();
+                int hoElotte = ujSav.getHo();
+                if (hoElotte > 0) {
+                    hokotro.takarit();
+                    int takaritott = hoElotte - ujSav.getHo();
+                    if (takaritott > 0) {
+                        takarito.penztKap(takaritott * 2);
+                    }
+                }
+            }
+
+            jatekter.autoKorvaltas();
         } else {
-             System.out.println(">>> [MozgasPanel] Mozgás SIKERTELEN!");
+            System.out.println(">>> [MozgasPanel] Mozgás SIKERTELEN!");
         }
 
-        // FONTOS JAVÍTÁS: Újra kell rajzolni a térképet
-        mainFrame.korFrissites(); 
+        mainFrame.korFrissites();
     }
 
     public void korVege() {
