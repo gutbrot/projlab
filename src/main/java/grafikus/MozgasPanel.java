@@ -128,8 +128,25 @@ public class MozgasPanel extends JPanel {
 
         Ut jelenlegiUt = poz.getUt();
         List<Sav> jelenlegiSzakasz = poz.getSzakasz();
-        elerhetoSavok = kivalasztott.getElerhetoSavok();
+        List<Sav> osszesSav = kivalasztott.getElerhetoSavok();
         boolean isPozitivDir = (poz.getSav().getSavSzama() < jelenlegiUt.getPozSavokSzama());
+
+        // Előrehaladás kerüljön az elejére; minden más mögé
+        List<Sav> eloreHaladas = new ArrayList<>();
+        List<Sav> tobbi = new ArrayList<>();
+        for (Sav s : osszesSav) {
+            boolean sajatSzakasz = jelenlegiSzakasz != null && jelenlegiSzakasz.contains(s);
+            if (!sajatSzakasz) {
+                boolean sajatUton = false;
+                for (List<Sav> sz : jelenlegiUt.getSzakaszok()) {
+                    if (sz.contains(s)) { sajatUton = true; break; }
+                }
+                if (sajatUton) { eloreHaladas.add(s); continue; }
+            }
+            tobbi.add(s);
+        }
+        elerhetoSavok.addAll(eloreHaladas);
+        elerhetoSavok.addAll(tobbi);
 
         for (Sav s : elerhetoSavok) {
             String akcio = "";
@@ -199,12 +216,28 @@ public class MozgasPanel extends JPanel {
         if (siker) {
             System.out.println(">>> [MozgasPanel] Mozgás sikeres!");
             aktJatekos.akcioPontKezelo();
+
+            // Ha hókotró lépett, automatikusan takarít és a takarító pénzt kap
+            if (kivalasztott instanceof Hokotro && aktJatekos instanceof Takarito) {
+                Hokotro hokotro = (Hokotro) kivalasztott;
+                Takarito takarito = (Takarito) aktJatekos;
+                Sav ujSav = hokotro.getPozicio().getSav();
+                int hoElotte = ujSav.getHo();
+                if (hoElotte > 0) {
+                    hokotro.takarit();
+                    int takaritott = hoElotte - ujSav.getHo();
+                    if (takaritott > 0) {
+                        takarito.penztKap(takaritott * 2);
+                    }
+                }
+            }
+
+            jatekter.autoKorvaltas();
         } else {
-             System.out.println(">>> [MozgasPanel] Mozgás SIKERTELEN!");
+            System.out.println(">>> [MozgasPanel] Mozgás SIKERTELEN!");
         }
 
-        // FONTOS JAVÍTÁS: Újra kell rajzolni a térképet
-        mainFrame.korFrissites(); 
+        mainFrame.korFrissites();
     }
 
     public void korVege() {

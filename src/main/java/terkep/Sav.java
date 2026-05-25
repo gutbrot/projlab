@@ -47,8 +47,8 @@ public class Sav {
             return false;
         }
 
-        //Ha 30 cm vagy annál nagyobb a hó, a sáv áthatolhatatlan.
-        if (hoVastagsag >= 30) {
+        //Ha 30 cm vagy annál nagyobb a hó, csak a hókotró tud áthajtani (és takarítani)
+        if (hoVastagsag >= 30 && !(j instanceof jarmu.Hokotro)) {
             System.out.println("    >>> [SÁV " + savSzama + "] Akadály: Túl nagy a hó (" + hoVastagsag + " cm), a jármű nem tud áthajtani.");
             return false;
         }

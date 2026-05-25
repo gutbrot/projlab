@@ -16,6 +16,9 @@ public abstract class Jarmu {
     
     protected Jarmu(Lokacio pozicio) {
         this.pozicio = pozicio;
+        if (pozicio != null && pozicio.getSav() != null) {
+            pozicio.getSav().setVanEJarmu(true);
+        }
     }
     
     /**

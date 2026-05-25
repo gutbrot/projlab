@@ -128,24 +128,43 @@ public class TerkepPanel extends JPanel {
             g2d.setColor(Color.DARK_GRAY);
             g2d.drawRoundRect(p.x, p.y, utSzelesseg, utMagassag, 10, 10);
 
-            // --- ÚJ: IRÁNYJELZŐ NYILAK MINDEN CELLÁBA ---
+            // CELLÁNKÉNTI RAJZOLÁS: hó/jég, majd iránynyíl
             for (int szakaszIdx = 0; szakaszIdx < ut.getHossz(); szakaszIdx++) {
+                List<Sav> szakaszSavok = ut.getSzakaszok().get(szakaszIdx);
                 for (int savIdx = 0; savIdx < osszSav; savIdx++) {
-                    int cx = p.x + (savIdx * SAV_SZELESSEG) + (SAV_SZELESSEG / 2);
-                    int cy = p.y + (szakaszIdx * SZAKASZ_MAGASSAG) + (SZAKASZ_MAGASSAG / 2);
+                    int cellX = p.x + (savIdx * SAV_SZELESSEG);
+                    int cellY = p.y + (szakaszIdx * SZAKASZ_MAGASSAG);
+                    int cx = cellX + SAV_SZELESSEG / 2;
+                    int cy = cellY + SZAKASZ_MAGASSAG / 2;
                     boolean isPositive = (savIdx < pozSav);
 
-                    // Halvány, átlátszó fehér nyíl
-                    g2d.setColor(new Color(255, 255, 255, 90)); 
-                    int size = 8; // Nyíl mérete
+                    // Hóviszonyok megjelenítése
+                    if (savIdx < szakaszSavok.size()) {
+                        Sav sav = szakaszSavok.get(savIdx);
+                        int ho = sav.getHo();
+                        if (ho > 0) {
+                            int alfa = Math.min(200, ho * 8);
+                            g2d.setColor(new Color(255, 255, 255, alfa));
+                            g2d.fillRect(cellX + 1, cellY + 1, SAV_SZELESSEG - 2, SZAKASZ_MAGASSAG - 2);
+                        }
+                        if (sav.jegesE()) {
+                            g2d.setColor(new Color(133, 193, 233, 160));
+                            g2d.fillRect(cellX + 1, cellY + 1, SAV_SZELESSEG - 2, SZAKASZ_MAGASSAG - 2);
+                        }
+                        if (sav.isZuzalekos()) {
+                            g2d.setColor(new Color(180, 180, 180, 150));
+                            g2d.drawRect(cellX + 2, cellY + 2, SAV_SZELESSEG - 4, SZAKASZ_MAGASSAG - 4);
+                        }
+                    }
 
+                    // Irányjelző nyíl
+                    g2d.setColor(new Color(255, 255, 255, 90));
+                    int size = 8;
                     if (isPositive) {
-                        // Pozitív irány: Lefelé mutató háromszög (mert nő a szakasz index)
                         int[] xPoints = {cx - size, cx + size, cx};
                         int[] yPoints = {cy - size, cy - size, cy + size};
                         g2d.fillPolygon(xPoints, yPoints, 3);
                     } else {
-                        // Negatív irány: Felfelé mutató háromszög (mert csökken a szakasz index)
                         int[] xPoints = {cx - size, cx + size, cx};
                         int[] yPoints = {cy + size, cy + size, cy - size};
                         g2d.fillPolygon(xPoints, yPoints, 3);

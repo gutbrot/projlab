@@ -1,7 +1,9 @@
 package grafikus;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.List;
 import jarmu.Hokotro;
@@ -26,25 +28,40 @@ public class GraphicHokotro extends GraphicObject {
         frissitPozicio();
         vanKotrofej = (hokotro.getFelszereltFej() != null);
 
-        g.setColor(new Color(230, 126, 34));
-        g.fillRoundRect(x, y, 26, 34, 5, 5);
+        boolean lefeleMegy = hokotro.getPozicio() != null
+                && hokotro.getPozicio().getSav() != null
+                && hokotro.getPozicio().getUt() != null
+                && hokotro.getPozicio().getSav().getSavSzama() < hokotro.getPozicio().getUt().getPozSavokSzama();
 
-        g.setColor(new Color(127, 140, 141));
-        g.fillRect(x + 5, y + 15, 16, 12);
-
-        g.setColor(Color.BLACK);
-        g.fillRoundRect(x - 2, y + 4, 4, 8, 2, 2);
-        g.fillRoundRect(x + 24, y + 4, 4, 8, 2, 2);
-        g.fillRoundRect(x - 2, y + 22, 4, 8, 2, 2);
-        g.fillRoundRect(x + 24, y + 22, 4, 8, 2, 2);
-
-        if (vanKotrofej) {
-            g.setColor(new Color(192, 57, 43)); 
-            g.fillRect(x - 2, y - 4, 30, 6); 
+        Graphics2D g2d = (Graphics2D) g.create();
+        if (lefeleMegy) {
+            // pozitív sáv = lefelé haladás → elő (pengefej) legyen lent
+            g2d.rotate(Math.PI, x + 13, y + 17);
         }
 
-        g.setColor(Color.WHITE);
-        g.drawString(hokotro.getId(), x - 10, y + 20);
+        g2d.setColor(new Color(230, 126, 34));
+        g2d.fillRoundRect(x, y, 26, 34, 5, 5);
+
+        g2d.setColor(new Color(127, 140, 141));
+        g2d.fillRect(x + 5, y + 15, 16, 12);
+
+        g2d.setColor(Color.BLACK);
+        g2d.fillRoundRect(x - 2, y + 4, 4, 8, 2, 2);
+        g2d.fillRoundRect(x + 24, y + 4, 4, 8, 2, 2);
+        g2d.fillRoundRect(x - 2, y + 22, 4, 8, 2, 2);
+        g2d.fillRoundRect(x + 24, y + 22, 4, 8, 2, 2);
+
+        if (vanKotrofej) {
+            g2d.setColor(new Color(192, 57, 43));
+            g2d.fillRect(x - 2, y - 4, 30, 6);
+        }
+
+        g2d.dispose();
+
+        // Felirat mindig egyenesen, a jármű bounding box felett
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 10));
+        g.drawString(hokotro.getId(), x - 5, y - 2);
     }
 
    @Override

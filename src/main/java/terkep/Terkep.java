@@ -55,18 +55,23 @@ public class Terkep {
         if (utak.isEmpty()) return null;
 
         Random rand = new Random();
-        //Választunk egy véletlen utat
-        Ut randomUt = utak.get(rand.nextInt(utak.size()));
-        
-        //Választunk az úton belül egy véletlen szakaszt
-        List<List<Sav>> szakaszok = randomUt.getSzakaszok();
-        int szakaszIdx = rand.nextInt(szakaszok.size());
-        List<Sav> randomSzakasz = szakaszok.get(szakaszIdx);
-        
-        //Választunk a szakaszon belül egy véletlen sávot
-        Sav randomSav = randomSzakasz.get(rand.nextInt(randomSzakasz.size()));
+        // Próbálunk szabad (nem foglalt) sávot találni, max 100 kísérlettel
+        for (int i = 0; i < 100; i++) {
+            Ut randomUt = utak.get(rand.nextInt(utak.size()));
+            List<List<Sav>> szakaszok = randomUt.getSzakaszok();
+            List<Sav> randomSzakasz = szakaszok.get(rand.nextInt(szakaszok.size()));
+            Sav randomSav = randomSzakasz.get(rand.nextInt(randomSzakasz.size()));
 
-        //Létrehozzuk a lokációt (feltételezve a Lokacio konstruktorát)
+            if (!randomSav.isVanEJarmu()) {
+                return new Lokacio(randomUt, randomSzakasz, randomSav);
+            }
+        }
+
+        // Fallback: ha a térkép teli, visszaadunk egy tetszőleges pozíciót
+        Ut randomUt = utak.get(rand.nextInt(utak.size()));
+        List<List<Sav>> szakaszok = randomUt.getSzakaszok();
+        List<Sav> randomSzakasz = szakaszok.get(rand.nextInt(szakaszok.size()));
+        Sav randomSav = randomSzakasz.get(rand.nextInt(randomSzakasz.size()));
         return new Lokacio(randomUt, randomSzakasz, randomSav);
     }
 }
