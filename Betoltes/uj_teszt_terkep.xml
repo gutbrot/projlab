@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Init>
+    <Jatekallapot korok="1" />
+    
+    <Terkep>
+        <!-- A rajz szerinti utak (1, 42, 99, 23, 11, 67) -->
+        
+        <!-- 67: Felső út -->
+        <Ut tipus="sima" nev="67" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="1" irany="1" />
+                <Szomszed nev="42" irany="1" />
+            </Elagazodas>
+        </Ut>
+        
+        <!-- 1: Bal oldali út -->
+        <Ut tipus="sima" nev="1" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="67" irany="1" />
+                <Szomszed nev="99" irany="1" />
+            </Elagazodas>
+        </Ut>
+        
+        <!-- 99: Központi út (Kereszteződés) -->
+        <Ut tipus="sima" nev="99" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="1" irany="1" />
+                <Szomszed nev="42" irany="1" />
+                <Szomszed nev="23" irany="1" />
+                <Szomszed nev="11" irany="1" />
+            </Elagazodas>
+        </Ut>
+        
+        <!-- 42: Jobb felső út -->
+        <Ut tipus="hid" nev="42" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="67" irany="1" />
+                <Szomszed nev="99" irany="1" />
+            </Elagazodas>
+        </Ut>
+        
+        <!-- 23: Jobb alsó út -->
+        <Ut tipus="hid" nev="23" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="99" irany="1" />
+                <Szomszed nev="11" irany="1" />
+            </Elagazodas>
+        </Ut>
+        
+        <!-- 11: Alsó út -->
+        <Ut tipus="alagut" nev="11" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="99" irany="1" />
+                <Szomszed nev="23" irany="1" />
+            </Elagazodas>
+        </Ut>
+    </Terkep>
+</Init>

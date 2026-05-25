@@ -34,96 +34,104 @@ public class MainFrame extends JFrame {
      */
     public MainFrame(Jatekter jatekter) {
         this.jatekter = jatekter;
-
-        // Ablak alapbeállításai
-        setTitle("Zúzmaraváros — Játék");
+        
+        setTitle("Hókotró Szimulátor");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Középre igazítás
-        setLayout(new BorderLayout()); // A specifikáció szerinti elrendezés
-        getContentPane().setBackground(new Color(236, 240, 241)); // Télies, világosszürke háttér
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        // Felső státuszsáv beállítása
-        statuszCimke = new JLabel("Inicializálás...");
+        // Felső státusz sáv (Aktuális játékos kiírása)
+        statuszCimke = new JLabel("Aktuális játékos: Betöltés...", SwingConstants.CENTER);
         statuszCimke.setFont(new Font("Arial", Font.BOLD, 16));
-        statuszCimke.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
-        statuszCimke.setForeground(new Color(44, 62, 80));
+        statuszCimke.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(statuszCimke, BorderLayout.NORTH);
 
-        // Panelek példányosítása és elhelyezése
+        // Panelek inicializálása - csak létrehozzuk őket, még nem frissítünk!
         terkepPanel = new TerkepPanel(jatekter);
         mozgasPanel = new MozgasPanel(this, jatekter);
+        //takaritoPanel = new TakaritoPanel(jatekter, this);
         takaritoPanel = new TakaritoPanel(this, jatekter);
 
-        add(terkepPanel, BorderLayout.CENTER);
+        // Középső játéktér panel
+        JScrollPane scrollPane = new JScrollPane(terkepPanel);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Jobb oldali panel (Mozgás vezérlő)
         add(mozgasPanel, BorderLayout.EAST);
+
+        // Alsó panel (Takarító eszközök / Vásárlás)
         add(takaritoPanel, BorderLayout.SOUTH);
+
+        // Az ablak megjelenítése
+        setVisible(true);
+
+        // FONTOS JAVÍTÁS: Az első kör frissítését az eseménykezelő szálra bízzuk,
+        // így biztosan lefut a komponensek teljes betöltése (elkerülve a NullPointerException-t).
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                korFrissites();
+            }
+        });
     }
 
     /**
-     * Frissíti a pálya megjelenítését.
-     * A pull-alapú architektúra részeként ez a metódus utasítja a TerkepPanel-t az újrarajzolásra.
+     * Frissíti a fejlécben megjelenő szöveget.
+     * @param szoveg Az új megjelenítendő szöveg.
      */
-    public void terkepFrissites() {
-        if (terkepPanel != null) {
-            terkepPanel.frissit();
+    public void aktivJatekosFrissites(String szoveg) {
+        if (statuszCimke != null) {
+            statuszCimke.setText("Aktuális játékos: " + szoveg);
         }
     }
 
     /**
-     * Engedélyezi vagy tiltja a takarító panel elemeit.
-     * Ha Buszvezető a soron lévő játékos, a specifikáció szerint a takarító vezérlők letiltásra kerülnek.
-     *
-     * @param engedelyezve Igaz esetén a panel látható és használható (Takarító), hamis esetén rejtett (Buszvezető).
+     * Engedélyezi vagy letiltja a takarítóhoz tartozó specifikus vezérlőpanelt.
+     * @param engedelyezett true esetén aktív, false esetén inaktív lesz.
      */
-    public void takaritoPanelEngedelyezes(boolean engedelyezve) {
+    public void takaritoPanelEngedelyezes(boolean engedelyezett) {
         if (takaritoPanel != null) {
-            takaritoPanel.setVisible(engedelyezve);
+            takaritoPanel.setVisible(engedelyezett);
         }
     }
 
     /**
-     * Frissíti az aktuális játékos adatait a felületen (pl. körváltáskor).
-     *
-     * @param jatekosNev Az újonnan aktívvá vált játékos neve és típusa.
-     */
-    public void aktivJatekosFrissites(String jatekosNev) {
-        statuszCimke.setText("Aktuális játékos: " + jatekosNev);
-    }
-
-    /**
-     * Frissíti a teljes felületet a soron lévő játékos típusának és állapotának megfelelően.
-     * Ezt a metódust hívja meg a rendszer minden kör végén (vagy a játék legelején).
+     * A globális körfrissítő metódus.
+     * Kigyűjti a modellből a legújabb állapotokat, és szétküldi azokat a megfelelő paneleknek.
      */
     public void korFrissites() {
+        // Biztonsági ellenőrzések: ha valami még null, nem futtatjuk le a frissítést
         if (jatekter == null || jatekter.getJatekosok().isEmpty()) return;
+        if (mozgasPanel == null || takaritoPanel == null || terkepPanel == null) return;
         
-        // Lekérjük az aktuális játékost a modellből (feltételezve, hogy a 0. indexszel kezdődik a lista,
-        // vagy a Jatekter tartja nyilván az 'aktualisJatekosIndex'-et)
-        // A te Jatekter kódod alapján az aktualisJatekosIndex publikus, de elegánsabb ha így kezeljük:
+        // Lekérjük az aktuális játékost a modellből
         int aktIndex = jatekter.aktualisJatekosIndex;
         if (aktIndex >= 0 && aktIndex < jatekter.getJatekosok().size()) {
             jatekos.Jatekos aktJatekos = jatekter.getJatekosok().get(aktIndex);
             
             // Felső felirat frissítése
+            String nev = aktJatekos.getNev() != null ? aktJatekos.getNev() : "Ismeretlen";
             String szerep = (aktJatekos instanceof jatekos.Takarito) ? " (Takarító)" : " (Buszvezető)";
-            aktivJatekosFrissites(aktJatekos.getNev() + szerep);
+            aktivJatekosFrissites(nev + szerep);
             
             // Takarító panel (bolt és szerelés) megjelenítése vagy elrejtése a szerepkör alapján
-            takaritoPanelEngedelyezes(aktJatekos instanceof jatekos.Takarito);
+            boolean isTakarito = (aktJatekos instanceof jatekos.Takarito);
+            takaritoPanelEngedelyezes(isTakarito);
             
             // Ha takarító, frissítjük a pénzét és a boltját is
-            if (aktJatekos instanceof jatekos.Takarito && takaritoPanel != null) {
+            if (isTakarito) {
                 takaritoPanel.feluletAdatFrissites();
             }
-        }
-
-        // Mozgáspanel dropdownjainak frissítése (jármű- és sávlista az új játékoshoz)
-        if (mozgasPanel != null) {
+            
+            // Mozgás panel frissítése
             mozgasPanel.frissit();
         }
-
-        // Térkép vizuális újrarajzolása
-        terkepFrissites();
+        
+        // Térkép újrarajzolása a megváltozott koordinátákkal
+        terkepPanel.jarmuGrafikusObjektumokFrissitese();
+        terkepPanel.repaint();
     }
 }

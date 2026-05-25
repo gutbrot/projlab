@@ -6,27 +6,22 @@ import java.io.File;
 import java.util.*;
 
 /**
- * A TerkepLoader osztály felelős a térkép XML fájlból történő betöltéséért.
- * A fájlban meghatározott utak, elágazások és útviszonyok alapján létrehozza a Terkep objektumot.
+ * Javított TerkepLoader: kezeli az utak létrehozását és az elágazások 
+ * alapján a szomszédsági kapcsolatok kétirányú felépítését.
  */
 public class TerkepLoader {
 
-    /**
-     * Betölti a térképet egy XML fájlból.
-     */
     public static Terkep betolt(String fajlNev) {
         String eleresiUt = "Betoltes/" + fajlNev;
         Terkep terkep = new Terkep();
         Map<String, Ut> utMap = new HashMap<>();
 
         try {
-            //XML fájl beolvasása és normalizálása
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(eleresiUt));
             doc.getDocumentElement().normalize();
 
-            //Utak létrehozása
+            // 1. Első menet: Utak létrehozása és tárolása a Map-ben
             NodeList nList = doc.getElementsByTagName("Ut");
-            //Az XML-ben található minden "Ut" elem feldolgozása
             for (int i = 0; i < nList.getLength(); i++) {
                 Element e = (Element) nList.item(i);
                 String nev = e.getAttribute("nev");
@@ -43,7 +38,30 @@ public class TerkepLoader {
                 utMap.put(nev, ujUt);
                 terkep.addUt(ujUt);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+
+            // 2. Második menet: Kapcsolatok (Elagazodas) beolvasása és összekötés
+            for (int i = 0; i < nList.getLength(); i++) {
+                Element e = (Element) nList.item(i);
+                String forrasNev = e.getAttribute("nev");
+                Ut forrasUt = utMap.get(forrasNev);
+
+                NodeList elagazasok = e.getElementsByTagName("Szomszed");
+                for (int j = 0; j < elagazasok.getLength(); j++) {
+                    Element szomszedElem = (Element) elagazasok.item(j);
+                    String celNev = szomszedElem.getAttribute("nev");
+                    int irany = Integer.parseInt(szomszedElem.getAttribute("irany"));
+                    
+                    Ut celUt = utMap.get(celNev);
+                    if (forrasUt != null && celUt != null) {
+                        // Kétirányú kapcsolat felépítése a modellben
+                        forrasUt.addSzomszed(celUt, irany);
+                    }
+                }
+            }
+        } catch (Exception e) { 
+            System.err.println("Hiba a térkép betöltésekor: " + e.getMessage());
+            e.printStackTrace(); 
+        }
         return terkep;
     }
 }

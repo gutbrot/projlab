@@ -16,6 +16,7 @@ import jarmu.Hokotro;
 import jarmu.Busz;
 import terkep.Lokacio;
 import terkep.Sav;
+import terkep.Ut;
 
 /**
  * A játékos mozgásának vezérléséért felelős panel.
@@ -31,9 +32,7 @@ public class MozgasPanel extends JPanel {
     private Jatekter jatekter;
     private final Color HATTER_SZIN = new Color(236, 240, 241);
 
-    /** Az aktuális játékos járműveinek listája (párhuzamos a jarmuValaszto elemekkel). */
     private List<Jarmu> aktualisJarmuvek = new ArrayList<>();
-    /** Az aktuálisan kiválasztott jármű elérhető sávjainak listája. */
     private List<Sav> elerhetoSavok = new ArrayList<>();
 
     public MozgasPanel(MainFrame mainFrame, Jatekter jatekter) {
@@ -83,12 +82,7 @@ public class MozgasPanel extends JPanel {
         add(korVegeGomb);
     }
 
-    /**
-     * Frissíti a jármű- és sávválasztó dropdownokat az aktuális játékos alapján.
-     * Ezt hívja a MainFrame.korFrissites() körváltáskor.
-     */
     public void frissit() {
-        // Leállítjuk az ActionListenert, hogy ne váltson ki savokFrissit()-et minden addItem()-nél
         ActionListener[] listeners = jarmuValaszto.getActionListeners();
         for (ActionListener l : listeners) jarmuValaszto.removeActionListener(l);
 
@@ -109,13 +103,15 @@ public class MozgasPanel extends JPanel {
         }
 
         for (ActionListener l : listeners) jarmuValaszto.addActionListener(l);
-
-        savokFrissit();
+        
+        // JAVÍTÁS: Ha van jármű, automatikusan válasszuk ki az elsőt a lista frissítése előtt
+        if (jarmuValaszto.getItemCount() > 0 && jarmuValaszto.getSelectedIndex() == -1) {
+            jarmuValaszto.setSelectedIndex(0);
+        } else {
+            savokFrissit();
+        }
     }
 
-    /**
-     * Frissíti a sávválasztó dropdownt a kiválasztott jármű elérhető sávjaival.
-     */
     private void savokFrissit() {
         savValaszto.removeAllItems();
         elerhetoSavok.clear();
@@ -130,29 +126,60 @@ public class MozgasPanel extends JPanel {
             return;
         }
 
+        Ut jelenlegiUt = poz.getUt();
         List<Sav> jelenlegiSzakasz = poz.getSzakasz();
         elerhetoSavok = kivalasztott.getElerhetoSavok();
+        boolean isPozitivDir = (poz.getSav().getSavSzama() < jelenlegiUt.getPozSavokSzama());
 
         for (Sav s : elerhetoSavok) {
-            boolean savvaltas = (jelenlegiSzakasz != null && jelenlegiSzakasz.contains(s));
-            String leiras = (savvaltas ? "Sávváltás" : "Előre") + " → Sáv " + s.getSavSzama();
+            String akcio = "";
+
+            if (jelenlegiSzakasz != null && jelenlegiSzakasz.contains(s)) {
+                boolean sIsPozitiv = (s.getSavSzama() < jelenlegiUt.getPozSavokSzama());
+                if (isPozitivDir != sIsPozitiv) {
+                    akcio = "Megfordulás";
+                } else {
+                    akcio = "Sávváltás";
+                }
+            } else {
+                boolean isUjUt = true;
+                for (List<Sav> szakasz : jelenlegiUt.getSzakaszok()) {
+                    if (szakasz.contains(s)) {
+                        isUjUt = false;
+                        break;
+                    }
+                }
+                
+                if (isUjUt) {
+                    akcio = "Kanyarodás";
+                } else {
+                    akcio = "Előrehaladás";
+                }
+            }
+
+            // JAVÍTÁS: Segít a hibakeresésben is, ha látjuk az utat is
+            String utNeve = "";
+            for (Ut u : jatekter.getTerkep().getTeljesHalozat()) {
+                for (List<Sav> szakasz : u.getSzakaszok()) {
+                    if (szakasz.contains(s)) {
+                        utNeve = u.getNev();
+                        break;
+                    }
+                }
+            }
+            
+            String leiras = akcio + " → " + utNeve + " Sáv " + s.getSavSzama();
             savValaszto.addItem(leiras);
         }
 
         if (elerhetoSavok.isEmpty()) {
-            savValaszto.addItem("(nincs elérhető sáv)");
+            savValaszto.addItem("(Zsákutca / Nincs lépés)");
         }
     }
 
-    /**
-     * Végrehajtja a mozgást: a kiválasztott jármű a kiválasztott sávra lép.
-     */
     private void mozgasKezeles() {
         int savIdx = savValaszto.getSelectedIndex();
-        if (savIdx < 0 || savIdx >= elerhetoSavok.size()) {
-            System.out.println(">>> [MozgasPanel] Nincs érvényes sáv kiválasztva.");
-            return;
-        }
+        if (savIdx < 0 || savIdx >= elerhetoSavok.size()) return;
 
         int jarmuIdx = jarmuValaszto.getSelectedIndex();
         if (jarmuIdx < 0 || jarmuIdx >= aktualisJarmuvek.size()) return;
@@ -164,24 +191,23 @@ public class MozgasPanel extends JPanel {
         }
 
         Jarmu kivalasztott = aktualisJarmuvek.get(jarmuIdx);
-        // A mozgas() a Sav.savSzama értékét indexként használja az elerhetoSavok listában
-        boolean siker = kivalasztott.mozgas(new Sav(savIdx));
-        System.out.println(">>> [MozgasPanel] Mozgás: " + (siker ? "SIKERES" : "SIKERTELEN"));
-
+        Sav valodiSav = elerhetoSavok.get(savIdx);
+        
+        System.out.println(">>> [MozgasPanel] Mozgás kérése a(z) " + valodiSav.getSavSzama() + ". sávra...");
+        boolean siker = kivalasztott.mozgas(valodiSav);
+        
         if (siker) {
+            System.out.println(">>> [MozgasPanel] Mozgás sikeres!");
             aktJatekos.akcioPontKezelo();
+        } else {
+             System.out.println(">>> [MozgasPanel] Mozgás SIKERTELEN!");
         }
 
-        jatekter.autoKorvaltas();
-        frissit();
-        mainFrame.korFrissites();
+        // FONTOS JAVÍTÁS: Újra kell rajzolni a térképet
+        mainFrame.korFrissites(); 
     }
 
-    /**
-     * Lezárja az aktuális kört és vált a következő játékosra.
-     */
     public void korVege() {
-        System.out.println(">>> [MozgasPanel] Kör befejezése gomb megnyomva.");
         jatekter.korVegeVegrehajtas();
         mainFrame.korFrissites();
     }
