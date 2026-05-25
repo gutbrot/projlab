@@ -128,8 +128,25 @@ public class MozgasPanel extends JPanel {
 
         Ut jelenlegiUt = poz.getUt();
         List<Sav> jelenlegiSzakasz = poz.getSzakasz();
-        elerhetoSavok = kivalasztott.getElerhetoSavok();
+        List<Sav> osszesSav = kivalasztott.getElerhetoSavok();
         boolean isPozitivDir = (poz.getSav().getSavSzama() < jelenlegiUt.getPozSavokSzama());
+
+        // Előrehaladás kerüljön az elejére; minden más mögé
+        List<Sav> eloreHaladas = new ArrayList<>();
+        List<Sav> tobbi = new ArrayList<>();
+        for (Sav s : osszesSav) {
+            boolean sajatSzakasz = jelenlegiSzakasz != null && jelenlegiSzakasz.contains(s);
+            if (!sajatSzakasz) {
+                boolean sajatUton = false;
+                for (List<Sav> sz : jelenlegiUt.getSzakaszok()) {
+                    if (sz.contains(s)) { sajatUton = true; break; }
+                }
+                if (sajatUton) { eloreHaladas.add(s); continue; }
+            }
+            tobbi.add(s);
+        }
+        elerhetoSavok.addAll(eloreHaladas);
+        elerhetoSavok.addAll(tobbi);
 
         for (Sav s : elerhetoSavok) {
             String akcio = "";

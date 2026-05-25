@@ -2,6 +2,7 @@ package grafikus;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Font;
 import java.util.List;
@@ -25,21 +26,34 @@ public class GraphicBusz extends GraphicObject {
     public void rajzol(Graphics g) {
         frissitPozicio();
 
-        g.setColor(new Color(241, 196, 15));
-        g.fillRoundRect(x, y, 24, 40, 5, 5);
+        boolean lefeleMegy = busz.getPozicio() != null
+                && busz.getPozicio().getSav() != null
+                && busz.getPozicio().getUt() != null
+                && busz.getPozicio().getSav().getSavSzama() < busz.getPozicio().getUt().getPozSavokSzama();
 
-        g.setColor(new Color(41, 128, 185)); 
-        g.fillRect(x + 2, y + 2, 20, 6);
+        Graphics2D g2d = (Graphics2D) g.create();
+        if (lefeleMegy) {
+            g2d.rotate(Math.PI, x + 12, y + 20);
+        }
 
-        g.setColor(Color.BLACK);
-        g.fillRect(x - 1, y + 5, 3, 6);
-        g.fillRect(x + 22, y + 5, 3, 6);
-        g.fillRect(x - 1, y + 30, 3, 6);
-        g.fillRect(x + 22, y + 30, 3, 6);
+        g2d.setColor(new Color(241, 196, 15));
+        g2d.fillRoundRect(x, y, 24, 40, 5, 5);
 
-        g.setColor(new Color(52, 73, 94));
-        g.fillRect(x + 4, y + 10, 16, 25);
+        g2d.setColor(new Color(41, 128, 185));
+        g2d.fillRect(x + 2, y + 2, 20, 6);
 
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(x - 1, y + 5, 3, 6);
+        g2d.fillRect(x + 22, y + 5, 3, 6);
+        g2d.fillRect(x - 1, y + 30, 3, 6);
+        g2d.fillRect(x + 22, y + 30, 3, 6);
+
+        g2d.setColor(new Color(52, 73, 94));
+        g2d.fillRect(x + 4, y + 10, 16, 25);
+
+        g2d.dispose();
+
+        // Felirat mindig egyenesen, a jármű bounding box felett
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 10));
         g.drawString(busz.getId(), x - 5, y - 2);

@@ -13,6 +13,9 @@ public class Busz extends Jarmu {
     private final String id;
     private final Lokacio[] vegallomasok = new Lokacio[2];
     private Buszvezeto vezeto;
+    private static int szamlalo = 1;
+
+    public static String kovetkezoId() { return "Busz_" + szamlalo++; }
 
     //Konstruktor a busz létrehozásához, megadva az azonosítót, kezdő pozíciót és a két végállomást.
     public Busz(String id, Lokacio pozicio, Lokacio v1, Lokacio v2) {

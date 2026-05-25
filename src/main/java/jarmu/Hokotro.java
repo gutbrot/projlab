@@ -18,11 +18,12 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
     private int ar = 50;
     private KotroFej felszereltFej;
     private Eszkoztar eszkoztar;
-    private static int vasaroltSzamlalo = 1; //Vásárlások számlálója a bolti azonosítóhoz
+    private static int szamlalo = 1; // Globális számlálő minden hokotróhoz
  
     private static Terkep globalTerkep; 
 
-    //Statikus setter, hogy a játék elején rögzíthessük, hol van a világ
+    public static String kovetkezoId() { return "Hókotró_" + szamlalo++; }
+
     public static void setGlobalTerkep(Terkep terkep) {
         globalTerkep = terkep;
     }
@@ -55,7 +56,7 @@ public class Hokotro extends Jarmu implements IBoltiCikk {
     public void atadVevonek(Takarito v) {
         //Ellenőrizzük, hogy a vevő és a globális térkép is érvényes-e
         if (v != null && globalTerkep != null) {
-            String ujAzonosito = "H_" + vasaroltSzamlalo++;
+            String ujAzonosito = kovetkezoId();
             
             //Itt is a globalTerkep-et adjuk át, a konstruktor pedig elintézi a random pozíciót
             Hokotro megvasaroltHokotro = new Hokotro(ujAzonosito, globalTerkep, new SoproFej(30));
