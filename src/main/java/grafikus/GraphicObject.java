@@ -1,6 +1,7 @@
 package grafikus;
 
 import java.awt.Graphics;
+import java.awt.Point; 
 
 /**
  * A játéktéren megjelenő minden rajzolható elem (autók, buszok, hókotrók) absztrakt ősosztálya.
@@ -67,5 +68,10 @@ public abstract class GraphicObject {
      */
     public void setY(int y) {
         this.y = y;
+    }
+
+    // Segédmetódus az alap pozícióhoz, amit a leszármazottak használnak
+    protected Point getUtKezdopont(String utNev) {
+        return TerkepPanel.getUtAlapPozicio(utNev);
     }
 }

@@ -3,155 +3,164 @@ package grafikus;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jatekos.Jatekter;
 import jarmu.*;
 import terkep.*;
 
-/**
- * A játéktér központi térképmegjelenítő panelje.
- * Pull-alapú adatolvasással kirajzolja az utakat, a sávok időjárási viszonyait 
- * (hó, jég, zúzalék) és a járművek grafikus objektumait egy összefüggő 2D-s úthálózatban.
- */
 public class TerkepPanel extends JPanel {
 
     private Jatekter jatekter;
     private List<GraphicObject> rajzolandoObjektumok;
-    private final Color TAJ_S_ZIN = new Color(214, 234, 248);
+    
+    // --- KONSTANSOK A DINAMIKUS MÉRETEZÉSHEZ ---
+    // Ezeket használják a GraphicAuto, GraphicBusz és GraphicHokotro osztályok!
+    public static final int SAV_SZELESSEG = 40;
+    public static final int SZAKASZ_MAGASSAG = 50;
+
+    // Fix pozíciók az utak BAL FELSŐ sarkához
+    private static final Map<String, Point> poziciok = new HashMap<>();
 
     public TerkepPanel(Jatekter jatekter) {
         this.jatekter = jatekter;
         this.rajzolandoObjektumok = new ArrayList<>();
-        // Megnövelt méret a görgetősávnak, hogy a teljes 2D-s hálózat kényelmesen elférjen
-        setPreferredSize(new Dimension(1000, 1450));
-        setBackground(TAJ_S_ZIN);
+        setPreferredSize(new Dimension(1000, 800));
+        setBackground(new Color(236, 240, 241)); // Havas, világos háttér
+
+        // Az XML-ben lévő nevek alapján
+        poziciok.put("EszakiUt", new Point(400, 50));
+        poziciok.put("NyugatiUt", new Point(100, 350));
+        poziciok.put("Kozpont", new Point(400, 350));
+        poziciok.put("KeletiHid", new Point(700, 350));
+        poziciok.put("DeliAlagut", new Point(400, 600));
+
+        // A rajzodon lévő számos nevek alapján is (biztonságból)
+        poziciok.put("67", new Point(400, 50));   
+        poziciok.put("1",  new Point(100, 350));  
+        poziciok.put("99", new Point(400, 350));  
+        poziciok.put("42", new Point(700, 350));  
+        poziciok.put("23", new Point(700, 600));  
+        poziciok.put("11", new Point(400, 750));
+    }
+
+    // Régi visszakompatibilitás miatt (hogy más osztályok se adjanak hibát, ha használják)
+    public static Point getUtAlapPozicio(String nev) {
+        return poziciok.getOrDefault(nev, new Point(50, 50));
     }
 
     /**
-     * Statikus segédmetódus, amely visszaadja egy adott út alapértelmezett koordinátáit a képernyőn.
-     * Intelligens szövegegyezést használ, így mindegy, hogy "EszakUt" vagy "EszakiUt" a név az XML-ben.
+     * Kiszámolja a cella pontos koordinátáját (ahová a járművek rajzolódnak).
+     * EZT A METÓDUST KERESTE A FORDÍTÓ!
      */
-    public static Point getUtAlapPozicio(String nev) {
-        if (nev == null) return new Point(100, 80);
-        String n = nev.toLowerCase();
-        
-        if (n.contains("kozpont"))   return new Point(400, 500); // Középen
-        if (n.contains("eszak"))     return new Point(400, 50);  // Fent
-        if (n.contains("kelet"))     return new Point(700, 500); // Jobbra
-        if (n.contains("nyugat"))    return new Point(100, 500); // Balra
-        if (n.contains("del"))       return new Point(400, 950); // Lent
-        
-        return new Point(100, 80); // Alapértelmezett fallback pozíció
+    public static Point getPontosCellaPozicio(Ut ut, List<Sav> szakasz, Sav sav) {
+        Point alap = poziciok.get(ut.getNev());
+        if (alap == null) return new Point(50, 50); // Biztonsági alapérték
+
+        // Megkeressük a szakasz sorszámát (Y tengely eltolás)
+        int szakaszIdx = ut.getSzakaszok().indexOf(szakasz);
+        if (szakaszIdx == -1) szakaszIdx = 0;
+
+        // Megkeressük a sáv sorszámát a szakaszon belül (X tengely eltolás)
+        int savIdx = -1;
+        if (szakasz != null) {
+            savIdx = szakasz.indexOf(sav);
+        }
+        if (savIdx == -1) savIdx = 0;
+
+        int x = alap.x + (savIdx * SAV_SZELESSEG);
+        int y = alap.y + (szakaszIdx * SZAKASZ_MAGASSAG);
+        return new Point(x, y);
     }
 
     public void jarmuGrafikusObjektumokFrissitese() {
-        if (jatekter == null) return;
-
+        if (jatekter == null || jatekter.getJarmuvek() == null) return;
         rajzolandoObjektumok.clear();
-        List<Jarmu> modelJarmuvek = jatekter.getJarmuvek();
-
-        for (Jarmu j : modelJarmuvek) {
-            if (j instanceof Hokotro) {
-                rajzolandoObjektumok.add(new GraphicHokotro((Hokotro) j));
-            } else if (j instanceof Busz) {
-                rajzolandoObjektumok.add(new GraphicBusz((Busz) j));
-            } else if (j instanceof Auto) {
-                rajzolandoObjektumok.add(new GraphicAuto((Auto) j));
-            }
+        for (Jarmu j : jatekter.getJarmuvek()) {
+            if (j.getPozicio() == null || j.getPozicio().getUt() == null) continue;
+            if (j instanceof Hokotro) rajzolandoObjektumok.add(new GraphicHokotro((Hokotro) j));
+            else if (j instanceof Busz) rajzolandoObjektumok.add(new GraphicBusz((Busz) j));
+            else if (j instanceof Auto) rajzolandoObjektumok.add(new GraphicAuto((Auto) j));
         }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        
         if (jatekter == null || jatekter.getTerkep() == null) return;
 
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         List<Ut> halozat = jatekter.getTerkep().getTeljesHalozat();
 
-        for (Ut ut : halozat) {
-            int szakaszSzam = ut.getHossz(); 
-            int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
+        // 1. ÖSSZEKÖTŐ VONALAK RAJZOLÁSA (Az utak mögé)
+        g2d.setStroke(new BasicStroke(6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.setColor(new Color(52, 152, 219, 150)); 
+        
+        for (Ut forrasUt : halozat) {
+            Point p1 = poziciok.get(forrasUt.getNev());
+            if (p1 == null) continue;
             
-            // Kiszámoljuk egy cella szélességét (X) és magasságát (Y)
-            int szakaszMagassag = szakaszSzam > 0 ? 400 / szakaszSzam : 400;
-            int savSzelesseg = osszSav > 0 ? 120 / osszSav : 120;
+            int szelesseg1 = (forrasUt.getPozSavokSzama() + forrasUt.getNegSavokSzama()) * SAV_SZELESSEG;
+            int magassag1 = forrasUt.getHossz() * SZAKASZ_MAGASSAG;
+            Point kozep1 = new Point(p1.x + szelesseg1 / 2, p1.y + magassag1 / 2);
 
-            // Lekérjük az aktuális út fix pozícióját a hálózatban
-            Point alapPoz = getUtAlapPozicio(ut.getNev());
-
-            // Út alap aszfaltjának megrajzolása (Fix 120x400-as téglalapok)
-            g2d.setColor(new Color(189, 195, 199)); 
-            g2d.fillRect(alapPoz.x, alapPoz.y, 120, 400);
-
-            // Végigmegyünk a rácson és kirajzoljuk az időjárást / cellahatárokat
-            List<List<Sav>> szakaszok = ut.getSzakaszok();
-            if (szakaszok != null) {
-                for (int i = 0; i < szakaszok.size(); i++) {
-                    List<Sav> savok = szakaszok.get(i);
+            for (Ut celUt : forrasUt.getSzomszedok(1)) {
+                Point p2 = poziciok.get(celUt.getNev());
+                if (p2 != null) {
+                    int szelesseg2 = (celUt.getPozSavokSzama() + celUt.getNegSavokSzama()) * SAV_SZELESSEG;
+                    int magassag2 = celUt.getHossz() * SZAKASZ_MAGASSAG;
+                    Point kozep2 = new Point(p2.x + szelesseg2 / 2, p2.y + magassag2 / 2);
                     
-                    for (int j = 0; j < savok.size(); j++) {
-                        Sav sav = savok.get(j);
-                        
-                        int cellX = alapPoz.x + (j * savSzelesseg);
-                        int cellY = alapPoz.y + (i * szakaszMagassag);
-
-                        // 1. Hó réteg kirajzolása
-                        if (sav.getHo() >= 30) {
-                            g2d.setColor(Color.WHITE); // Áthatolhatatlan vastag hó
-                            g2d.fillRect(cellX, cellY, savSzelesseg, szakaszMagassag);
-                        } else if (sav.getHo() > 0) {
-                            g2d.setColor(new Color(236, 240, 241, 180)); // Vékony hóréteg
-                            g2d.fillRect(cellX, cellY, savSzelesseg, szakaszMagassag);
-                        }
-
-                        // 2. Jég réteg kirajzolása
-                        if (sav.jegesE()) {
-                            g2d.setColor(new Color(173, 216, 230, 150)); 
-                            g2d.fillRect(cellX, cellY, savSzelesseg, szakaszMagassag);
-                        }
-
-                        // 3. Zúzalék réteg kirajzolása
-                        if (sav.isZuzalekos()) {
-                            g2d.setColor(new Color(139, 69, 19, 100)); 
-                            g2d.fillRect(cellX, cellY, savSzelesseg, szakaszMagassag);
-                        }
-
-                        // 4. Cella keret rajzolása (Sávok és Szakaszok elválasztóvonalai)
-                        g2d.setColor(Color.GRAY);
-                        g2d.drawRect(cellX, cellY, savSzelesseg, szakaszMagassag);
-                    }
+                    g2d.drawLine(kozep1.x, kozep1.y, kozep2.x, kozep2.y);
                 }
             }
-
-            // Út nevének kiírása az aszfaltcsík fölé
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(new Font("Arial", Font.BOLD, 14));
-            g2d.drawString(ut.getNev(), alapPoz.x, alapPoz.y - 10);
         }
 
-        // ÖSSZEKÖTŐ VONALAK: Kirajzoljuk a logikai kapcsolatokat a hálózati rajz szerint
-        g2d.setColor(new Color(52, 152, 219)); // Esztétikus kék szín
-        Stroke regiStroke = g2d.getStroke();
-        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[]{6}, 0)); // Szaggatott vonal
+        // 2. UTAK, SZAKASZOK ÉS SÁVOK RAJZOLÁSA
+        for (Ut ut : halozat) {
+            Point p = poziciok.get(ut.getNev());
+            if (p == null) continue;
 
-        // Kereszt-irányú összeköttetések a Központtal
-        g2d.drawLine(400 + 60, 50 + 400, 400 + 60, 500);   // Észak -> Központ
-        g2d.drawLine(400 + 60, 500 + 400, 400 + 60, 950);  // Központ -> Dél
-        g2d.drawLine(100 + 120, 500 + 200, 400, 500 + 200); // Nyugat -> Központ
-        g2d.drawLine(400 + 120, 500 + 200, 700, 500 + 200); // Központ -> Kelet
+            int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
+            int utSzelesseg = osszSav * SAV_SZELESSEG;
+            int utMagassag = ut.getHossz() * SZAKASZ_MAGASSAG;
 
-        // Külső körgyűrű összeköttetései (Gyűrű hálózat szemléltetése)
-        g2d.drawLine(400, 50 + 50, 100 + 60, 500);          // Észak -> Nyugat
-        g2d.drawLine(400 + 120, 50 + 50, 700 + 60, 500);   // Észak -> Kelet
-        g2d.drawLine(400, 950 + 350, 100 + 60, 500 + 400);  // Dél -> Nyugat
-        g2d.drawLine(400 + 120, 950 + 350, 700 + 60, 500 + 400); // Dél -> Kelet
+            g2d.setColor(new Color(149, 165, 166));
+            g2d.fillRoundRect(p.x, p.y, utSzelesseg, utMagassag, 10, 10);
+            g2d.setColor(Color.DARK_GRAY);
+            g2d.drawRoundRect(p.x, p.y, utSzelesseg, utMagassag, 10, 10);
 
-        g2d.setStroke(regiStroke); // Visszaállítjuk az eredeti vonalstílust
+            // Szakaszok elválasztó vonalai (vízszintes)
+            g2d.setColor(new Color(127, 140, 141, 100));
+            g2d.setStroke(new BasicStroke(1));
+            for (int i = 1; i < ut.getHossz(); i++) {
+                int y = p.y + (i * SZAKASZ_MAGASSAG);
+                g2d.drawLine(p.x, y, p.x + utSzelesseg, y);
+            }
 
-        // Járművek kirajzolása a cellák fölé
+            // Sávok elválasztó vonalai (függőleges)
+            Stroke dashed = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
+            for (int i = 1; i < osszSav; i++) {
+                int x = p.x + (i * SAV_SZELESSEG);
+                if (i == ut.getPozSavokSzama()) {
+                    g2d.setColor(new Color(241, 196, 15));
+                    g2d.setStroke(new BasicStroke(3));
+                } else {
+                    g2d.setColor(Color.WHITE);
+                    g2d.setStroke(dashed);
+                }
+                g2d.drawLine(x, p.y, x, p.y + utMagassag);
+            }
+
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(new Font("Arial", Font.BOLD, 14));
+            g2d.drawString("Út: " + ut.getNev(), p.x, p.y - 5);
+        }
+
+        // 3. JÁRMŰVEK RAJZOLÁSA
         for (GraphicObject go : rajzolandoObjektumok) {
             go.rajzol(g2d);
         }

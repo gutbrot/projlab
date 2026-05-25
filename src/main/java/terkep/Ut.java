@@ -43,10 +43,12 @@ public abstract class Ut {
     public abstract void havazik(int h);
     
     /** Szomszéd hozzáadása adott irányban (1 vagy -1) */
-    public void addSzomszed(Ut szomszed, int irany) {
-        //Csak akkor adjuk hozzá, ha a szomszéd nem null és az irány érvényes
-        if (szomszed != null && szomszedok.containsKey(irany)) {
-            szomszedok.get(irany).add(szomszed);
+    public void addSzomszed(Ut ut, int irany) {
+        if (!szomszedok.containsKey(irany)) {
+            szomszedok.put(irany, new ArrayList<>());
+        }
+        if (!szomszedok.get(irany).contains(ut)) {
+            szomszedok.get(irany).add(ut);
         }
     }
 

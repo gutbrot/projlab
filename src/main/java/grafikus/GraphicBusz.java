@@ -25,34 +25,26 @@ public class GraphicBusz extends GraphicObject {
     public void rajzol(Graphics g) {
         frissitPozicio();
 
-        // Busztest (Télies, feltűnő sárga szín)
         g.setColor(new Color(241, 196, 15));
-        g.fillRect(x + 5, y + 2, 34, 26);
+        g.fillRoundRect(x, y, 24, 40, 5, 5);
 
-        // Szélvédő és fényszórók
-        g.setColor(new Color(41, 128, 185)); // Kék szélvédő
-        g.fillRect(x + 33, y + 4, 6, 22);
+        g.setColor(new Color(41, 128, 185)); 
+        g.fillRect(x + 2, y + 2, 20, 6);
 
-        // Kerekek
         g.setColor(Color.BLACK);
-        g.fillRect(x + 6, y + 1, 7, 3);
-        g.fillRect(x + 30, y + 1, 7, 3);
-        g.fillRect(x + 6, y + 26, 7, 3);
-        g.fillRect(x + 30, y + 26, 7, 3);
+        g.fillRect(x - 1, y + 5, 3, 6);
+        g.fillRect(x + 22, y + 5, 3, 6);
+        g.fillRect(x - 1, y + 30, 3, 6);
+        g.fillRect(x + 22, y + 30, 3, 6);
 
-        // Utasablakok sora
         g.setColor(new Color(52, 73, 94));
-        g.fillRect(x + 8, y + 10, 6, 4);
-        g.fillRect(x + 16, y + 10, 6, 4);
-        g.fillRect(x + 24, y + 10, 6, 4);
+        g.fillRect(x + 4, y + 10, 16, 25);
 
-        // Busz ID felirat
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 10));
-        g.drawString(busz.getId(), x + 9, y + 23);
+        g.drawString(busz.getId(), x - 5, y - 2);
     }
 
-    
     @Override
     public void frissitPozicio() {
         if (busz == null || busz.getPozicio() == null || busz.getPozicio().getUt() == null) return;
@@ -63,18 +55,11 @@ public class GraphicBusz extends GraphicObject {
 
         if (sav == null || ut == null || szakasz == null) return;
 
-        // JAVÍTÁS: Lekérjük a TerkepPanel közös statikus koordinátáját!
-        Point alapPoz = TerkepPanel.getUtAlapPozicio(ut.getNev());
+        // Lekérjük a pontos cella bal felső sarkát
+        Point cella = TerkepPanel.getPontosCellaPozicio(ut, szakasz, sav);
 
-        int szakaszIndex = ut.getSzakaszok().indexOf(szakasz);
-        int savIndex = sav.getSavSzama();
-
-        int szakaszMagassag = ut.getSzakaszok().size() > 0 ? 400 / ut.getSzakaszok().size() : 400;
-        int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
-        int savSzelesseg = osszSav > 0 ? 120 / osszSav : 120;
-
-        // Kiszámítjuk a pontos X és Y pozíciót a kiválasztott úthoz képest
-        this.x = alapPoz.x + (savIndex * savSzelesseg) + 10; 
-        this.y = alapPoz.y + (szakaszIndex * szakaszMagassag) + 15; 
+        // Középre igazítjuk a járművet a cellán belül
+        this.x = cella.x + (TerkepPanel.SAV_SZELESSEG - 24) / 2;
+        this.y = cella.y + (TerkepPanel.SZAKASZ_MAGASSAG - 40) / 2;
     }
 }

@@ -26,30 +26,25 @@ public class GraphicHokotro extends GraphicObject {
         frissitPozicio();
         vanKotrofej = (hokotro.getFelszereltFej() != null);
 
-        // Hókotró test (Sötétsárga/narancs masszív blokk)
         g.setColor(new Color(230, 126, 34));
-        g.fillRect(x + 5, y + 2, 30, 26);
+        g.fillRoundRect(x, y, 26, 34, 5, 5);
 
-        // Vezérlő fülke (Szürke)
         g.setColor(new Color(127, 140, 141));
-        g.fillRect(x + 12, y + 6, 12, 18);
+        g.fillRect(x + 5, y + 15, 16, 12);
 
-        // Kerekek
         g.setColor(Color.BLACK);
-        g.fillRoundRect(x + 8, y + 0, 8, 4, 2, 2);
-        g.fillRoundRect(x + 24, y + 0, 8, 4, 2, 2);
-        g.fillRoundRect(x + 8, y + 26, 8, 4, 2, 2);
-        g.fillRoundRect(x + 24, y + 26, 8, 4, 2, 2);
+        g.fillRoundRect(x - 2, y + 4, 4, 8, 2, 2);
+        g.fillRoundRect(x + 24, y + 4, 4, 8, 2, 2);
+        g.fillRoundRect(x - 2, y + 22, 4, 8, 2, 2);
+        g.fillRoundRect(x + 24, y + 22, 4, 8, 2, 2);
 
-        // Kotrófej jelzése (ha van felszerelve)
         if (vanKotrofej) {
-            g.setColor(new Color(192, 57, 43)); // Jól látható narancssárga/piros fej
-            g.fillRect(x + 35, y + 2, 4, 26);
+            g.setColor(new Color(192, 57, 43)); 
+            g.fillRect(x - 2, y - 4, 30, 6); 
         }
 
-        // Jármű azonosítójának kiírása
         g.setColor(Color.WHITE);
-        g.drawString(hokotro.getId(), x + 7, y + 19);
+        g.drawString(hokotro.getId(), x - 10, y + 20);
     }
 
    @Override
@@ -62,18 +57,9 @@ public class GraphicHokotro extends GraphicObject {
 
         if (sav == null || ut == null || szakasz == null) return;
 
-        // JAVÍTÁS: Lekérjük a TerkepPanel közös statikus koordinátáját!
-        Point alapPoz = TerkepPanel.getUtAlapPozicio(ut.getNev());
+        Point cella = TerkepPanel.getPontosCellaPozicio(ut, szakasz, sav);
 
-        int szakaszIndex = ut.getSzakaszok().indexOf(szakasz);
-        int savIndex = sav.getSavSzama();
-
-        int szakaszMagassag = ut.getSzakaszok().size() > 0 ? 400 / ut.getSzakaszok().size() : 400;
-        int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
-        int savSzelesseg = osszSav > 0 ? 120 / osszSav : 120;
-
-        // Kiszámítjuk a pontos X és Y pozíciót a kiválasztott úthoz képest
-        this.x = alapPoz.x + (savIndex * savSzelesseg) + 10; 
-        this.y = alapPoz.y + (szakaszIndex * szakaszMagassag) + 15; 
+        this.x = cella.x + (TerkepPanel.SAV_SZELESSEG - 26) / 2;
+        this.y = cella.y + (TerkepPanel.SZAKASZ_MAGASSAG - 34) / 2;
     }
 }
