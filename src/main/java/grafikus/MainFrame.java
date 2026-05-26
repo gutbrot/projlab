@@ -89,16 +89,6 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Engedélyezi vagy letiltja a takarítóhoz tartozó specifikus vezérlőpanelt.
-     * @param engedelyezett true esetén aktív, false esetén inaktív lesz.
-     */
-    public void takaritoPanelEngedelyezes(boolean engedelyezett) {
-        if (takaritoPanel != null) {
-            takaritoPanel.setVisible(engedelyezett);
-        }
-    }
-
-    /**
      * A globális körfrissítő metódus.
      * Kigyűjti a modellből a legújabb állapotokat, és szétküldi azokat a megfelelő paneleknek.
      */
@@ -106,26 +96,20 @@ public class MainFrame extends JFrame {
         // Biztonsági ellenőrzések: ha valami még null, nem futtatjuk le a frissítést
         if (jatekter == null || jatekter.getJatekosok().isEmpty()) return;
         if (mozgasPanel == null || takaritoPanel == null || terkepPanel == null) return;
-        
+
         // Lekérjük az aktuális játékost a modellből
         int aktIndex = jatekter.aktualisJatekosIndex;
         if (aktIndex >= 0 && aktIndex < jatekter.getJatekosok().size()) {
             jatekos.Jatekos aktJatekos = jatekter.getJatekosok().get(aktIndex);
-            
+
             // Felső felirat frissítése
             String nev = aktJatekos.getNev() != null ? aktJatekos.getNev() : "Ismeretlen";
             String szerep = (aktJatekos instanceof jatekos.Takarito) ? " (Takarító)" : " (Buszvezető)";
             aktivJatekosFrissites(nev + szerep);
-            
-            // Takarító panel (bolt és szerelés) megjelenítése vagy elrejtése a szerepkör alapján
-            boolean isTakarito = (aktJatekos instanceof jatekos.Takarito);
-            takaritoPanelEngedelyezes(isTakarito);
-            
-            // Ha takarító, frissítjük a pénzét és a boltját is
-            if (isTakarito) {
-                takaritoPanel.feluletAdatFrissites();
-            }
-            
+
+            // Az alsó panel mindig látható, feluletAdatFrissites() kezeli a nem-Takarító esetet
+            takaritoPanel.feluletAdatFrissites();
+
             // Mozgás panel frissítése
             mozgasPanel.frissit();
         }

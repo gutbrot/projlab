@@ -4,8 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import jatekos.Jatekter;
 import jarmu.*;
@@ -20,37 +24,57 @@ public class TerkepPanel extends JPanel {
     public static final int SAV_SZELESSEG = 40;
     public static final int SZAKASZ_MAGASSAG = 50;
 
-    // Fix pozíciók az utak BAL FELSŐ sarkához
+    // Statikus override-ok ismert térképekhez
     private static final Map<String, Point> poziciok = new HashMap<>();
+    // Aktuálisan használt pozíciók (statikus override + dinamikus BFS)
+    private static Map<String, Point> aktualisPoziciok = new HashMap<>();
 
     public TerkepPanel(Jatekter jatekter) {
         this.jatekter = jatekter;
         this.rajzolandoObjektumok = new ArrayList<>();
-        setPreferredSize(new Dimension(1000, 800));
+        setPreferredSize(new Dimension(1500, 1300));
         setBackground(new Color(236, 240, 241)); // Havas, világos háttér
 
-        // Az XML-ben lévő nevek alapján
+        // Az XML-ben lévő nevek alapján (névvel ellátott utak)
         poziciok.put("EszakiUt", new Point(400, 50));
         poziciok.put("NyugatiUt", new Point(100, 350));
         poziciok.put("Kozpont", new Point(400, 350));
         poziciok.put("KeletiHid", new Point(700, 350));
         poziciok.put("DeliAlagut", new Point(400, 600));
 
-        // A rajzodon lévő számos nevek alapján is
-        poziciok.put("67", new Point(400, 50));   
-        poziciok.put("1",  new Point(100, 350));  
-        poziciok.put("99", new Point(400, 350));  
-        poziciok.put("42", new Point(700, 350));  
-        poziciok.put("23", new Point(700, 600));  
+        // uj_teszt_terkep.xml utak
+        poziciok.put("67", new Point(400, 50));
+        poziciok.put("1",  new Point(100, 350));
+        poziciok.put("99", new Point(400, 350));
+        poziciok.put("42", new Point(700, 350));
+        poziciok.put("23", new Point(700, 600));
         poziciok.put("11", new Point(400, 750));
+
+        // nagy_teszt_terkep.xml utak (3 sor × 4 oszlop + 1 déli zsákút)
+        // Északi sor (y=50)
+        poziciok.put("10",  new Point(300,  50));
+        poziciok.put("20",  new Point(600,  50));
+        poziciok.put("30",  new Point(900,  50));
+        // Középső sor (y=350)
+        poziciok.put("40",  new Point(50,  350));
+        poziciok.put("50",  new Point(300, 350));
+        poziciok.put("60",  new Point(600, 350));
+        poziciok.put("70",  new Point(900, 350));
+        poziciok.put("80",  new Point(1150, 350));
+        // Alsó sor (y=700)
+        poziciok.put("90",  new Point(300, 700));
+        poziciok.put("100", new Point(600, 700));
+        poziciok.put("110", new Point(900, 700));
+        // Legdélibb zsákút (y=1000)
+        poziciok.put("120", new Point(600, 1000));
     }
 
     public static Point getUtAlapPozicio(String nev) {
-        return poziciok.getOrDefault(nev, new Point(50, 50));
+        return aktualisPoziciok.getOrDefault(nev, new Point(50, 50));
     }
 
     public static Point getPontosCellaPozicio(Ut ut, List<Sav> szakasz, Sav sav) {
-        Point alap = poziciok.get(ut.getNev());
+        Point alap = aktualisPoziciok.get(ut.getNev());
         if (alap == null) return new Point(50, 50);
 
         int szakaszIdx = ut.getSzakaszok().indexOf(szakasz);
@@ -69,6 +93,12 @@ public class TerkepPanel extends JPanel {
 
     public void jarmuGrafikusObjektumokFrissitese() {
         if (jatekter == null || jatekter.getJarmuvek() == null) return;
+
+        // Pozíciók frissítése az aktuális térkép alapján
+        if (jatekter.getTerkep() != null) {
+            frissitPoziciok(jatekter.getTerkep().getTeljesHalozat());
+        }
+
         rajzolandoObjektumok.clear();
         for (Jarmu j : jatekter.getJarmuvek()) {
             if (j.getPozicio() == null || j.getPozicio().getUt() == null) continue;
@@ -76,6 +106,88 @@ public class TerkepPanel extends JPanel {
             else if (j instanceof Busz) rajzolandoObjektumok.add(new GraphicBusz((Busz) j));
             else if (j instanceof Auto) rajzolandoObjektumok.add(new GraphicAuto((Auto) j));
         }
+    }
+
+    /**
+     * Ha minden útnak van statikus override-ja, azt használja.
+     * Különben BFS-alapú automatikus rácsba rendezi az utakat.
+     */
+    private void frissitPoziciok(List<Ut> halozat) {
+        boolean mindStatikus = halozat.stream().allMatch(u -> poziciok.containsKey(u.getNev()));
+        if (mindStatikus) {
+            aktualisPoziciok = new HashMap<>(poziciok);
+            return;
+        }
+
+        final int CELL_X = 220;
+        final int CELL_Y = 380;
+        final int MARGIN = 50;
+
+        Map<String, int[]> racs = new HashMap<>();
+        Set<String> foglalt = new HashSet<>();
+        Set<String> latogatott = new HashSet<>();
+        Queue<Ut> sor = new LinkedList<>();
+        int[][] iranyok = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+
+        Ut gyoker = halozat.get(0);
+        racs.put(gyoker.getNev(), new int[]{0, 0});
+        foglalt.add("0,0");
+        latogatott.add(gyoker.getNev());
+        sor.add(gyoker);
+
+        while (!sor.isEmpty()) {
+            Ut aktualis = sor.poll();
+            int[] pos = racs.get(aktualis.getNev());
+
+            List<Ut> szomszedok = new ArrayList<>(aktualis.getSzomszedok(1));
+            for (Ut s : aktualis.getSzomszedok(-1)) {
+                if (!szomszedok.contains(s)) szomszedok.add(s);
+            }
+
+            for (Ut szomszed : szomszedok) {
+                if (latogatott.contains(szomszed.getNev())) continue;
+                for (int[] d : iranyok) {
+                    int nx = pos[0] + d[0];
+                    int ny = pos[1] + d[1];
+                    String key = nx + "," + ny;
+                    if (!foglalt.contains(key)) {
+                        racs.put(szomszed.getNev(), new int[]{nx, ny});
+                        foglalt.add(key);
+                        latogatott.add(szomszed.getNev());
+                        sor.add(szomszed);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Leválasztott (nem összefüggő) utak kezelése
+        int fc = 0, fr = halozat.size() + 2;
+        for (Ut u : halozat) {
+            if (!racs.containsKey(u.getNev())) {
+                while (foglalt.contains(fc + "," + fr)) fc++;
+                racs.put(u.getNev(), new int[]{fc, fr});
+                foglalt.add(fc + "," + fr);
+                fc++;
+            }
+        }
+
+        // Normalizálás (legkisebb col/row = 0)
+        int minC = racs.values().stream().mapToInt(p -> p[0]).min().orElse(0);
+        int minR = racs.values().stream().mapToInt(p -> p[1]).min().orElse(0);
+
+        aktualisPoziciok = new HashMap<>();
+        for (Map.Entry<String, int[]> e : racs.entrySet()) {
+            int px = MARGIN + (e.getValue()[0] - minC) * CELL_X;
+            int py = MARGIN + (e.getValue()[1] - minR) * CELL_Y;
+            aktualisPoziciok.put(e.getKey(), new Point(px, py));
+        }
+
+        // Preferred size igazítása a térképhez
+        int maxX = aktualisPoziciok.values().stream().mapToInt(p -> p.x).max().orElse(800) + 300;
+        int maxY = aktualisPoziciok.values().stream().mapToInt(p -> p.y).max().orElse(600) + 300;
+        setPreferredSize(new Dimension(Math.max(maxX, 800), Math.max(maxY, 600)));
+        revalidate();
     }
 
     @Override
@@ -92,7 +204,7 @@ public class TerkepPanel extends JPanel {
         g2d.setColor(new Color(52, 152, 219, 150)); 
         
         for (Ut forrasUt : halozat) {
-            Point p1 = poziciok.get(forrasUt.getNev());
+            Point p1 = aktualisPoziciok.get(forrasUt.getNev());
             if (p1 == null) continue;
             
             int szelesseg1 = (forrasUt.getPozSavokSzama() + forrasUt.getNegSavokSzama()) * SAV_SZELESSEG;
@@ -100,7 +212,7 @@ public class TerkepPanel extends JPanel {
             Point kozep1 = new Point(p1.x + szelesseg1 / 2, p1.y + magassag1 / 2);
 
             for (Ut celUt : forrasUt.getSzomszedok(1)) {
-                Point p2 = poziciok.get(celUt.getNev());
+                Point p2 = aktualisPoziciok.get(celUt.getNev());
                 if (p2 != null) {
                     int szelesseg2 = (celUt.getPozSavokSzama() + celUt.getNegSavokSzama()) * SAV_SZELESSEG;
                     int magassag2 = celUt.getHossz() * SZAKASZ_MAGASSAG;
@@ -113,7 +225,7 @@ public class TerkepPanel extends JPanel {
 
         // 2. UTAK, SZAKASZOK, SÁVOK ÉS IRÁNYOK RAJZOLÁSA
         for (Ut ut : halozat) {
-            Point p = poziciok.get(ut.getNev());
+            Point p = aktualisPoziciok.get(ut.getNev());
             if (p == null) continue;
 
             int pozSav = ut.getPozSavokSzama();
