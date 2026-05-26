@@ -219,9 +219,22 @@ public class MenuFrame extends JFrame {
         });
         panel.add(startGomb);
 
-        // Térképválasztó ComboBox feltöltése alapértelmezett fájlokkal
-        String[] terkepek = {"teszt_terkep.xml", "teszt_terkep_penz.xml", "uj_teszt_terkep.xml"};
-        terkepValaszto = new JComboBox<>(terkepek);
+        // Térképválasztó ComboBox dinamikus feltöltése a Betoltes/ mappából
+        terkepValaszto = new JComboBox<>();
+        java.io.File betoltesDir = new java.io.File("Betoltes");
+        if (betoltesDir.exists() && betoltesDir.isDirectory()) {
+            java.io.File[] xmlFajlok = betoltesDir.listFiles((dir, name) ->
+                name.endsWith(".xml") && !name.contains("_kimenet") && !name.contains("_elvart"));
+            if (xmlFajlok != null) {
+                java.util.Arrays.sort(xmlFajlok);
+                for (java.io.File f : xmlFajlok) {
+                    terkepValaszto.addItem(f.getName());
+                }
+            }
+        }
+        if (terkepValaszto.getItemCount() == 0) {
+            terkepValaszto.addItem("uj_teszt_terkep.xml");
+        }
         terkepValaszto.setFont(new Font("Arial", Font.BOLD, 16));
         panel.add(terkepValaszto);
 
@@ -289,9 +302,13 @@ public class MenuFrame extends JFrame {
 
         // Beállítjuk a statikus globális térképet a Hókotróknak a bolt/vásárlás miatt
         Hokotro.setGlobalTerkep(betoltottTerkep);
-        
+
         // Létrehozzuk az új Játékteret a betöltött térképpel
         Jatekter ujJatekter = new Jatekter(betoltottTerkep);
+
+        // NPC autók betöltése az XML-ből (ha vannak)
+        new seged.Betolteskezelo().betoltNpcAutok(terkepFile, betoltottTerkep, ujJatekter);
+
         return ujJatekter;
     }
 

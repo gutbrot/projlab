@@ -44,6 +44,10 @@ public class TakaritoPanel extends JPanel {
     /** A játéktér modell rétegének referenciája. */
     private Jatekter jatekter;
 
+    private JPanel statuszAlPanel;
+    private JPanel boltAlPanel;
+    private JPanel szerelesAlPanel;
+
     /** Alapértelmezett télies háttérszín. */
     private final Color PANEL_HATTER = new Color(236, 240, 241);
 
@@ -61,12 +65,15 @@ public class TakaritoPanel extends JPanel {
         // Alapvető panelbeállítások: vízszintes rácsszerkezet 3 fő oszloppal
         setLayout(new GridLayout(1, 3, 15, 0));
         setBackground(PANEL_HATTER);
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setBorder(new EmptyBorder(6, 15, 6, 15));
 
         // A három funkcionális részpanel felépítése és hozzáadása
-        add(createStatuszAlPanel());
-        add(createBoltAlPanel());
-        add(createSzerelesAlPanel());
+        statuszAlPanel = createStatuszAlPanel();
+        boltAlPanel = createBoltAlPanel();
+        szerelesAlPanel = createSzerelesAlPanel();
+        add(statuszAlPanel);
+        add(boltAlPanel);
+        add(szerelesAlPanel);
 
         // Kezdőadatok betöltése a modellből a felületre
         feluletAdatFrissites();
@@ -101,10 +108,10 @@ public class TakaritoPanel extends JPanel {
      * @return A formázott bolt panel.
      */
     private JPanel createBoltAlPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
         panel.setBackground(PANEL_HATTER);
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Hókotró Bolt", 
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Hókotró Bolt",
             TitledBorder.LEFT, TitledBorder.TOP, new Font("Arial", Font.BOLD, 11), Color.DARK_GRAY));
 
         boltKinalatDoboz = new JComboBox<>();
@@ -137,10 +144,10 @@ public class TakaritoPanel extends JPanel {
      * @return A formázott szerelő panel.
      */
     private JPanel createSzerelesAlPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
         panel.setBackground(PANEL_HATTER);
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Szerelőműhely", 
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Szerelőműhely",
             TitledBorder.LEFT, TitledBorder.TOP, new Font("Arial", Font.BOLD, 11), Color.DARK_GRAY));
 
         raktarFejekDoboz = new JComboBox<>();
@@ -270,13 +277,11 @@ public class TakaritoPanel extends JPanel {
         if (jatekter == null) return;
 
         Jatekos aktJatekos = jatekter.getAktivJatekos();
-        if (!(aktJatekos instanceof Takarito)) {
-            penzInfoLabel.setText("Egyenleg: —");
-            aktivFejInfoLabel.setText("Aktív eszköz: —");
-            raktarFejekDoboz.removeAllItems();
-            felszerelesGomb.setEnabled(false);
-            return;
-        }
+        boolean isTakarito = aktJatekos instanceof Takarito;
+        statuszAlPanel.setVisible(isTakarito);
+        boltAlPanel.setVisible(isTakarito);
+        szerelesAlPanel.setVisible(isTakarito);
+        if (!isTakarito) return;
 
         Takarito takarito = (Takarito) aktJatekos;
         penzInfoLabel.setText("Egyenleg: " + takarito.getPenz() + " pénz");

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Init>
+    <Jatekallapot korok="1" />
+
+    <Terkep>
+
+        <!-- ÉSZAKI SOR: felső bekötő utak -->
+
+        <!-- 10: Észak-bal bekötő -->
+        <Ut tipus="sima" nev="10" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="50" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 20: Észak-közép bekötő -->
+        <Ut tipus="sima" nev="20" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="60" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 30: Észak-jobb bekötő (híd) -->
+        <Ut tipus="hid" nev="30" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="70" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- KÖZÉPSŐ SOR: fő vízszintes gerincút -->
+
+        <!-- 40: Nyugati zsákút -->
+        <Ut tipus="sima" nev="40" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="50" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 50: Bal középső csomópont -->
+        <Ut tipus="sima" nev="50" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="10" irany="1" />
+                <Szomszed nev="40" irany="1" />
+                <Szomszed nev="60" irany="1" />
+                <Szomszed nev="90" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 60: Központi főút (nagy kereszteződés) -->
+        <Ut tipus="sima" nev="60" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="20" irany="1" />
+                <Szomszed nev="50" irany="1" />
+                <Szomszed nev="70" irany="1" />
+                <Szomszed nev="100" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 70: Jobb középső csomópont (híd) -->
+        <Ut tipus="hid" nev="70" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="30" irany="1" />
+                <Szomszed nev="60" irany="1" />
+                <Szomszed nev="80" irany="1" />
+                <Szomszed nev="110" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 80: Keleti zsákút -->
+        <Ut tipus="sima" nev="80" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="70" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- ALSÓ SOR: déli úthálózat -->
+
+        <!-- 90: Déli-bal alagút -->
+        <Ut tipus="alagut" nev="90" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="50" irany="1" />
+                <Szomszed nev="100" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 100: Déli középső csomópont -->
+        <Ut tipus="sima" nev="100" hossz="5" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="60" irany="1" />
+                <Szomszed nev="90" irany="1" />
+                <Szomszed nev="110" irany="1" />
+                <Szomszed nev="120" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 110: Déli-jobb híd -->
+        <Ut tipus="hid" nev="110" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="70" irany="1" />
+                <Szomszed nev="100" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+        <!-- 120: Legdélibb alagút (zsákút) -->
+        <Ut tipus="alagut" nev="120" hossz="4" pozsav="2" negsav="2">
+            <Elagazodas>
+                <Szomszed nev="100" irany="1" />
+            </Elagazodas>
+        </Ut>
+
+    </Terkep>
+
+    <Jarmuvek>
+        <Autok>
+            <!-- Auto_1: a nyugati (40) és a középső (60) csomópont között ingázik -->
+            <Auto id="Auto_1" mozgaskeptelen="0">
+                <Lokacio    ut="50"  szakasz="2" sav="1" />
+                <Lakas      ut="40"  szakasz="2" sav="1" />
+                <Munkahely  ut="60"  szakasz="3" sav="1" />
+            </Auto>
+
+            <!-- Auto_2: a déli-bal (90) és a déli-jobb (110) között ingázik -->
+            <Auto id="Auto_2" mozgaskeptelen="0">
+                <Lokacio    ut="100" szakasz="3" sav="2" />
+                <Lakas      ut="90"  szakasz="2" sav="1" />
+                <Munkahely  ut="110" szakasz="2" sav="1" />
+            </Auto>
+        </Autok>
+    </Jarmuvek>
+
+</Init>

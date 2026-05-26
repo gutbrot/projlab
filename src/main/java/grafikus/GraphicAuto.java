@@ -3,6 +3,7 @@ package grafikus;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.List;
 import jarmu.Auto;
@@ -25,27 +26,47 @@ public class GraphicAuto extends GraphicObject {
     public void rajzol(Graphics g) {
         frissitPozicio();
 
-        // Autótest (Klasszikus piros)
-        g.setColor(new Color(192, 57, 43));
-        g.fillRect(x + 5, y + 5, 24, 14);
+        boolean lefeleMegy = auto.getPozicio() != null
+                && auto.getPozicio().getSav() != null
+                && auto.getPozicio().getUt() != null
+                && auto.getPozicio().getSav().getSavSzama() < auto.getPozicio().getUt().getPozSavokSzama();
 
-        // Szélvédők és tetővonal
-        g.setColor(new Color(231, 76, 60));
-        g.fillRect(x + 11, y + 7, 12, 10);
-        g.setColor(Color.BLACK);
-        g.fillRect(x + 19, y + 8, 3, 8); // Első ablak
-
-        // Baleset/Mozgásképtelenség jelzése
-        if (auto.getMozgaskeptelenKorokSzama() > 0) {
-            g.setColor(Color.ORANGE);
-            g.fillOval(x + 3, y + 2, 6, 6); // Vészvillogó sárga pötty
-            g.fillOval(x + 25, y + 15, 6, 6);
+        Graphics2D g2d = (Graphics2D) g.create();
+        if (lefeleMegy) {
+            g2d.rotate(Math.PI, x + 10, y + 15);
         }
 
-        // ID kiírása
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 10));
-        g.drawString(auto.getId().replace("Auto_", "A"), x + 7, y + 16);
+        // Autótest
+        g2d.setColor(new Color(192, 57, 43));
+        g2d.fillRoundRect(x, y, 20, 30, 4, 4);
+
+        // Első szélvédő (felül)
+        g2d.setColor(new Color(174, 214, 241));
+        g2d.fillRect(x + 3, y + 3, 14, 8);
+
+        // Hátsó ablak (alul)
+        g2d.setColor(new Color(174, 214, 241));
+        g2d.fillRect(x + 3, y + 19, 14, 6);
+
+        // Kerekek
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(x - 2, y + 4,  4, 6);
+        g2d.fillRect(x + 18, y + 4,  4, 6);
+        g2d.fillRect(x - 2, y + 20, 4, 6);
+        g2d.fillRect(x + 18, y + 20, 4, 6);
+
+        g2d.dispose();
+
+        // Baleset jelzése
+        if (auto.getMozgaskeptelenKorokSzama() > 0) {
+            g.setColor(Color.ORANGE);
+            g.fillOval(x + 6, y - 4, 8, 8);
+        }
+
+        // ID felirat – mindig egyenesen
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 9));
+        g.drawString(auto.getId().replace("Auto_", "A"), x + 3, y - 2);
     }
 
     @Override
@@ -58,18 +79,9 @@ public class GraphicAuto extends GraphicObject {
 
         if (sav == null || ut == null || szakasz == null) return;
 
-        // JAVÍTÁS: Lekérjük a TerkepPanel közös statikus koordinátáját!
-        Point alapPoz = TerkepPanel.getUtAlapPozicio(ut.getNev());
+        Point cella = TerkepPanel.getPontosCellaPozicio(ut, szakasz, sav);
 
-        int szakaszIndex = ut.getSzakaszok().indexOf(szakasz);
-        int savIndex = sav.getSavSzama();
-
-        int szakaszMagassag = ut.getSzakaszok().size() > 0 ? 400 / ut.getSzakaszok().size() : 400;
-        int osszSav = ut.getPozSavokSzama() + ut.getNegSavokSzama();
-        int savSzelesseg = osszSav > 0 ? 120 / osszSav : 120;
-
-        // Kiszámítjuk a pontos X és Y pozíciót a kiválasztott úthoz képest
-        this.x = alapPoz.x + (savIndex * savSzelesseg) + 10; 
-        this.y = alapPoz.y + (szakaszIndex * szakaszMagassag) + 15; 
+        this.x = cella.x + (TerkepPanel.SAV_SZELESSEG - 20) / 2;
+        this.y = cella.y + (TerkepPanel.SZAKASZ_MAGASSAG - 30) / 2;
     }
 }

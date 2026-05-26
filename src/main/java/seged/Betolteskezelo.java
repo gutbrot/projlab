@@ -138,6 +138,25 @@ public class Betolteskezelo {
         }
     }
 
+    /**
+     * Csak az XML fájl &lt;Autok&gt; szekcióját tölti be a játéktérbe.
+     * A grafikus menüből hívható, ahol a játékosok és a térkép már külön lett inicializálva.
+     */
+    public void betoltNpcAutok(String fajlNev, Terkep terkep, Jatekter jatekter) {
+        String eleresiUt = "Betoltes/" + fajlNev;
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                    .parse(new java.io.File(eleresiUt));
+            doc.getDocumentElement().normalize();
+            NodeList jarmuvekNode = doc.getElementsByTagName("Jarmuvek");
+            if (jarmuvekNode.getLength() == 0) return;
+            Element jarmuElem = (Element) jarmuvekNode.item(0);
+            processAutok(jarmuElem, terkep, jatekter, new HashMap<>());
+        } catch (Exception e) {
+            System.err.println(">>> [BETÖLTÉS] NPC autók betöltése sikertelen: " + e.getMessage());
+        }
+    }
+
     private void processAutok(Element root, Terkep terkep, Jatekter jatekter, Map<String, Jarmu> jarmuAdattar) {
         NodeList nodes = root.getElementsByTagName("Auto");
         for (int i = 0; i < nodes.getLength(); i++) {
