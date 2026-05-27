@@ -12,6 +12,11 @@ import terkep.Sav;
 import terkep.Terkep;
 import terkep.Ut;
 
+/**
+ * A hókotrót rajzolja ki a térképen: narancssárga test, szürke keret, fekete kerekek.
+ * Ha van felszerelt kotrófej, piros pengét is kap az orra elé.
+ * Pozitív sávon haladva (lefelé) megfordul, hogy a penge mindig előre nézzen.
+ */
 public class GraphicHokotro extends GraphicObject {
 
     private Hokotro hokotro;

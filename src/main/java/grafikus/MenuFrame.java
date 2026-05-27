@@ -20,14 +20,15 @@ import terkep.Terkep;
 import terkep.TerkepLoader;
 
 /**
- * A játék indulás előtti konfigurációs ablaka. 
- * A játékosok létrehozását, a szerepkörök kiválasztását és a pálya betöltését kezeli.
+ * Ez az ablak jelenik meg először, amikor elindítjuk a játékot.
+ * Ide lehet beírni a játékosok nevét, kiválasztani a szerepkörüket (Takarító vagy Buszvezető),
+ * megadni a betöltendő pályát, majd a Start gombbal elindítani a játékot.
  */
 public class MenuFrame extends JFrame {
 
     /**
-     * A játékos szerepkörének kiválasztására szolgáló gombcsoport (Takarító vs. Buszvezető).
-     * Bár a specifikáció egy JToggleButton-t ír, a UI terven kettő látszik, így ButtonGroup-pal oldjuk meg.
+     * A két szerepkör-választó gomb (Takarító / Buszvezető) össze van kötve ebbe a csoportba,
+     * hogy egyszerre csak az egyik legyen bekapcsolva.
      */
     private ButtonGroup jatekosValaszto;
 
@@ -68,8 +69,8 @@ public class MenuFrame extends JFrame {
     private final Color SZURKE_GOMB_SZIN = new Color(127, 140, 141);
 
     /**
-     * A MenuFrame konstruktora. 
-     * Felépíti a grafikus felületet, beállítja a színeket, elrendezéseket és az eseménykezelőket.
+     * Felépíti a menüablakot: összerakja a fejlécet, a játékos-felvevő bal panelt
+     * és a jobb oldali indítógombokat, majd beállítja a gombok kezdeti állapotát.
      */
     public MenuFrame() {
         // Ablak alapvető beállításai
@@ -101,8 +102,8 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Létrehozza az ablak felső részén található cím panelt.
-     * @return A formázott címet tartalmazó JPanel.
+     * A fejléc panel az ablak tetején: nagy betűkkel a játék neve,
+     * alatta kisebb dőlt betűkkel a csapatnév.
      */
     private JPanel cimPanelLetrehozasa() {
         JPanel panel = new JPanel(new GridLayout(2, 1));
@@ -125,8 +126,9 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Létrehozza a bal oldali panelt, amely a játékosok felvételéért és listázásáért felel.
-     * @return A játékos hozzáadó UI elemeket tartalmazó JPanel.
+     * A bal oldali panel, ahol a játékosokat lehet felvenni.
+     * Ide kell beírni a nevet, kiválasztani a szerepkört, majd a Hozzáad gombbal
+     * rögzíteni — az eddig felvett játékosok listája is itt látható.
      */
     private JPanel balPanelLetrehozasa() {
         JPanel panel = new JPanel();
@@ -192,8 +194,8 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Létrehozza a jobb oldali panelt a fő vezérlőgombokkal (Start, Térkép, Kilépés).
-     * @return A vezérlőgombokat tartalmazó JPanel.
+     * A jobb oldali panel a főbb vezérlőkkel: pályaválasztó legördülő lista,
+     * Start gomb a játék elindításához, és Kilépés gomb az alkalmazás bezárásához.
      */
     private JPanel jobbPanelLetrehozasa() {
         JPanel panel = new JPanel(new GridLayout(4, 1, 0, 15));
@@ -258,9 +260,8 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Új játékost hoz létre a megadott névvel és a kiválasztott szerepkörrel.
-     * Frissíti az adatmodellt és a grafikus listát.
-     * @param nev A játékos neve, amit a szövegmezőből olvasunk ki.
+     * Felvesz egy új játékost a megadott névvel és a kiválasztott szerepkörrel,
+     * majd rögtön frissíti a listát és ellenőrzi, hogy a Start gomb aktívvá válhat-e.
      */
     public void jatekosHozzaad(String nev) {
         Jatekos ujJatekos;
@@ -288,9 +289,9 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Betölti a kiválasztott pályát az XML fájlból a meglévő modell (TerkepLoader) segítségével.
-     * @param terkepFile A betöltendő XML fájl neve (pl. "teszt_terkep.xml").
-     * @return Az inicializált Jatekter objektum, vagy null hiba esetén.
+     * Beolvassa a megadott nevű XML fájlból a pályát és felépíti a Játékteret.
+     * Ha valami hiba van (pl. hiányzik a fájl, üres a hálózat), hibaüzenet jelenik meg
+     * és null értékkel tér vissza.
      */
     public Jatekter terkepBetoltes(String terkepFile) {
         // A TerkepLoader betölti az úthálózatot
@@ -314,8 +315,8 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Ellenőrzi, hogy megvan-e a játék indításához szükséges minimum feltétel 
-     * (1 takarító és 1 buszvezető), és ennek megfelelően kapcsolja a Start gombot.
+     * Megnézi, hogy a felvett játékosok közt van-e legalább egy takarító és egy buszvezető.
+     * Ha igen, a Start gomb aktív lesz; ha nem, szürkén marad és nem kattintható.
      */
     private void gombokAllapotFrissitese() {
         boolean vanTakarito = false;
@@ -339,9 +340,9 @@ public class MenuFrame extends JFrame {
     }
 
     /**
-     * Összeköti a felvett játékosokat a betöltött Játéktérrel, majd átadja a vezérlést
-     * a főablaknak (MainFrame).
-     * @param jatekter Az inicializált Játéktér objektum a betöltött térképpel.
+     * Összeköti a játékosokat a betöltött pályával, majd kinyitja a főjáték ablakot.
+     * Minden takarítóhoz létrehoz egy kezdő hókotrót; minden buszvezető kap
+     * egy véletlenszerű A–B végállomású buszt. A menüablak ezután bezárul.
      */
     private void jatekInditasa(Jatekter jatekter) {
         // A felvett játékosokat bevezetjük a Játéktérbe

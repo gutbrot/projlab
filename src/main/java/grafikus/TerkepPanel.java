@@ -111,8 +111,9 @@ public class TerkepPanel extends JPanel {
     }
 
     /**
-     * Ha minden útnak van statikus override-ja, azt használja.
-     * Különben BFS-alapú automatikus rácsba rendezi az utakat.
+     * Meghatározza, hova kerüljön az egyes utak négyzete a képernyőn.
+     * Ha az összes úthoz van kézzel megadott koordináta, azt használja;
+     * különben BFS-sel automatikusan rácsba rendezi őket a szomszédsági kapcsolatok alapján.
      */
     private void frissitPoziciok(List<Ut> halozat) {
         boolean mindStatikus = halozat.stream().allMatch(u -> poziciok.containsKey(u.getNev()));

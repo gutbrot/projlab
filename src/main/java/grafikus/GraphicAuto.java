@@ -12,6 +12,11 @@ import terkep.Sav;
 import terkep.Terkep;
 import terkep.Ut;
 
+/**
+ * Az NPC személyautót rajzolja ki a térképen: piros test, kék szélvédők, fekete kerekek.
+ * Ha mozgásképtelen (balesets), narancssárga jelzőkör jelenik meg rajta.
+ * Pozitív sávon haladva (lefelé) megfordul.
+ */
 public class GraphicAuto extends GraphicObject {
 
     private Auto auto;
