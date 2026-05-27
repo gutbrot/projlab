@@ -12,6 +12,10 @@ import terkep.Sav;
 import terkep.Terkep;
 import terkep.Ut;
 
+/**
+ * A buszt rajzolja ki a térképen: sárga karosszéria, kék szélvédő, fekete kerekek.
+ * Ha pozitív sávon halad (lefelé), 180 fokkal megforgatja az alakzatot.
+ */
 public class GraphicBusz extends GraphicObject {
 
     private Busz busz;

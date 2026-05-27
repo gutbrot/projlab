@@ -5,9 +5,9 @@ import java.awt.*;
 import jatekos.Jatekter;
 
 /**
- * A játék fő ablaka. 
- * Tartalmazza a játék során használt grafikus paneleket és koordinálja azok frissítését 
- * a specifikált pull-alapú MVC mechanizmus szerint.
+ * A főjáték ablak, ahol minden megjelenik: középen a térkép, jobbra a mozgásvezérlő,
+ * alul a takarítós/buszvezétős panel. A korFrissites() metóduson keresztül
+ * frissíti az összes részét minden lépés vagy körváltás után.
  */
 public class MainFrame extends JFrame {
 
@@ -27,10 +27,8 @@ public class MainFrame extends JFrame {
     private JLabel statuszCimke;
 
     /**
-     * A MainFrame konstruktora. 
-     * Felépíti az ablak szerkezetét és elhelyezi benne a specifikált három fő panelt.
-     *
-     * @param jatekter A játék aktuális állapotát tartalmazó modell osztály.
+     * Összerakja a főablakot: beállítja a méretét, elhelyezi a három fő panelt
+     * (térkép középen, mozgásvezérlő jobbra, alsó sáv lent), majd elindítja az első kör frissítését.
      */
     public MainFrame(Jatekter jatekter) {
         this.jatekter = jatekter;
@@ -79,8 +77,7 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Frissíti a fejlécben megjelenő szöveget.
-     * @param szoveg Az új megjelenítendő szöveg.
+     * Beírja az aktuális játékos nevét és szerepkörét a felső feliratba.
      */
     public void aktivJatekosFrissites(String szoveg) {
         if (statuszCimke != null) {
@@ -89,8 +86,9 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * A globális körfrissítő metódus.
-     * Kigyűjti a modellből a legújabb állapotokat, és szétküldi azokat a megfelelő paneleknek.
+     * Minden lépés vagy körváltás után ez frissíti a teljes felületet:
+     * beírja az aktuális játékos nevét, frissíti az alsó panelt és a mozgáspanelt,
+     * majd újrarajzolja a térképet.
      */
     public void korFrissites() {
         // Biztonsági ellenőrzések: ha valami még null, nem futtatjuk le a frissítést

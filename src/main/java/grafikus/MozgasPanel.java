@@ -19,8 +19,9 @@ import terkep.Sav;
 import terkep.Ut;
 
 /**
- * A játékos mozgásának vezérléséért felelős panel.
- * Lehetővé teszi jármű kiválasztását, a célsáv megadását és a kör befejezését.
+ * A jobb oldali mozgásvezérlő panel. Innen lehet kiválasztani, melyik járművel
+ * mozogjunk és melyik sávra lépjünk; itt van a Kör vége gomb is.
+ * Lépés után automatikusan frissíti az elérhető célsávokat és az akciópontot.
  */
 public class MozgasPanel extends JPanel {
 
@@ -82,6 +83,10 @@ public class MozgasPanel extends JPanel {
         add(korVegeGomb);
     }
 
+    /**
+     * Frissíti a járműválasztó listát az aktív játékos járművei alapján,
+     * majd automatikusan betölti az első jármű elérhető célsávjait is.
+     */
     public void frissit() {
         ActionListener[] listeners = jarmuValaszto.getActionListeners();
         for (ActionListener l : listeners) jarmuValaszto.removeActionListener(l);
@@ -112,6 +117,11 @@ public class MozgasPanel extends JPanel {
         }
     }
 
+    /**
+     * A kiválasztott jármű pozíciójából kiszámolja az elérhető szomszédos sávokat,
+     * és feltölti a célsáv-legördülő listát — minden sávnál jelzi az akció típusát
+     * (Előrehaladás, Sávváltás, Megfordulás, Kanyarodás).
+     */
     private void savokFrissit() {
         savValaszto.removeAllItems();
         elerhetoSavok.clear();
@@ -194,6 +204,11 @@ public class MozgasPanel extends JPanel {
         }
     }
 
+    /**
+     * Végrehajtja a mozgást: levonja az akciópontot, hókotró esetén automatikusan
+     * takarít és pénzt ad a takarítónak, busz esetén ellenőrzi a végállomást.
+     * Végül frissíti a teljes felületet.
+     */
     private void mozgasKezeles() {
         int savIdx = savValaszto.getSelectedIndex();
         if (savIdx < 0 || savIdx >= elerhetoSavok.size()) return;
@@ -245,6 +260,10 @@ public class MozgasPanel extends JPanel {
         mainFrame.korFrissites();
     }
 
+    /**
+     * Lezárja az aktuális kört: az NPC járművek lépnek, az időjárás változhat,
+     * majd a következő játékos kerül sorra és a felület frissül.
+     */
     public void korVege() {
         jatekter.korVegeVegrehajtas();
         mainFrame.korFrissites();

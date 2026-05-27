@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Az alkalmazás belépési pontja és a grafikus felület inicializálásáért felelős singleton osztály.
- * Létrehozza a főablakokat, kezeli az aktuális frame-eket és biztosítja a GUI indítását.
+ * Singleton osztály, amely az egész alkalmazást fogja össze.
+ * Ő indítja el a főmenüt, és tárolja a megnyílt játékablak (MainFrame) referenciáját.
+ * Az egész programból egyetlen példány létezhet belőle.
  */
 public class GraphicsApp {
 
@@ -25,17 +26,15 @@ public class GraphicsApp {
     private List<GraphicObject> graphicObjects;
 
     /**
-     * Privát konstruktor a Singleton tervezési minta biztosítására.
-     * Inicializálja a grafikus objektumok listáját.
+     * A konstruktor szándékosan privát: kívülről nem lehet új példányt létrehozni.
+     * Az egyetlen példányhoz a getInstance() metóduson keresztül lehet hozzáférni.
      */
     private GraphicsApp() {
         this.graphicObjects = new ArrayList<>();
     }
 
     /**
-     * Visszaadja az alkalmazás singleton példányát.
-     * Ha még nem létezik, létrehozza azt.
-     * * @return A GraphicsApp egyetlen példánya.
+     * Visszaadja az alkalmazás egyetlen példányát — ha még nem jött létre, itt hozza létre először.
      */
     public static GraphicsApp getInstance() {
         if (instance == null) {
@@ -45,7 +44,7 @@ public class GraphicsApp {
     }
 
     /**
-     * Elindítja a grafikus alkalmazást a főmenü megjelenítésével.
+     * Megnyitja a főmenü ablakot — ezzel indul el a játék.
      */
     public void start() {
         // A MenuFrame megnyitása
@@ -54,8 +53,8 @@ public class GraphicsApp {
     }
 
     /**
-     * Frissíti a grafikus felület állapotát.
-     * Meghívja a főablak (MainFrame) frissítő metódusait.
+     * Frissíti a grafikus felületet a modell aktuális állapota alapján.
+     * Jelenleg stub — a tényleges frissítés a MainFrame.korFrissites()-en át történik.
      */
     public void frissites() {
         if (frame != null) {
@@ -65,8 +64,8 @@ public class GraphicsApp {
     }
 
     /**
-     * Új jármű grafikus reprezentációját hozza létre és adja hozzá a listához.
-     * * @param id A hozzáadandó jármű azonosítója.
+     * Jövőbeli belépési pont: egy jármű ID alapján létrehozza a megfelelő grafikus objektumot
+     * (GraphicBusz, GraphicHokotro, stb.) és hozzáadja a rajzolandók listájához.
      */
     public void jarmuHozzaad(String id) {
         // Ide kerül majd a logika, ami a Játéktérből lekéri a járművet az ID alapján,
@@ -75,9 +74,8 @@ public class GraphicsApp {
     }
 
     /**
-     * Beállítja az aktív főablakot (MainFrame).
-     * Ezt a MenuFrame fogja meghívni a játék indításakor.
-     * * @param mainFrame A beállítandó főablak.
+     * A játék indulásakor a MenuFrame ezzel regisztrálja a megnyílt főablakot,
+     * hogy a frissites() és más metódusok tudják, hova kell küldeni a frissítéseket.
      */
     public void setMainFrame(MainFrame mainFrame) {
         this.frame = mainFrame;

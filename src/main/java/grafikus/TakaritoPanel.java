@@ -19,8 +19,9 @@ import bolt.IBoltiCikk;
 import java.util.List;
 
 /**
- * A Takarító játékosok speciális interakcióit (vásárlás, fejcsere) kezelő vezérlőpanel.
- * Ez a komponens a játékablak alsó (SOUTH) régiójában helyezkedik el.
+ * Az ablak alján lévő panel, amely az aktív játékostól függően mást mutat:
+ * takarítónak az egyenleget, a boltot és a szerelőt; buszvezétőnek a pontszámot.
+ * A CardLayout segítségével vált a két nézet között.
  */
 public class TakaritoPanel extends JPanel {
 
@@ -58,11 +59,9 @@ public class TakaritoPanel extends JPanel {
     private final Color PANEL_HATTER = new Color(236, 240, 241);
 
     /**
-     * A TakaritoPanel konstruktora.
-     * Beállítja a rácsos elrendezést (GridLayout) és inicializálja a bolti, illetve szerelési funkciókat.
-     *
-     * @param mainFrame A grafikus keretablak referenciája.
-     * @param jatekter A szimulációs játéktér modellje.
+     * Felépíti az alsó panelt: a takarítós nézetet (egyenleg, bolt, szerelő)
+     * és a buszvezétős nézetet (pontszám) egy CardLayout mögé rakja,
+     * hogy a feluletAdatFrissites() egyszerűen tudjon köztük váltani.
      */
     public TakaritoPanel(MainFrame mainFrame, Jatekter jatekter) {
         this.mainFrame = mainFrame;
@@ -98,8 +97,8 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Létrehozza a játékos állapotát (pénz, felszerelés) mutató bal oldali alpanelt.
-     * @return A formázott státusz panel.
+     * Bal oldali státusz panel: mutatja a takarító aktuális egyenlegét
+     * és az éppen felszerelt kotrófej típusát.
      */
     private JPanel createStatuszAlPanel() {
         JPanel panel = new JPanel(new GridLayout(2, 1, 0, 5));
@@ -122,8 +121,8 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Létrehozza a bolti vásárlást kezelő középső alpanelt.
-     * @return A formázott bolt panel.
+     * Középső bolt panel: egy legördülő listából lehet kiválasztani, mit vásároljunk,
+     * és a Vásárlás gombra kattintva levonódik az ár és az akciópont.
      */
     private JPanel createBoltAlPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
@@ -158,8 +157,8 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Létrehozza a kotrófejek cseréjéért felelős jobb oldali alpanelt.
-     * @return A formázott szerelő panel.
+     * Jobb oldali szerelőpanel: az eszköztárban tárolt fejek közül
+     * lehet egyet felszerelni a kiválasztott hókotróra.
      */
     private JPanel createSzerelesAlPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
@@ -202,8 +201,9 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Lebonyolítja a vásárlást a kiválasztott termékre a modell üzleti logikáján keresztül.
-     * @param termekID A megvásárolni kívánt cikk neve.
+     * Megvásárolja a kiválasztott terméket: ellenőrzi az akciópontot, fogyóanyagnál
+     * megkérdezi melyik hókotróhoz kell, majd levonja az árat és frissíti a felületet.
+     * Új hókotró vásárlásakor azt rögtön regisztrálja a játéktérre is.
      */
     private void vasarlasTranzakcio(String termekID) {
         System.out.println(">>> [TakaritoPanel] Tranzakció indítása: " + termekID);
@@ -247,8 +247,9 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Popup dialog, amellyel a játékos kiválaszthatja, melyik hókotrójához rendelje a fogyóanyagot.
-     * @return A kiválasztott Hokotro, vagy null ha a felhasználó bezárta az ablakot.
+     * Ha a takarítónak több hókotrója is van, felugrik egy párbeszédablak,
+     * ahol kiválaszthatja, melyikhez rendelje a fogyóanyagot.
+     * Ha bezárja az ablakot, null értékkel tér vissza (megszakítás).
      */
     private Hokotro hokotroValasztasDialog(Takarito takarito) {
         List<Hokotro> hokotrok = takarito.getIranyitottHokotrok();
@@ -273,8 +274,8 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Lecseréli a hókotrón lévő fejet a játékos által kiválasztott raktári darabra.
-     * @param fejTipus A felszerelni kívánt új kotrófej osztályneve.
+     * Felszereli a kiválasztott kotrófejt az aktív hókotróra.
+     * Ha több hókotró is van, előbb megkérdezi, melyikre szereljük.
      */
     private void fejCsereVégrehajtas(String fejTipus) {
         System.out.println(">>> [TakaritoPanel] Fejcsere indítása: " + fejTipus);
@@ -302,8 +303,9 @@ public class TakaritoPanel extends JPanel {
     }
 
     /**
-     * Pull-alapú adatolvasással lekéri a modellből az aktuális Takarító értékeit,
-     * és naprakészen tartja a gombokat, feliratokat, legördülő listákat.
+     * Lekéri a modellből az aktuális állapotot és frissíti a megjelenítést.
+     * Buszvezető esetén a pontszámot mutatja; takarítónál az egyenleget,
+     * az aktív kotrófej típusát és a raktárban lévő fejek listáját.
      */
     public void feluletAdatFrissites() {
         if (jatekter == null) return;
