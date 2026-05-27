@@ -140,9 +140,11 @@
         <Buszok>
             <Busz nev="B1" mozgaskeptelen="3">
                 <Lokacio ut="S1" szakasz="2" sav="2" />
+                <Vegallomas ut="S1" szakasz="5" sav="1" />
             </Busz>
             <Busz nev="B2" mozgaskeptelen="0">
                 <Lokacio ut="H1" szakasz="1" sav="1" />
+                <Vegallomas ut="H1" szakasz="2" sav="2" />
             </Busz>
         </Buszok>
         <Autok>

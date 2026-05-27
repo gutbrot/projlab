@@ -6,9 +6,10 @@ import terkep.Lokacio;
  * Az osztály felelőssége egy NPC jármű reprezentálása a szimulációban. 
  */
 public class Auto extends Jarmu {
-    
+
     private final String id;
     private final Lokacio[] vegallomasok = new Lokacio[2];
+    private int celVegallomasIndex = 1; // 0 = A végállomás, 1 = B végállomás
 
     //Konstruktor, amely inicializálja az autó azonosítóját, a két végállomást és a kezdő pozíciót.
     public Auto(String id, Lokacio v1, Lokacio v2, Lokacio kezdo) {
@@ -38,11 +39,19 @@ public class Auto extends Jarmu {
     }
 
     // --- GETTEREK ---
-    public String getId() { 
-        return id; 
+    public String getId() {
+        return id;
     }
-    
-    public Lokacio[] getVegallomasok() { 
-        return vegallomasok.clone(); 
+
+    public Lokacio[] getVegallomasok() {
+        return vegallomasok.clone();
+    }
+
+    public int getCelVegallomasIndex() {
+        return celVegallomasIndex;
+    }
+
+    public void toggleCelVegallomasIndex() {
+        celVegallomasIndex = (celVegallomasIndex == 0) ? 1 : 0;
     }
 }

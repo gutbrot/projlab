@@ -15,6 +15,7 @@ import jatekos.Takarito;
 import jarmu.Busz;
 import jarmu.Hokotro;
 import kotrofej.SoproFej;
+import terkep.Lokacio;
 import terkep.Terkep;
 import terkep.TerkepLoader;
 
@@ -355,8 +356,13 @@ public class MenuFrame extends JFrame {
                 jatekter.hozzaadJarmu(h);
             } else if (j instanceof Buszvezeto) {
                 Buszvezeto bv = (Buszvezeto) j;
-                Busz b = new Busz(Busz.kovetkezoId(),
-                        jatekter.getTerkep().getRandomLokacio(), null, null);
+                Lokacio lokA = jatekter.getTerkep().getRandomLokacio();
+                Lokacio lokB = jatekter.getTerkep().getRandomLokacio();
+                // Biztosítjuk, hogy A és B különböző cellák legyenek
+                if (lokA != null && lokB != null && lokA.getSav() == lokB.getSav()) {
+                    lokB = jatekter.getTerkep().getRandomLokacio();
+                }
+                Busz b = new Busz(Busz.kovetkezoId(), lokA, lokA, lokB);
                 b.setVezeto(bv);
                 bv.hozzaadBusz(b);
                 jatekter.hozzaadJarmu(b);

@@ -126,7 +126,8 @@ public class Betolteskezelo {
             Lokacio v1 = parseLokacio((Element) e.getElementsByTagName("Vegallomas").item(0), terkep);
             if (v1 == null) v1 = parseLokacio((Element) e.getElementsByTagName("Cel").item(0), terkep);
 
-            Busz b = new Busz(id, pos, v1, null);
+            // vegallomasok[0] = indulóhely (A), vegallomasok[1] = XML-ben megadott cél (B)
+            Busz b = new Busz(id, pos, pos, v1);
             if (e.hasAttribute("mozgaskeptelen")) {
                 int mk = Integer.parseInt(e.getAttribute("mozgaskeptelen"));
                 for(int k=0; k<mk; k++) b.mozgasKeptelen();

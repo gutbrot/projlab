@@ -187,14 +187,17 @@ public class Jatekter {
                     continue;
                 }
 
-                // Cél meghatározása: ha végállomáson van, forduljon meg
+                // Cél meghatározása: ha elértük az aktuális végállomást, forduljon meg
                 Lokacio[] vegallomasok = auto.getVegallomasok();
-                Lokacio cel = auto.vegallomasraErt() ? 
-                    (auto.getPozicio().getSav() == vegallomasok[0].getSav() ? vegallomasok[1] : vegallomasok[0]) 
-                    : vegallomasok[1];
+                Lokacio celLokacio = vegallomasok[auto.getCelVegallomasIndex()];
+                if (celLokacio != null && auto.getPozicio() != null &&
+                        auto.getPozicio().getSav() == celLokacio.getSav()) {
+                    auto.toggleCelVegallomasIndex();
+                    celLokacio = vegallomasok[auto.getCelVegallomasIndex()];
+                }
 
                 // Útvonaltervezés és közvetlen mozgatás
-                Sav kovetkezoSav = navigacio.kovetkezoLepes(auto.getPozicio(), cel);
+                Sav kovetkezoSav = navigacio.kovetkezoLepes(auto.getPozicio(), celLokacio);
                 if (kovetkezoSav != null) {
                     auto.mozgasDirekt(kovetkezoSav);
                 }

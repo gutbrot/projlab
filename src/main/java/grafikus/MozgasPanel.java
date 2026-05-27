@@ -232,6 +232,11 @@ public class MozgasPanel extends JPanel {
                 }
             }
 
+            // Ha busz lépett, ellenőrizzük elérte-e a célvégállomást
+            if (kivalasztott instanceof Busz) {
+                ((Busz) kivalasztott).vegallomasbaErt();
+            }
+
             jatekter.autoKorvaltas();
         } else {
             System.out.println(">>> [MozgasPanel] Mozgás SIKERTELEN!");

@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import jatekos.Buszvezeto;
+import jatekos.Jatekos;
 import jatekos.Jatekter;
 import jarmu.*;
 import terkep.*;
@@ -223,6 +225,19 @@ public class TerkepPanel extends JPanel {
             }
         }
 
+        // Aktív buszsofőr célsávjainak összegyűjtése (sárga kiemeléshez)
+        Set<Sav> celSavok = new HashSet<>();
+        Jatekos aktJatekos = jatekter.getAktivJatekos();
+        if (aktJatekos instanceof Buszvezeto) {
+            for (Busz b : ((Buszvezeto) aktJatekos).getIranyithatoBuszok()) {
+                Lokacio[] vegallomasok = b.getVegallomasok();
+                int celIdx = b.getCelVegallomasIndex();
+                if (vegallomasok != null && vegallomasok[celIdx] != null) {
+                    celSavok.add(vegallomasok[celIdx].getSav());
+                }
+            }
+        }
+
         // 2. UTAK, SZAKASZOK, SÁVOK ÉS IRÁNYOK RAJZOLÁSA
         for (Ut ut : halozat) {
             Point p = aktualisPoziciok.get(ut.getNev());
@@ -269,9 +284,21 @@ public class TerkepPanel extends JPanel {
                         }
                     }
 
-                    // Irányjelző nyíl
-                    g2d.setColor(new Color(255, 255, 255, 90));
-                    int size = 8;
+                    // Irányjelző nyíl – sárga kiemelés ha ez az aktív busz célsávja
+                    Sav aktualisSav = (savIdx < szakaszSavok.size()) ? szakaszSavok.get(savIdx) : null;
+                    boolean celSav = aktualisSav != null && celSavok.contains(aktualisSav);
+
+                    if (celSav) {
+                        // Sárga háttér kiemelés
+                        g2d.setColor(new Color(255, 215, 0, 120));
+                        g2d.fillRect(cellX + 1, cellY + 1, SAV_SZELESSEG - 2, SZAKASZ_MAGASSAG - 2);
+                        g2d.setColor(new Color(255, 180, 0));
+                        g2d.setStroke(new BasicStroke(2));
+                        g2d.drawRect(cellX + 1, cellY + 1, SAV_SZELESSEG - 2, SZAKASZ_MAGASSAG - 2);
+                    }
+
+                    g2d.setColor(celSav ? new Color(255, 220, 0) : new Color(255, 255, 255, 90));
+                    int size = celSav ? 11 : 8;
                     if (isPositive) {
                         int[] xPoints = {cx - size, cx + size, cx};
                         int[] yPoints = {cy - size, cy - size, cy + size};

@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import jatekos.Jatekter;
 import jatekos.Jatekos;
 import jatekos.Takarito;
+import jatekos.Buszvezeto;
 import jarmu.Hokotro;
 import kotrofej.KotroFej;
 import bolt.Bolt;
@@ -47,6 +48,11 @@ public class TakaritoPanel extends JPanel {
     private JPanel statuszAlPanel;
     private JPanel boltAlPanel;
     private JPanel szerelesAlPanel;
+    private JPanel buszvezetoAlPanel;
+    private JLabel pontInfoLabel;
+
+    private CardLayout cardLayout;
+    private JPanel cardPanel;
 
     /** Alapértelmezett télies háttérszín. */
     private final Color PANEL_HATTER = new Color(236, 240, 241);
@@ -62,18 +68,30 @@ public class TakaritoPanel extends JPanel {
         this.mainFrame = mainFrame;
         this.jatekter = jatekter;
 
-        // Alapvető panelbeállítások: vízszintes rácsszerkezet 3 fő oszloppal
-        setLayout(new GridLayout(1, 3, 15, 0));
         setBackground(PANEL_HATTER);
         setBorder(new EmptyBorder(6, 15, 6, 15));
 
-        // A három funkcionális részpanel felépítése és hozzáadása
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(PANEL_HATTER);
+
+        // Takarító nézet: 3 alpanel
+        JPanel takaritoPanels = new JPanel(new GridLayout(1, 3, 15, 0));
+        takaritoPanels.setBackground(PANEL_HATTER);
         statuszAlPanel = createStatuszAlPanel();
         boltAlPanel = createBoltAlPanel();
         szerelesAlPanel = createSzerelesAlPanel();
-        add(statuszAlPanel);
-        add(boltAlPanel);
-        add(szerelesAlPanel);
+        takaritoPanels.add(statuszAlPanel);
+        takaritoPanels.add(boltAlPanel);
+        takaritoPanels.add(szerelesAlPanel);
+        cardPanel.add(takaritoPanels, "takarito");
+
+        // Buszvezető nézet: pontszám kijelző
+        buszvezetoAlPanel = createBuszvezetoAlPanel();
+        cardPanel.add(buszvezetoAlPanel, "buszvezeto");
+
+        setLayout(new BorderLayout());
+        add(cardPanel, BorderLayout.CENTER);
 
         // Kezdőadatok betöltése a modellből a felületre
         feluletAdatFrissites();
@@ -166,6 +184,20 @@ public class TakaritoPanel extends JPanel {
 
         panel.add(raktarFejekDoboz);
         panel.add(felszerelesGomb);
+        return panel;
+    }
+
+    private JPanel createBuszvezetoAlPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(PANEL_HATTER);
+        panel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Buszvezető",
+            TitledBorder.LEFT, TitledBorder.TOP, new Font("Arial", Font.BOLD, 11), Color.DARK_GRAY));
+
+        pontInfoLabel = new JLabel("Pontszám: 0");
+        pontInfoLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        pontInfoLabel.setForeground(new Color(30, 100, 180));
+        panel.add(pontInfoLabel);
         return panel;
     }
 
@@ -277,10 +309,16 @@ public class TakaritoPanel extends JPanel {
         if (jatekter == null) return;
 
         Jatekos aktJatekos = jatekter.getAktivJatekos();
+
+        if (aktJatekos instanceof Buszvezeto) {
+            Buszvezeto bv = (Buszvezeto) aktJatekos;
+            pontInfoLabel.setText("Pontszám: " + bv.getPont());
+            cardLayout.show(cardPanel, "buszvezeto");
+            return;
+        }
+
+        cardLayout.show(cardPanel, "takarito");
         boolean isTakarito = aktJatekos instanceof Takarito;
-        statuszAlPanel.setVisible(isTakarito);
-        boltAlPanel.setVisible(isTakarito);
-        szerelesAlPanel.setVisible(isTakarito);
         if (!isTakarito) return;
 
         Takarito takarito = (Takarito) aktJatekos;
