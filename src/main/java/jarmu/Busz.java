@@ -1,7 +1,6 @@
 package jarmu;
 
 import terkep.Lokacio;
-import terkep.Sav;
 import jatekos.Buszvezeto;
 
 /**
@@ -14,6 +13,7 @@ public class Busz extends Jarmu {
     private final Lokacio[] vegallomasok = new Lokacio[2];
     private Buszvezeto vezeto;
     private static int szamlalo = 1;
+    private int celVegallomasIndex = 1; // 0 = A végállomás, 1 = B végállomás
 
     public static String kovetkezoId() { return "Busz_" + szamlalo++; }
 
@@ -26,32 +26,19 @@ public class Busz extends Jarmu {
     }
 
     /**
-     * A busz mozgását kezeli a megadott irányban.
-     * Először megpróbálja a kívánt irányba mozogni, majd ellenőrzi, hogy elérte-e valamelyik végállomást.
-     * Ha igen, akkor pontot ad a vezetőnek.
+     * Ellenőrzi, hogy a busz elérte-e az aktuális célvégállomást.
+     * Ha igen, pontot ad a vezetőnek és a másik végállomást veszi célba.
      */
     public boolean vegallomasbaErt() {
         Lokacio aktualis = getPozicio();
+        Lokacio cel = vegallomasok[celVegallomasIndex];
 
-        boolean match = false;
-        // Ellenőrizzük, hogy a busz aktuális pozíciója megegyezik-e valamelyik végállomás pozíciójával.
-        for (Lokacio v : vegallomasok) {
-            if (v != null && aktualis != null && v.getSav() == aktualis.getSav()) {
-                match = true;
-                break;
-            }
-        }
+        if (cel == null || aktualis == null || cel.getSav() != aktualis.getSav()) return false;
 
-        // Ha elérte valamelyik végállomást, akkor pontot adunk a vezetőnek.
-        if (match) {
-            System.out.println(">>> [JÁRMŰ AKCIÓ] A(z) " + id + " busz sikeresen elérte a végállomást!");
-            if (vezeto != null) {
-                vezeto.pontotKap();
-            }
-            return true;
-        }
-
-        return false;
+        System.out.println(">>> [JÁRMŰ AKCIÓ] A(z) " + id + " busz sikeresen elérte a végállomást!");
+        if (vezeto != null) vezeto.pontotKap();
+        toggleCelVegallomasIndex();
+        return true;
     }
 
     /**
@@ -67,13 +54,16 @@ public class Busz extends Jarmu {
     //--- GETTEREK ÉS SETTEREK ---
     public String getId() { return id; }
 
-    
-    public Buszvezeto getVezeto() {
-        return vezeto;
+    public Lokacio[] getVegallomasok() { return vegallomasok.clone(); }
+
+    public int getCelVegallomasIndex() { return celVegallomasIndex; }
+
+    public void toggleCelVegallomasIndex() {
+        celVegallomasIndex = (celVegallomasIndex == 0) ? 1 : 0;
     }
 
-    public void setVezeto(Buszvezeto vezeto) {
-        this.vezeto = vezeto;
-    }
+    public Buszvezeto getVezeto() { return vezeto; }
+
+    public void setVezeto(Buszvezeto vezeto) { this.vezeto = vezeto; }
 
 }

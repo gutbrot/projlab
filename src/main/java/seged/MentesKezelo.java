@@ -157,7 +157,10 @@ public class MentesKezelo {
                 for (Busz b : buszok) {
                     writer.printf("            <Busz nev=\"%s\" mozgaskeptelen=\"%d\">\n", b.getId(), b.getMozgaskeptelenKorokSzama());
                     kiirLokacio(writer, "Lokacio", b.getPozicio(), "                ");
-                    //Célok/Végállomások kiírása, ha azok le vannak mentve
+                    Lokacio[] bVeg = b.getVegallomasok();
+                    if (bVeg != null && bVeg.length >= 2 && bVeg[1] != null) {
+                        kiirLokacio(writer, "Vegallomas", bVeg[1], "                ");
+                    }
                     writer.println("            </Busz>");
                 }
                 writer.println("        </Buszok>");
